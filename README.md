@@ -9,9 +9,12 @@
 
 ## Installation
 
+<a href="https://githubsfdeploy.herokuapp.com?owner=Flow-Scanner&repo=lightning-flow-scanner-app&ref=main">
+  <img alt="Deploy to Salesforce"
+       src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
+</a>
 
-
-## Using the Lightning Flow Scanner
+## Using the Flow Scanner
 
 1) Open the App Launcher:
 - Click on the App Launcher icon in the top-left corner of your Salesforce interface.
