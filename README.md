@@ -1,13 +1,15 @@
- [![Lightning Flow Scanner](media/banner.png)](https://github.com/Lightning-Flow-Scanner)
+<p align="center">
+  <a href="https://github.com/Flow-Scanner">
+    <img src="https://raw.githubusercontent.com/Flow-Scanner/lightning-flow-scanner-core/main/media/bannerslim.png" style="width: 55%;" />
+  </a>
+</p>
+<p align="center">Scans for unsafe contexts, hardcoded IDs, and other issues to optimize your Flows.</p>
 
- [![Demo](media/lfsapp.gif)](https://github.com/Lightning-Flow-Scanner)
+[![Demo](media/lfsapp.gif)](https://github.com/Lightning-Flow-Scanner)
 
-#### Pinpoint deviations from Industry Best Practices in Salesforce Flows and ensure standards of business automation excellence.
+## Installation
 
-## Features
 
-- **Flow Overview**: Displays a list of all flows in your Salesforce org and allows users to scan the metadata of a selected flow.
-- **Flow Analysis**: Provides detailed metadata analysis of the selected flow.
 
 ## Using the Lightning Flow Scanner
 
@@ -18,15 +20,6 @@
 
 2) Scan a Flow:
 - To scan a flow, click the "Scan" button next to the flow you want to analyze.
-
-## Project Structure
-
-The project is organized into two main directories:
-
-1) force-app: The main application(tab, page etc)
-2) lfs_component: Contains the Lightning Flow Scanner Component, used by the main application.
-
-This structure allows for clear separation of the core scanning functionality and the main application logic. By modularizing the core scanning functionality, we ensure easier maintenance and updates. Additionally, this setup encourages other Salesforce apps to integrate our functionality, promoting collaboration and expanding the potential use cases for the Lightning Flow Scanner.
 
 ## Development
 
@@ -58,3 +51,5 @@ sfdx force:source:push
 ```sh
 sfdx force:source:pull
 ```
+
+If you'd like to help us enhance Flow Scanner, please consider having a look at the [Contributing Guidelines](https://github.com/Flow-Scanner/lightning-flow-scanner-core/blob/main/CONTRIBUTING.md).
