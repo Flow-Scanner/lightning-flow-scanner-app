@@ -40,7 +40,7 @@ sfdx force:auth:web:login -d -a <YourOrgAlias>
 3) Push Source to Your Org:
 
 ```sh
-sfdx force:source:push
+sf project:deploy:start
 ```
 
 4) Pull Modifications from Your Org:
