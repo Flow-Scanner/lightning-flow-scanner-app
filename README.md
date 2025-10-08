@@ -35,7 +35,7 @@
 git clone https://github.com/Flow-Scanner/lightning-flow-scanner-app.git
 ```
 
-2) Authorize your Salesforce org to set up a connection between your local development environment and the Salesforce org:
+2) Authorize your Salesforce org to set up a connection with your local development environment:
 
 ```sh
 sf login web --set-default --alias <YourOrgAlias>
@@ -53,4 +53,4 @@ sf project:deploy:start
 sf project sync
 ```
 
-If you'd like to help us enhance Flow Scanner, please consider having a look at the [Contributing Guidelines](https://github.com/Flow-Scanner/lightning-flow-scanner-core/blob/main/CONTRIBUTING.md).
+Want to help improve Lightning Flow Scanner? See the [Contributing Guidelines](https://github.com/Flow-Scanner/lightning-flow-scanner-core/blob/main/CONTRIBUTING.md).

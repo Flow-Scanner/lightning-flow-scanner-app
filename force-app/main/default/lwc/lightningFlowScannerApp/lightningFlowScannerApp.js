@@ -1,6 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
 import { loadScript } from 'lightning/platformResourceLoader';
-import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
+import LFSStaticRessource from "@salesforce/resourceUrl/LFS_SR";
 
 export default class lightningFlowScannerApp extends LightningElement {
     @api accessToken;
@@ -31,7 +31,7 @@ export default class lightningFlowScannerApp extends LightningElement {
 
     async connectedCallback() {
         try {
-            await loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js');
+            await loadScript(this, LFSStaticRessource + '/js/jsforce.js');
             let SF_API_VERSION = '60.0';
             this.conn = new jsforce.Connection({
                 accessToken: this.accessToken,
