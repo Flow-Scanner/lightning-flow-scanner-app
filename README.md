@@ -7,6 +7,10 @@
 
 [![Demo](media/lfsapp.gif)](https://github.com/Lightning-Flow-Scanner)
 
+## Features
+
+**Lightning Flow Scanner App** integrates the Lightning Flow Scanner as a UMD module within Salesforce, enabling scanning of flow metadata. The app runs predefined rules and presents detailed scan results for flows, including violation details, severity levels, and relevant flow metadata.
+
 ## Installation
 
 <a href="https://githubsfdeploy.herokuapp.com?owner=Flow-Scanner&repo=lightning-flow-scanner-app&ref=main">
