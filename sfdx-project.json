@@ -6,19 +6,9 @@
           "package": "app_namespace",
           "versionName": "1.0.0",
           "versionNumber": "1.0.0.NEXT"
-      },
-      {
-          "path": "lfs_component",
-          "package": "lfs_component",
-          "versionName": "1.0.0",
-          "versionNumber": "1.0.0.NEXT"
       }
   ],
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "51.0",
-  "packageAliases": {
-      "app_namespace": "0HoXXXXXXXXXXXXXXX",
-      "lfs_component": "0HoYYYYYYYYYYYYYYY"
-  }
+  "sourceApiVersion": "51.0"
 }

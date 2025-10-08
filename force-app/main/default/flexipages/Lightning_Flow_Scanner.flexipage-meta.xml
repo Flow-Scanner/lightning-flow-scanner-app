@@ -3,7 +3,7 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentName>lfs_component:lightningFlowScanner</componentName>
+                <componentName>c:lightningFlowScanner</componentName>
             </componentInstance>
         </itemInstances>
         <name>main</name>
