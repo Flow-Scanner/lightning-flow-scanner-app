@@ -13,7 +13,7 @@
                     <c-flow-overview records={records} err={err} onscanflow={handleScanFlow}></c-flow-overview>
                 </template>
                 <template if:true={isTab2Active}>
-                    <lfs_component-lightning-flow-scanner name={flowName} metadata={flowMetadata}></lfs_component-lightning-flow-scanner>
+                    <c-lightning-flow-scanner name={flowName} metadata={flowMetadata}></c-lightning-flow-scanner>
                 </template>
             </div>
         </main>
