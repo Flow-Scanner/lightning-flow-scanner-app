@@ -1,7 +1,7 @@
 {
   "name": "lightning-flow-scanner-app",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Salesforce App of Lightning Flow Scanner",
   "scripts": {
     "lint": "eslint **/{aura,lwc}/**/*.js",
