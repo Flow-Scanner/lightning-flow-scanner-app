@@ -62,16 +62,17 @@ export default class lightningFlowScannerApp extends LightningElement {
         }
     }
 
-    async loadFlowMetadata(record) {
+   async loadFlowMetadata(record) {
         try {
-            let id = record.versionId;
-            const metadataRes = await this.conn.tooling.query(`SELECT Id, Fullname, Metadata FROM Flow WHERE Id = '${id}' LIMIT 1`);
-            let fullname =  metadataRes.records[0].FullName;
-            console.log('fn', fullname);
-            let fmd = metadataRes.records[0].Metadata; 
-            if (metadataRes && metadataRes.records) {
-                this.flowName = fullname;
-                this.flowMetadata = fmd;
+            const id = record.versionId;
+            const metadataRes = await this.conn.tooling.query(
+                `SELECT Id, FullName, Metadata FROM Flow WHERE Id = '${id}' LIMIT 1`
+            );
+
+            if (metadataRes && metadataRes.records.length) {
+                const flow = metadataRes.records[0];
+                this.flowName = flow.FullName;
+                this.flowMetadata = flow.Metadata;
             }
         } catch (error) {
             this.err = error.message;
@@ -81,8 +82,6 @@ export default class lightningFlowScannerApp extends LightningElement {
 
     handleTabClick(event) {
         this.activeTab = parseInt(event.currentTarget.dataset.tab, 10);
-
-
     }
 
     async handleScanFlow(event) {
