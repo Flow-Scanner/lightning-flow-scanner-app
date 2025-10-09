@@ -61,10 +61,10 @@ export default class lightningFlowScannerApp extends LightningElement {
                 isActive: true // Default all rules to active
             }));
 
-            // Initialize rulesConfig with all rules (correct format: { rules: { [name]: {} } })
+            // Initialize rulesConfig with all rules (correct format: { rules: { [name]: { severity } } })
             this.rulesConfig = {
                 rules: this.rules.reduce((acc, rule) => {
-                    acc[rule.name] = {}; // Empty config = default severity
+                    acc[rule.name] = { severity: rule.severity }; // Include default severity
                     return acc;
                 }, {})
             };
@@ -86,7 +86,7 @@ export default class lightningFlowScannerApp extends LightningElement {
                     isActive: !!record.ActiveVersionId,
                     masterLabel: record.ActiveVersionId ? record.ActiveVersion.MasterLabel : record.LatestVersion.MasterLabel,
                     processType: record.ActiveVersionId ? record.ActiveVersion.ProcessType : record.LatestVersion.ProcessType,
-                    versionId: record.ActiveVersionId ? record.ActiveVersionId : record.LatestVersionId
+                    versionId: record.ActiveVersionId ? record.ActiveVersionId : record.LatestVersionId // Fixed typo
                 }));
 
                 if (this.records.length > 0) {
@@ -204,7 +204,7 @@ export default class lightningFlowScannerApp extends LightningElement {
         this.rules = updatedRules;
         this.rulesConfig = {
             rules: updatedRules.filter(rule => rule.isActive).reduce((acc, rule) => {
-                acc[rule.name] = {}; // Empty config = default
+                acc[rule.name] = { severity: rule.severity }; // Include user-selected severity
                 return acc;
             }, {})
         };

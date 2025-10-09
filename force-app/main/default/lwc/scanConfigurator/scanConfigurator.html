@@ -23,7 +23,14 @@
                             </td>
                             <td>{rule.name}</td>
                             <td>{rule.description}</td>
-                            <td>{rule.severity}</td>
+                            <td>
+                                <lightning-combobox
+                                    data-rule-id={rule.id}
+                                    value={rule.severity}
+                                    options={severityOptions}
+                                    onchange={handleSeverityChange}
+                                ></lightning-combobox>
+                            </td>
                         </tr>
                     </template>
                 </tbody>
