@@ -21,7 +21,7 @@
                     <c-lightning-flow-scanner name={flowName} metadata={flowMetadata} scan-result={scanResult} number-of-rules={numberOfRules} error={err}></c-lightning-flow-scanner>
                 </template>
                 <template if:true={isTab3Active}>
-                    <c-scan-configurator rules={rules}></c-scan-configurator>
+                    <c-scan-configurator rules={rules} onrulechange={handleRuleChange}></c-scan-configurator>
                 </template>
             </div>
         </main>

@@ -1,6 +1,6 @@
-
 <template>
     <div class="config-page">
+        <h2>Flow Scanner Rules</h2>
         <template if:true={rules}>
             <table class="slds-table slds-table_cell-buffer slds-table_bordered">
                 <thead>
@@ -15,12 +15,16 @@
                     <template for:each={rules} for:item="rule">
                         <tr key={rule.id}>
                             <td>
-                                <lightning-input type="checkbox" checked disabled></lightning-input>
+                                <lightning-input
+                                    type="checkbox"
+                                    checked={rule.isActive}
+                                    data-rule-id={rule.id}
+                                    onchange={handleRuleToggle}
+                                ></lightning-input>
                             </td>
                             <td>{rule.name}</td>
                             <td>{rule.description}</td>
                             <td>{rule.severity}</td>
-                            
                         </tr>
                     </template>
                 </tbody>
