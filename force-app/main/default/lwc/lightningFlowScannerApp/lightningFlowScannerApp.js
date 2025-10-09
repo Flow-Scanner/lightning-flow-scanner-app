@@ -31,7 +31,7 @@ export default class lightningFlowScannerApp extends LightningElement {
 
     async connectedCallback() {
         try {
-            await loadScript(this, LFSStaticRessource + '/js/jsforce.js');
+            await loadScript(this, LFSStaticRessource + '/jsforce.js');
             let SF_API_VERSION = '60.0';
             this.conn = new jsforce.Connection({
                 accessToken: this.accessToken,

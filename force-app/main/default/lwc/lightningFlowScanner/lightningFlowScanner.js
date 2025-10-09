@@ -1,6 +1,6 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import { loadScript } from 'lightning/platformResourceLoader';
-import lfs from '@salesforce/resourceUrl/LFS'; 
+import LFSStaticRessource from "@salesforce/resourceUrl/LFS_SR";
 
 export default class LightningFlowScanner extends LightningElement {
     @api name;
@@ -14,7 +14,7 @@ export default class LightningFlowScanner extends LightningElement {
     scriptLoaded = false;
 
     connectedCallback() {
-        loadScript(this, lfs)
+        loadScript(this, LFSStaticRessource + '/LFS.js')
             .then(() => {
                 try {
                     this.numberOfRules = lightningflowscanner.getRules().length;
