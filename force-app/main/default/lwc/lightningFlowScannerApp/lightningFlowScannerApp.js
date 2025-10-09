@@ -45,7 +45,6 @@ export default class lightningFlowScannerApp extends LightningElement {
 
     async connectedCallback() {
         try {
-            // Load both jsforce and LFS scripts
             await Promise.all([
                 loadScript(this, LFSStaticRessource + '/jsforce.js'),
                 loadScript(this, LFSStaticRessource + '/LFS.js')
@@ -129,7 +128,7 @@ export default class lightningFlowScannerApp extends LightningElement {
         }
         try {
             this.isLoading = true;
-            // Log ruleOptions for debugging (note: renamed from rulesConfig to match API)
+            // Log ruleOptions for debugging
             console.log('Scanning with ruleOptions:', JSON.stringify(ruleOptions));
             // Use only active rules for numberOfRules
             this.numberOfRules = ruleOptions && ruleOptions.rules ? Object.keys(ruleOptions.rules).length : lightningflowscanner.getRules().length;
@@ -144,12 +143,16 @@ export default class lightningFlowScannerApp extends LightningElement {
                 console.log('Raw scan results ruleResults count:', this.scanResult.ruleResults.length);
                 console.log('Sample raw ruleResult structure:', JSON.stringify(this.scanResult.ruleResults[0] || {}));
 
-                // Fallback: Filter scan results to include only active rules (if API fallback needed)
+                // Fallback: Filter scan results to include only active rules
                 const activeRuleNames = ruleOptions && ruleOptions.rules ? Object.keys(ruleOptions.rules) : [];
                 if (this.scanResult && this.scanResult.ruleResults && activeRuleNames.length > 0) {
-                    this.scanResult.ruleResults = this.scanResult.ruleResults.filter(ruleResult => 
-                        activeRuleNames.includes(ruleResult.rule.name)  // Use rule.name based on RuleResult structure
-                    );
+                    this.scanResult.ruleResults = this.scanResult.ruleResults.filter(ruleResult => {
+                        if (!ruleResult.ruleName) {
+                            console.warn('Skipping ruleResult due to missing ruleName:', JSON.stringify(ruleResult));
+                            return false;
+                        }
+                        return activeRuleNames.includes(ruleResult.ruleName);
+                    });
                     console.log('Filtered scan results ruleResults count:', this.scanResult.ruleResults.length);
                 }
 
@@ -199,7 +202,6 @@ export default class lightningFlowScannerApp extends LightningElement {
     async handleRuleChange(event) {
         const updatedRules = event.detail.rules;
         this.rules = updatedRules;
-        // Correct format: { rules: { [activeRuleName]: {} } }
         this.rulesConfig = {
             rules: updatedRules.filter(rule => rule.isActive).reduce((acc, rule) => {
                 acc[rule.name] = {}; // Empty config = default
@@ -211,7 +213,6 @@ export default class lightningFlowScannerApp extends LightningElement {
         // Re-run scan if a flow is already selected
         if (this.flowName && this.flowMetadata && this.selectedFlowRecord) {
             await this.scanFlow(this.rulesConfig);
-            this.activeTab = 2; // Switch to Results tab to show updated results
         }
     }
 }
