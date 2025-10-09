@@ -49,3 +49,7 @@ footer {
     bottom: 0;
     width: 100%;
 }
+lightning-spinner {
+    display: block;
+    margin: 2rem auto;
+}

@@ -3,9 +3,14 @@
         <main>
             <ul class="tabs">
                 <li class={FlowsClass} data-tab="1" onclick={handleTabClick}>Flows</li>
-                <li class={AnalysisClass} data-tab="2" onclick={handleTabClick}>Analysis</li>
+                <li class={AnalysisClass} data-tab="2" onclick={handleTabClick}>Results</li>
+                <li class={ConfigClass} data-tab="3" onclick={handleTabClick}>Configuration</li>
             </ul>
             <div class="tab-content">
+                <template if:true={isLoading}>
+                    <lightning-spinner alternative-text="Loading Flow Metadata..." size="medium"></lightning-spinner>
+                </template>
+
                 <template if:true={err}>
                     <p>Error fetching Flows: {err}</p>
                 </template>
@@ -13,7 +18,10 @@
                     <c-flow-overview records={records} err={err} onscanflow={handleScanFlow}></c-flow-overview>
                 </template>
                 <template if:true={isTab2Active}>
-                    <c-lightning-flow-scanner name={flowName} metadata={flowMetadata}></c-lightning-flow-scanner>
+                    <c-lightning-flow-scanner name={flowName} metadata={flowMetadata} scan-result={scanResult} number-of-rules={numberOfRules} error={err}></c-lightning-flow-scanner>
+                </template>
+                <template if:true={isTab3Active}>
+                    <c-scan-configurator rules={rules} onrulechange={handleRuleChange}></c-scan-configurator>
                 </template>
             </div>
         </main>
