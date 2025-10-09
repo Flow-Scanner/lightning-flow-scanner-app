@@ -7,7 +7,8 @@ export default class scanConfigurator extends LightningElement {
     severityOptions = [
         { label: 'Error', value: 'error' },
         { label: 'Warning', value: 'warning' },
-        { label: 'Info', value: 'info' }
+        { label: 'Info', value: 'info' },
+        { label: 'Note', value: 'note' }
     ];
 
     connectedCallback() {
