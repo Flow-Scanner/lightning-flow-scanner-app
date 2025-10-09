@@ -85,15 +85,14 @@ export default class lightningFlowScannerApp extends LightningElement {
 
     }
 
-    handleScanFlow(event) {
-        console.log('scan');
-        const flowId = event.detail.flowId;
-        const record = this.records.find(rec => rec.id === flowId);
-      
+    async handleScanFlow(event) {
+    const flowId = event.detail.flowId;
+    const record = this.records.find(rec => rec.id === flowId);
+  
         if (record) {
-            this.loadFlowMetadata(record, this.conn);
             this.selectedFlowRecord = record;
+            await this.loadFlowMetadata(record);
+            this.activeTab = 2;
         }
-        this.activeTab = 2;
     }
 }
