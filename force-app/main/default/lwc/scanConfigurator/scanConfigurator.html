@@ -1,0 +1,35 @@
+
+<template>
+    <div class="config-page">
+        <h2>Flow Scanner Rules</h2>
+        <template if:true={rules}>
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                <thead>
+                    <tr>
+                        <th>Rule Name</th>
+                        <th>Description</th>
+                        <th>Severity</th>
+                        <th>Category</th>
+                        <th>Active</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={rules} for:item="rule">
+                        <tr key={rule.id}>
+                            <td>{rule.name}</td>
+                            <td>{rule.description}</td>
+                            <td>{rule.severity}</td>
+                            <td>{rule.category}</td>
+                            <td>
+                                <lightning-input type="checkbox" checked disabled></lightning-input>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </template>
+        <template if:false={rules}>
+            <p>No rules available.</p>
+        </template>
+    </div>
+</template>

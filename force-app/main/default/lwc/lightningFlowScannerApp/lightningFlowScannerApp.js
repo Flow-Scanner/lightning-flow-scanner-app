@@ -13,6 +13,7 @@ export default class lightningFlowScannerApp extends LightningElement {
     @track flowName;
     @track scanResult;
     @track numberOfRules;
+    @track rules = [];
     @track isLoading = false;
     conn;
     scriptLoaded = false;
@@ -25,12 +26,20 @@ export default class lightningFlowScannerApp extends LightningElement {
         return this.activeTab === 2;
     }
 
+    get isTab3Active() {
+        return this.activeTab === 3;
+    }
+
     get FlowsClass() {
         return this.activeTab === 1 ? 'active' : '';
     }
 
     get AnalysisClass() {
         return this.activeTab === 2 ? 'active' : '';
+    }
+
+    get ConfigClass() {
+        return this.activeTab === 3 ? 'active' : '';
     }
 
     async connectedCallback() {
@@ -41,6 +50,15 @@ export default class lightningFlowScannerApp extends LightningElement {
                 loadScript(this, LFSStaticRessource + '/LFS.js')
             ]);
             this.scriptLoaded = true;
+
+            // Fetch rules for Configuration tab
+            this.rules = lightningflowscanner.getRules().map((rule, index) => ({
+                id: `rule-${index}`,
+                name: rule.name,
+                description: rule.description,
+                severity: rule.severity,
+                category: rule.category
+            }));
 
             let SF_API_VERSION = '60.0';
             this.conn = new jsforce.Connection({
@@ -94,7 +112,7 @@ export default class lightningFlowScannerApp extends LightningElement {
         }
     }
 
-    async scanFlow() {
+    async scanFlow(rulesConfig = null) {
         if (!this.scriptLoaded || !this.flowName || !this.flowMetadata) {
             return;
         }
@@ -107,7 +125,8 @@ export default class lightningFlowScannerApp extends LightningElement {
             let parsedFlow = { uri, flow };
 
             try {
-                let scanResults = lightningflowscanner.scan([parsedFlow]);
+                // Use rulesConfig if provided in the future; currently uses all rules
+                let scanResults = lightningflowscanner.scan([parsedFlow], rulesConfig);
                 this.scanResult = scanResults[0];
 
                 // Add unique keys to each rule result and its details
