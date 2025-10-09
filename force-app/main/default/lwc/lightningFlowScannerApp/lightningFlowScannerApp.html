@@ -17,10 +17,9 @@
                     <c-flow-overview records={records} err={err} onscanflow={handleScanFlow}></c-flow-overview>
                 </template>
                 <template if:true={isTab2Active}>
-                    <c-lightning-flow-scanner name={flowName} metadata={flowMetadata}></c-lightning-flow-scanner>
+                    <c-lightning-flow-scanner name={flowName} metadata={flowMetadata} scan-result={scanResult} number-of-rules={numberOfRules} error={err}></c-lightning-flow-scanner>
                 </template>
             </div>
-
         </main>
     </div>
 </template>

@@ -11,7 +11,11 @@ export default class lightningFlowScannerApp extends LightningElement {
     @track selectedFlowRecord = null;
     @track flowMetadata = null;
     @track flowName;
+    @track scanResult;
+    @track numberOfRules;
+    @track isLoading = false;
     conn;
+    scriptLoaded = false;
 
     get isTab1Active() {
         return this.activeTab === 1;
@@ -31,7 +35,13 @@ export default class lightningFlowScannerApp extends LightningElement {
 
     async connectedCallback() {
         try {
-            await loadScript(this, LFSStaticRessource + '/jsforce.js');
+            // Load both jsforce and LFS scripts
+            await Promise.all([
+                loadScript(this, LFSStaticRessource + '/jsforce.js'),
+                loadScript(this, LFSStaticRessource + '/LFS.js')
+            ]);
+            this.scriptLoaded = true;
+
             let SF_API_VERSION = '60.0';
             this.conn = new jsforce.Connection({
                 accessToken: this.accessToken,
@@ -62,8 +72,9 @@ export default class lightningFlowScannerApp extends LightningElement {
         }
     }
 
-   async loadFlowMetadata(record) {
+    async loadFlowMetadata(record) {
         try {
+            this.isLoading = true;
             const id = record.versionId;
             const metadataRes = await this.conn.tooling.query(
                 `SELECT Id, FullName, Metadata FROM Flow WHERE Id = '${id}' LIMIT 1`
@@ -73,10 +84,51 @@ export default class lightningFlowScannerApp extends LightningElement {
                 const flow = metadataRes.records[0];
                 this.flowName = flow.FullName;
                 this.flowMetadata = flow.Metadata;
+                await this.scanFlow(); // Trigger scan after loading metadata
             }
         } catch (error) {
             this.err = error.message;
             console.error(error.message);
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    async scanFlow() {
+        if (!this.scriptLoaded || !this.flowName || !this.flowMetadata) {
+            return;
+        }
+        try {
+            this.isLoading = true;
+            this.numberOfRules = lightningflowscanner.getRules().length;
+            const flow = new lightningflowscanner.Flow(this.flowName, this.flowMetadata);
+
+            let uri = '/services/data/v60.0/tooling/sobjects/Flow/' + this.selectedFlowRecord.versionId;
+            let parsedFlow = { uri, flow };
+
+            try {
+                let scanResults = lightningflowscanner.scan([parsedFlow]);
+                this.scanResult = scanResults[0];
+
+                // Add unique keys to each rule result and its details
+                this.scanResult.ruleResults = this.scanResult.ruleResults.map((ruleResult, ruleIndex) => {
+                    return {
+                        ...ruleResult,
+                        id: `rule-${ruleIndex}`,
+                        details: ruleResult.details.map((detail, detailIndex) => {
+                            return { ...detail, id: `rule-${ruleIndex}-detail-${detailIndex}` };
+                        })
+                    };
+                });
+            } catch (e) {
+                this.err = e.message;
+                console.error('Error scanning flow:', e);
+            }
+        } catch (error) {
+            this.err = error.message;
+            console.error('Error parsing flow:', error);
+        } finally {
+            this.isLoading = false;
         }
     }
 
@@ -84,7 +136,7 @@ export default class lightningFlowScannerApp extends LightningElement {
         this.activeTab = parseInt(event.currentTarget.dataset.tab, 10);
     }
 
-   async handleScanFlow(event) {
+    async handleScanFlow(event) {
         const flowId = event.detail.flowId;
         const record = this.records.find(rec => rec.id === flowId);
     
@@ -97,10 +149,7 @@ export default class lightningFlowScannerApp extends LightningElement {
             } catch (error) {
                 this.err = error.message;
                 console.error(error.message);
-            } finally {
-                this.isLoading = false; 
             }
         }
     }
-
 }

@@ -8,19 +8,19 @@
             <div class="header">
                 <div class="flow-container">
                     <div class="flow-column">
-                        <div class="info-item"><strong>Name:</strong> {flow.name}</div>
-                        <div class="info-item"><strong>Label:</strong> {flow.label}</div>
-                        <div class="info-item"><strong>Status:</strong> {flow.status}</div>
+                        <div class="info-item"><strong>Name:</strong> {name}</div>
+                        <div class="info-item"><strong>Label:</strong> {metadata.label}</div>
+                        <div class="info-item"><strong>Status:</strong> {metadata.status}</div>
                     </div>
                     <div class="flow-column">
-                        <div class="info-item"><strong>Type:</strong> {flow.processType}</div>
-                        <div class="info-item"><strong>API Version:</strong> {flow.apiVersion}</div>
+                        <div class="info-item"><strong>Type:</strong> {metadata.processType}</div>
+                        <div class="info-item"><strong>API Version:</strong> {metadata.apiVersion}</div>
                         <div class="info-item">
                             <strong># Rules Run:</strong> {numberOfRules}
                         </div>
                     </div>
                 </div>
-                <div class="description"><strong>Description:</strong> {flow.description}</div>
+                <div class="description"><strong>Description:</strong> {metadata.description}</div>
             </div>
         </template>
 
@@ -63,7 +63,7 @@
             </div>
         </template>
         <div class="github-star">
-         <p>Want to help improve <a href="https://flow-scanner.github.io/lightning-flow-scanner-core/">Lightning Flow Scanner</a>? See our <a href="https://github.com/Flow-Scanner/lightning-flow-scanner-core/blob/main/CONTRIBUTING.md" target="_blank">Contributing Guidelines</a>.</p>
+            <p>Want to help improve <a href="https://flow-scanner.github.io/lightning-flow-scanner-core/">Lightning Flow Scanner</a>? See our <a href="https://github.com/Flow-Scanner/lightning-flow-scanner-core/blob/main/CONTRIBUTING.md" target="_blank">Contributing Guidelines</a>.</p>
         </div>
     </div>
 </template>
