@@ -86,7 +86,7 @@ export default class lightningFlowScannerApp extends LightningElement {
         return;
       }
 
-      let SF_API_VERSION = "60.0";
+      const SF_API_VERSION = "60.0";
       this.conn = new window.jsforce.Connection({
         accessToken: this.accessToken,
         version: SF_API_VERSION,
@@ -235,13 +235,13 @@ export default class lightningFlowScannerApp extends LightningElement {
         this.flowMetadata
       );
 
-      let uri =
+      const uri =
         "/services/data/v60.0/tooling/sobjects/Flow/" +
         this.selectedFlowRecord.versionId;
-      let parsedFlow = { uri, flow };
+      const parsedFlow = { uri, flow };
 
       try {
-        let scanResults = window.lightningflowscanner.scan(
+        const scanResults = window.lightningflowscanner.scan(
           [parsedFlow],
           ruleOptions
         );
