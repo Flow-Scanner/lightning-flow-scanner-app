@@ -11,14 +11,17 @@ lightning-card {
 }
 
 .search-bar {
-    padding: 1rem;
+    padding: 0.25rem 1rem; /* Reduced padding for less height */
     background-color: #ffffff;
-    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
 }
 
 .search-bar lightning-input {
-    max-width: 400px;
+    max-width: 300px; /* Smaller width for compact look */
     --slds-c-input-color-border: #003087; /* Dark blue border */
+    --slds-c-input-radius-border: 0.25rem;
+    --slds-c-input-font-size: 0.875rem; /* Smaller font for compactness */
 }
 
 lightning-datatable {
