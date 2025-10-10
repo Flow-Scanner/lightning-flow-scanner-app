@@ -16,6 +16,7 @@ export default class lightningFlowScannerApp extends LightningElement {
     @track rules = [];
     @track rulesConfig = null;
     @track isLoading = false;
+    @track currentFlowIndex = 0; // Track the index of the selected flow
     conn;
     scriptLoaded = false;
 
@@ -58,13 +59,13 @@ export default class lightningFlowScannerApp extends LightningElement {
                 description: rule.description,
                 severity: rule.severity,
                 category: rule.category,
-                isActive: true // Default all rules to active
+                isActive: true
             }));
 
-            // Initialize rulesConfig with all rules (correct format: { rules: { [name]: { severity } } })
+            // Initialize rulesConfig with all rules
             this.rulesConfig = {
                 rules: this.rules.reduce((acc, rule) => {
-                    acc[rule.name] = { severity: rule.severity }; // Include default severity
+                    acc[rule.name] = { severity: rule.severity };
                     return acc;
                 }, {})
             };
@@ -86,11 +87,12 @@ export default class lightningFlowScannerApp extends LightningElement {
                     isActive: !!record.ActiveVersionId,
                     masterLabel: record.ActiveVersionId ? record.ActiveVersion.MasterLabel : record.LatestVersion.MasterLabel,
                     processType: record.ActiveVersionId ? record.ActiveVersion.ProcessType : record.LatestVersion.ProcessType,
-                    versionId: record.ActiveVersionId ? record.ActiveVersionId : record.LatestVersionId // Fixed typo
+                    versionId: record.ActiveVersionId ? record.ActiveVersionId : record.LatestVersionId
                 }));
 
                 if (this.records.length > 0) {
                     this.selectedFlowRecord = this.records[0];
+                    this.currentFlowIndex = 0; // Set initial index
                     await this.loadFlowMetadata(this.selectedFlowRecord);
                 }
             }
@@ -112,7 +114,7 @@ export default class lightningFlowScannerApp extends LightningElement {
                 const flow = metadataRes.records[0];
                 this.flowName = flow.FullName;
                 this.flowMetadata = flow.Metadata;
-                await this.scanFlow(this.rulesConfig); // Pass rulesConfig to scan
+                await this.scanFlow(this.rulesConfig);
             }
         } catch (error) {
             this.err = error.message;
@@ -128,9 +130,7 @@ export default class lightningFlowScannerApp extends LightningElement {
         }
         try {
             this.isLoading = true;
-            // Log ruleOptions for debugging
             console.log('Scanning with ruleOptions:', JSON.stringify(ruleOptions));
-            // Use only active rules for numberOfRules
             this.numberOfRules = ruleOptions && ruleOptions.rules ? Object.keys(ruleOptions.rules).length : lightningflowscanner.getRules().length;
             const flow = new lightningflowscanner.Flow(this.flowName, this.flowMetadata);
 
@@ -143,7 +143,6 @@ export default class lightningFlowScannerApp extends LightningElement {
                 console.log('Raw scan results ruleResults count:', this.scanResult.ruleResults.length);
                 console.log('Sample raw ruleResult structure:', JSON.stringify(this.scanResult.ruleResults[0] || {}));
 
-                // Fallback: Filter scan results to include only active rules
                 const activeRuleNames = ruleOptions && ruleOptions.rules ? Object.keys(ruleOptions.rules) : [];
                 if (this.scanResult && this.scanResult.ruleResults && activeRuleNames.length > 0) {
                     this.scanResult.ruleResults = this.scanResult.ruleResults.filter(ruleResult => {
@@ -156,7 +155,6 @@ export default class lightningFlowScannerApp extends LightningElement {
                     console.log('Filtered scan results ruleResults count:', this.scanResult.ruleResults.length);
                 }
 
-                // Add unique keys to each rule result and its details
                 this.scanResult.ruleResults = this.scanResult.ruleResults.map((ruleResult, ruleIndex) => {
                     return {
                         ...ruleResult,
@@ -185,10 +183,10 @@ export default class lightningFlowScannerApp extends LightningElement {
     async handleScanFlow(event) {
         const flowId = event.detail.flowId;
         const record = this.records.find(rec => rec.id === flowId);
-    
         if (record) {
             this.isLoading = true;
             this.selectedFlowRecord = record;
+            this.currentFlowIndex = this.records.findIndex(rec => rec.id === flowId); // Update index
             try {
                 await this.loadFlowMetadata(record);
                 this.activeTab = 2;
@@ -204,15 +202,39 @@ export default class lightningFlowScannerApp extends LightningElement {
         this.rules = updatedRules;
         this.rulesConfig = {
             rules: updatedRules.filter(rule => rule.isActive).reduce((acc, rule) => {
-                acc[rule.name] = { severity: rule.severity }; // Include user-selected severity
+                acc[rule.name] = { severity: rule.severity };
                 return acc;
             }, {})
         };
         console.log('Updated rulesConfig:', JSON.stringify(this.rulesConfig));
 
-        // Re-run scan if a flow is already selected
         if (this.flowName && this.flowMetadata && this.selectedFlowRecord) {
             await this.scanFlow(this.rulesConfig);
+        }
+    }
+
+    async handleNavigateFlow(event) {
+        const direction = event.detail.direction;
+        if (!this.records || this.records.length === 0) return;
+
+        let newIndex = this.currentFlowIndex;
+        if (direction === 'previous' && newIndex > 0) {
+            newIndex--;
+        } else if (direction === 'next' && newIndex < this.records.length - 1) {
+            newIndex++;
+        }
+
+        if (newIndex !== this.currentFlowIndex) {
+            this.isLoading = true;
+            this.currentFlowIndex = newIndex;
+            this.selectedFlowRecord = this.records[newIndex];
+            try {
+                await this.loadFlowMetadata(this.selectedFlowRecord);
+                this.activeTab = 2;
+            } catch (error) {
+                this.err = error.message;
+                console.error('Error in handleNavigateFlow:', error);
+            }
         }
     }
 }

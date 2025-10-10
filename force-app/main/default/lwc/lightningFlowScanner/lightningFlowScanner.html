@@ -1,10 +1,20 @@
 <template>
     <div class="page">
-        <template if:true={error}>
-            <p>Error scanning Flow: {error}</p>
-        </template>
-
         <template if:true={flowName}>
+            <div class="navigation">
+                <lightning-button
+                    label="Previous Flow"
+                    variant="brand"
+                    disabled={isFirstFlow}
+                    onclick={handlePreviousFlow}
+                ></lightning-button>
+                <lightning-button
+                    label="Next Flow"
+                    variant="brand"
+                    disabled={isLastFlow}
+                    onclick={handleNextFlow}
+                ></lightning-button>
+            </div>
             <div class="header">
                 <div class="flow-container">
                     <div class="flow-column">
@@ -23,10 +33,12 @@
                 <div class="description"><strong>Description:</strong> {metadata.description}</div>
             </div>
         </template>
-
+        <template if:true={error}>
+            <p class="error">Error scanning Flow: {error}</p>
+        </template>
         <template if:true={hasScanResults}>
             <div class="results">
-                <table>
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered">
                     <thead>
                         <tr>
                             <th>Rule Name</th>
