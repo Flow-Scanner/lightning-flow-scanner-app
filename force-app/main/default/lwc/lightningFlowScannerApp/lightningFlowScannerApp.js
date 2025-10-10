@@ -16,7 +16,9 @@ export default class lightningFlowScannerApp extends LightningElement {
     @track rules = [];
     @track rulesConfig = null;
     @track isLoading = false;
-    @track currentFlowIndex = 0; // Track the index of the selected flow
+    @track currentFlowIndex = 0;
+    @track nextRecordsUrl;
+    @track hasMoreRecords = false;
     conn;
     scriptLoaded = false;
 
@@ -52,7 +54,6 @@ export default class lightningFlowScannerApp extends LightningElement {
             ]);
             this.scriptLoaded = true;
 
-            // Fetch rules for Configuration tab, default all to active
             this.rules = lightningflowscanner.getRules().map((rule, index) => ({
                 id: `rule-${index}`,
                 name: rule.name,
@@ -62,7 +63,6 @@ export default class lightningFlowScannerApp extends LightningElement {
                 isActive: true
             }));
 
-            // Initialize rulesConfig with all rules
             this.rulesConfig = {
                 rules: this.rules.reduce((acc, rule) => {
                     acc[rule.name] = { severity: rule.severity };
@@ -78,9 +78,27 @@ export default class lightningFlowScannerApp extends LightningElement {
                 maxRequest: '10000'
             });
 
-            const res = await this.conn.tooling.query(`SELECT Id, DeveloperName, ActiveVersionId, LatestVersionId, ActiveVersion.Status, ActiveVersion.MasterLabel, ActiveVersion.ProcessType, LatestVersion.Status, LatestVersion.MasterLabel, LatestVersion.ProcessType FROM FlowDefinition`);
+            await this.fetchFlows();
+        } catch (error) {
+            this.err = error.message;
+            console.error('Error in connectedCallback:', error);
+        }
+    }
+
+    async fetchFlows(searchTerm = '') {
+        try {
+            this.isLoading = true;
+            let query = `SELECT Id, DeveloperName, ActiveVersionId, LatestVersionId, ActiveVersion.Status, ActiveVersion.MasterLabel, ActiveVersion.ProcessType, LatestVersion.Status, LatestVersion.MasterLabel, LatestVersion.ProcessType FROM FlowDefinition`;
+            
+            if (searchTerm) {
+                const escapedSearchTerm = searchTerm.replace(/'/g, "\\'");
+                query += ` WHERE DeveloperName LIKE '%${escapedSearchTerm}%' OR MasterLabel LIKE '%${escapedSearchTerm}%'`;
+            }
+            query += ' LIMIT 50';
+
+            const res = await this.conn.tooling.query(query);
             if (res && res.records) {
-                this.records = res.records.map(record => ({
+                const newRecords = res.records.map(record => ({
                     id: record.Id,
                     developerName: record.DeveloperName,
                     developerNameUrl: `/${record.Id}`,
@@ -90,16 +108,57 @@ export default class lightningFlowScannerApp extends LightningElement {
                     versionId: record.ActiveVersionId ? record.ActiveVersionId : record.LatestVersionId
                 }));
 
-                if (this.records.length > 0) {
+                this.records = searchTerm ? newRecords : [...this.records, ...newRecords];
+                this.nextRecordsUrl = res.nextRecordsUrl;
+                this.hasMoreRecords = !!res.nextRecordsUrl;
+
+                if (this.records.length > 0 && !searchTerm) {
                     this.selectedFlowRecord = this.records[0];
-                    this.currentFlowIndex = 0; // Set initial index
+                    this.currentFlowIndex = 0;
                     await this.loadFlowMetadata(this.selectedFlowRecord);
                 }
             }
         } catch (error) {
             this.err = error.message;
-            console.error('Error in connectedCallback:', error);
+            console.error('Error in fetchFlows:', error);
+        } finally {
+            this.isLoading = false;
         }
+    }
+
+    async loadMoreFlows() {
+        if (!this.nextRecordsUrl || !this.hasMoreRecords) return;
+        try {
+            this.isLoading = true;
+            const res = await this.conn.tooling.queryMore(this.nextRecordsUrl);
+            if (res && res.records) {
+                const newRecords = res.records.map(record => ({
+                    id: record.Id,
+                    developerName: record.DeveloperName,
+                    developerNameUrl: `/${record.Id}`,
+                    isActive: !!record.ActiveVersionId,
+                    masterLabel: record.ActiveVersionId ? record.ActiveVersion.MasterLabel : record.LatestVersion.MasterLabel,
+                    processType: record.ActiveVersionId ? record.ActiveVersion.ProcessType : record.LatestVersion.ProcessType,
+                    versionId: record.ActiveVersionId ? record.ActiveVersionId : record.LatestVersionId
+                }));
+                this.records = [...this.records, ...newRecords];
+                this.nextRecordsUrl = res.nextRecordsUrl;
+                this.hasMoreRecords = !!res.nextRecordsUrl;
+            }
+        } catch (error) {
+            this.err = error.message;
+            console.error('Error in loadMoreFlows:', error);
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    async handleSearch(event) {
+        const searchTerm = event.detail.searchTerm;
+        this.records = [];
+        this.nextRecordsUrl = null;
+        this.hasMoreRecords = false;
+        await this.fetchFlows(searchTerm);
     }
 
     async loadFlowMetadata(record) {
@@ -186,7 +245,7 @@ export default class lightningFlowScannerApp extends LightningElement {
         if (record) {
             this.isLoading = true;
             this.selectedFlowRecord = record;
-            this.currentFlowIndex = this.records.findIndex(rec => rec.id === flowId); // Update index
+            this.currentFlowIndex = this.records.findIndex(rec => rec.id === flowId);
             try {
                 await this.loadFlowMetadata(record);
                 this.activeTab = 2;

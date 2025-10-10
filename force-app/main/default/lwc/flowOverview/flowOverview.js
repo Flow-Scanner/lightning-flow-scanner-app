@@ -3,6 +3,7 @@ import { NavigationMixin } from 'lightning/navigation';
 
 export default class FlowOverview extends NavigationMixin(LightningElement) {
     @api records = [];
+    @api hasMoreRecords;
     @track err;
     @track columns = [
         { label: 'Label', fieldName: 'masterLabel', type: 'text' },
@@ -32,12 +33,20 @@ export default class FlowOverview extends NavigationMixin(LightningElement) {
         const actionName = event.detail.action.name;
         const row = event.detail.row;
         if (actionName === 'scan') {
-            const scanEvent = new CustomEvent('scanflow', {
-                detail: { 
-                    flowId: row.id
-                }
-            });
-            this.dispatchEvent(scanEvent);
+            this.dispatchEvent(new CustomEvent('scanflow', {
+                detail: { flowId: row.id }
+            }));
         }
+    }
+
+    handleSearchInput(event) {
+        const searchTerm = event.target.value;
+        this.dispatchEvent(new CustomEvent('search', {
+            detail: { searchTerm }
+        }));
+    }
+
+    handleLoadMore() {
+        this.dispatchEvent(new CustomEvent('loadmore'));
     }
 }

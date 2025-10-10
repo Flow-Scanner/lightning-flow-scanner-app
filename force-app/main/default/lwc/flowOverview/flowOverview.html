@@ -1,10 +1,19 @@
 <template>
     <lightning-card title="Flows" icon-name="custom:custom19">
+        <div class="search-bar">
+            <lightning-input
+                type="search"
+                label="Search Flows"
+                placeholder="Search by Name or Label..."
+                onchange={handleSearchInput}
+                class="slds-m-bottom_small"
+            ></lightning-input>
+        </div>
         <template if:true={err}>
-            <p>Error fetching records: {err}</p>
+            <p class="slds-p-horizontal_small">Error fetching records: {err}</p>
         </template>
         <template if:false={records.length}>
-            <p>No flows available to scan</p>
+            <p class="slds-p-horizontal_small">No flows available to scan</p>
         </template>
         <template if:true={records.length}>
             <lightning-datatable
@@ -12,8 +21,17 @@
                 data={records}
                 columns={columns}
                 hide-checkbox-column="true"
-                onrowaction={handleRowAction}>
-            </lightning-datatable>
+                onrowaction={handleRowAction}
+            ></lightning-datatable>
+        </template>
+        <template if:true={hasMoreRecords}>
+            <div slot="footer" class="slds-p-horizontal_small">
+                <lightning-button
+                    label="Load More"
+                    variant="brand"
+                    onclick={handleLoadMore}
+                ></lightning-button>
+            </div>
         </template>
     </lightning-card>
 </template>

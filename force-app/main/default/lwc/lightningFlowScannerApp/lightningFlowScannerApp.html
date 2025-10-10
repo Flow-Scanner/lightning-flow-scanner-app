@@ -5,7 +5,7 @@
                 <a class="slds-tabs_default__link {FlowsClass}" href="javascript:void(0);" role="tab" tabindex="0" data-tab="1" onclick={handleTabClick}>Flows</a>
             </li>
             <li class="slds-tabs_default__item" title="Analysis" role="presentation">
-                <a class="slds-tabs_default__link {AnalysisClass}" href="javascript:void(0);" role="tab" tabindex="-1" data-tab="2" onclick={handleTabClick}>Details</a>
+                <a class="slds-tabs_default__link {AnalysisClass}" href="javascript:void(0);" role="tab" tabindex="-1" data-tab="2" onclick={handleTabClick}>Analysis</a>
             </li>
             <li class="slds-tabs_default__item" title="Configuration" role="presentation">
                 <a class="slds-tabs_default__link {ConfigClass}" href="javascript:void(0);" role="tab" tabindex="-1" data-tab="3" onclick={handleTabClick}>Configuration</a>
@@ -13,7 +13,13 @@
         </ul>
         <div class="slds-tabs_default__content">
             <template if:true={isTab1Active}>
-                <c-flow-overview records={records} onscanflow={handleScanFlow}></c-flow-overview>
+                <c-flow-overview
+                    records={records}
+                    has-more-records={hasMoreRecords}
+                    onscanflow={handleScanFlow}
+                    onsearch={handleSearch}
+                    onloadmore={handleLoadMore}
+                ></c-flow-overview>
             </template>
             <template if:true={isTab2Active}>
                 <c-lightning-flow-scanner
