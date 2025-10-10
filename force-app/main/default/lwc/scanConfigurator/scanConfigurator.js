@@ -3,7 +3,6 @@ import { LightningElement, api, track } from 'lwc';
 export default class scanConfigurator extends LightningElement {
     @api rules;
     @track localRules;
-    // Severity options for dropdown
     severityOptions = [
         { label: 'Error', value: 'error' },
         { label: 'Warning', value: 'warning' },
@@ -12,8 +11,33 @@ export default class scanConfigurator extends LightningElement {
     ];
 
     connectedCallback() {
-        // Initialize localRules to ensure reactivity
         this.localRules = this.rules ? JSON.parse(JSON.stringify(this.rules)) : [];
+    }
+
+    get allRulesDisabled() {
+        return this.localRules.every(rule => !rule.isActive);
+    }
+
+    get allRulesEnabled() {
+        return this.localRules.every(rule => rule.isActive);
+    }
+
+    get toggleAllLabel() {
+        return this.allRulesDisabled ? 'Enable All Rules' : 'Disable All Rules';
+    }
+
+    handleToggleAllRules(event) {
+        const isChecked = event.target.checked;
+        this.localRules = this.localRules.map(rule => ({
+            ...rule,
+            isActive: isChecked
+        }));
+
+        this.dispatchEvent(
+            new CustomEvent('rulechange', {
+                detail: { rules: this.localRules }
+            })
+        );
     }
 
     handleRuleToggle(event) {
@@ -25,7 +49,6 @@ export default class scanConfigurator extends LightningElement {
             return rule;
         });
 
-        // Dispatch custom event with updated rules
         this.dispatchEvent(
             new CustomEvent('rulechange', {
                 detail: { rules: this.localRules }
@@ -43,7 +66,6 @@ export default class scanConfigurator extends LightningElement {
             return rule;
         });
 
-        // Dispatch custom event with updated rules
         this.dispatchEvent(
             new CustomEvent('rulechange', {
                 detail: { rules: this.localRules }

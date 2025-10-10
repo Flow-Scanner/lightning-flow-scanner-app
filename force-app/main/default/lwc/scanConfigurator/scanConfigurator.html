@@ -11,6 +11,17 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <tr class="toggle-all-row">
+                        <td colspan="4">
+                            <lightning-input
+                                type="checkbox"
+                                label={toggleAllLabel}
+                                checked={allRulesEnabled}
+                                onchange={handleToggleAllRules}
+                                class="toggle-all-checkbox"
+                            ></lightning-input>
+                        </td>
+                    </tr>
                     <template for:each={rules} for:item="rule">
                         <tr key={rule.id}>
                             <td>
