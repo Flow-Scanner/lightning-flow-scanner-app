@@ -55,7 +55,6 @@ export default class lightningFlowScannerApp extends LightningElement {
 
       this.scriptLoaded = true;
 
-      // Check if lightningflowscanner is loaded
       if (!window.lightningflowscanner) {
         console.error("lightningflowscanner not loaded correctly");
         return;
@@ -78,9 +77,7 @@ export default class lightningFlowScannerApp extends LightningElement {
           return acc;
         }, {})
       };
-      console.log("Initial rulesConfig:", JSON.stringify(this.rulesConfig));
 
-      // Check if jsforce is loaded
       if (!window.jsforce) {
         console.error("jsforce not loaded correctly");
         return;
@@ -113,21 +110,7 @@ export default class lightningFlowScannerApp extends LightningElement {
 
       const res = await this.conn.tooling.query(query);
       if (res && res.records) {
-        const newRecords = res.records.map((record) => ({
-          id: record.Id,
-          developerName: record.DeveloperName,
-          developerNameUrl: `/${record.Id}`,
-          isActive: !!record.ActiveVersionId,
-          masterLabel: record.ActiveVersionId
-            ? record.ActiveVersion.MasterLabel
-            : record.LatestVersion.MasterLabel,
-          processType: record.ActiveVersionId
-            ? record.ActiveVersion.ProcessType
-            : record.LatestVersion.ProcessType,
-          versionId: record.ActiveVersionId
-            ? record.ActiveVersionId
-            : record.LatestVersionId
-        }));
+        const newRecords = this._processFlowRecords(res.records);
 
         this.records = searchTerm
           ? newRecords
@@ -155,21 +138,7 @@ export default class lightningFlowScannerApp extends LightningElement {
       this.isLoading = true;
       const res = await this.conn.tooling.queryMore(this.nextRecordsUrl);
       if (res && res.records) {
-        const newRecords = res.records.map((record) => ({
-          id: record.Id,
-          developerName: record.DeveloperName,
-          developerNameUrl: `/${record.Id}`,
-          isActive: !!record.ActiveVersionId,
-          masterLabel: record.ActiveVersionId
-            ? record.ActiveVersion.MasterLabel
-            : record.LatestVersion.MasterLabel,
-          processType: record.ActiveVersionId
-            ? record.ActiveVersion.ProcessType
-            : record.LatestVersion.ProcessType,
-          versionId: record.ActiveVersionId
-            ? record.ActiveVersionId
-            : record.LatestVersionId
-        }));
+        const newRecords = this._processFlowRecords(res.records);
         this.records = [...this.records, ...newRecords];
         this.nextRecordsUrl = res.nextRecordsUrl;
         this.hasMoreRecords = !!res.nextRecordsUrl;
@@ -180,6 +149,24 @@ export default class lightningFlowScannerApp extends LightningElement {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  _processFlowRecords(records) {
+    return records.map((record) => ({
+      id: record.Id,
+      developerName: record.DeveloperName,
+      developerNameUrl: `/${record.Id}`,
+      isActive: !!record.ActiveVersionId,
+      masterLabel: record.ActiveVersionId
+        ? record.ActiveVersion.MasterLabel
+        : record.LatestVersion.MasterLabel,
+      processType: record.ActiveVersionId
+        ? record.ActiveVersion.ProcessType
+        : record.LatestVersion.ProcessType,
+      versionId: record.ActiveVersionId
+        ? record.ActiveVersionId
+        : record.LatestVersionId
+    }));
   }
 
   async handleSearch(event) {
@@ -218,7 +205,6 @@ export default class lightningFlowScannerApp extends LightningElement {
     }
     try {
       this.isLoading = true;
-      console.log("Scanning with ruleOptions:", JSON.stringify(ruleOptions));
 
       if (!window.lightningflowscanner) {
         console.error("lightningflowscanner is not loaded");
@@ -246,14 +232,6 @@ export default class lightningFlowScannerApp extends LightningElement {
           ruleOptions
         );
         this.scanResult = scanResults[0];
-        console.log(
-          "Raw scan results ruleResults count:",
-          this.scanResult.ruleResults.length
-        );
-        console.log(
-          "Sample raw ruleResult structure:",
-          JSON.stringify(this.scanResult.ruleResults[0] || {})
-        );
 
         const activeRuleNames =
           ruleOptions && ruleOptions.rules
@@ -268,18 +246,10 @@ export default class lightningFlowScannerApp extends LightningElement {
           this.scanResult.ruleResults = this.scanResult.ruleResults.filter(
             (ruleResult) => {
               if (!ruleResult.ruleName) {
-                console.warn(
-                  "Skipping ruleResult due to missing ruleName:",
-                  JSON.stringify(ruleResult)
-                );
                 return false;
               }
               return activeRuleNames.includes(ruleResult.ruleName);
             }
-          );
-          console.log(
-            "Filtered scan results ruleResults count:",
-            this.scanResult.ruleResults.length
           );
         }
 
@@ -299,11 +269,9 @@ export default class lightningFlowScannerApp extends LightningElement {
         );
       } catch (e) {
         this.err = e.message;
-        console.error("Error scanning flow:", e);
       }
     } catch (error) {
       this.err = error.message;
-      console.error("Error parsing flow:", error);
     } finally {
       this.isLoading = false;
     }
@@ -327,7 +295,6 @@ export default class lightningFlowScannerApp extends LightningElement {
         this.activeTab = 2;
       } catch (error) {
         this.err = error.message;
-        console.error("Error in handleScanFlow:", error);
       }
     }
   }
@@ -343,7 +310,6 @@ export default class lightningFlowScannerApp extends LightningElement {
           return acc;
         }, {})
     };
-    console.log("Updated rulesConfig:", JSON.stringify(this.rulesConfig));
 
     if (this.flowName && this.flowMetadata && this.selectedFlowRecord) {
       await this.scanFlow(this.rulesConfig);
@@ -370,7 +336,6 @@ export default class lightningFlowScannerApp extends LightningElement {
         this.activeTab = 2;
       } catch (error) {
         this.err = error.message;
-        console.error("Error in handleNavigateFlow:", error);
       }
     }
   }
