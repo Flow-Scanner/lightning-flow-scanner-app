@@ -1,41 +1,16 @@
 import { LightningElement, api, track } from "lwc";
 import { NavigationMixin } from "lightning/navigation";
+import { loadStyle } from "lightning/platformResourceLoader";
+import datatableHeaderStyles from "@salesforce/resourceUrl/LFS_CSS";
 
 export default class FlowOverview extends NavigationMixin(LightningElement) {
   _records = [];
-  @track sortedBy = "lastModifiedDate";
-  @track sortedDirection = "desc";
 
-  @api
-  get records() {
+  @api get records() {
     return this._records;
   }
-  set records(value) {
-    this._records = Array.isArray(value) ? [...value] : [];
-    this._records = this._records.map((r) => {
-      let normalizedIsActive = r.isActive;
-      if (typeof normalizedIsActive === "string") {
-        normalizedIsActive = normalizedIsActive.toLowerCase() === "true";
-      } else if (typeof normalizedIsActive === "number") {
-        normalizedIsActive = normalizedIsActive !== 0;
-      } else {
-        normalizedIsActive = Boolean(normalizedIsActive);
-      }
-      return { ...r, isActive: normalizedIsActive };
-    });
-    this.applyFilters();
-  }
-
   @api hasMoreRecords;
-  @track err;
-  @track displayedRecords = [];
-  @track sortedBy;
-  @track sortedDirection = "asc";
-
-  @track nameSearchTerm = "";
-  @track typeSearchTerm = "";
   @track activeOnly = false;
-
   @track columns = [
     { label: "Label", fieldName: "masterLabel", type: "text", sortable: true },
     {
@@ -55,20 +30,20 @@ export default class FlowOverview extends NavigationMixin(LightningElement) {
       sortable: true
     },
     {
-  label: "Last Modified Date",
-  fieldName: "lastModifiedDate",
-  type: "date",
-  typeAttributes: {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true
-  },
-  sortable: true,
-  cellAttributes: { alignment: "center" }
-},
+      label: "Last Modified Date",
+      fieldName: "lastModifiedDate",
+      type: "date",
+      typeAttributes: {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      },
+      sortable: true,
+      cellAttributes: { alignment: "center" }
+    },
     {
       label: "Is Active",
       fieldName: "isActive",
@@ -86,6 +61,39 @@ export default class FlowOverview extends NavigationMixin(LightningElement) {
       }
     }
   ];
+  @track displayedRecords = [];
+  @track err;
+  @track nameSearchTerm = "";
+  @track sortedBy = "lastModifiedDate";
+  @track sortedDirection = "desc";
+  @track typeSearchTerm = "";
+
+  set records(value) {
+    this._records = Array.isArray(value) ? [...value] : [];
+    this._records = this._records.map((r) => {
+      let normalizedIsActive = r.isActive;
+      if (typeof normalizedIsActive === "string") {
+        normalizedIsActive = normalizedIsActive.toLowerCase() === "true";
+      } else if (typeof normalizedIsActive === "number") {
+        normalizedIsActive = normalizedIsActive !== 0;
+      } else {
+        normalizedIsActive = Boolean(normalizedIsActive);
+      }
+      return { ...r, isActive: normalizedIsActive };
+    });
+    this.applyFilters();
+  }
+  
+  connectedCallback() {
+    loadStyle(this, datatableHeaderStyles)
+      .then(() => {
+        console.log("Datatable header styles loaded successfully");
+      })
+      .catch((error) => {
+        console.error("Error loading datatable header styles:", error);
+        this.err = "Failed to load custom styles for datatable headers.";
+      });
+  }
 
   handleRowAction(event) {
     const actionName = event.detail.action.name;

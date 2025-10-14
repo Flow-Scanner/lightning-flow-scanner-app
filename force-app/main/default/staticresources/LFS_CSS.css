@@ -1,0 +1,17 @@
+.custom-datatable lightning-datatable .slds-th__action {
+    background-color: #003087 !important;
+    color: #ffffff !important;
+}
+
+.custom-datatable lightning-datatable .slds-th__action:hover,
+.custom-datatable lightning-datatable .slds-th__action:focus {
+    background-color: #00205b !important;
+}
+
+.custom-datatable lightning-datatable th lightning-primitive-header-actions .slds-button_icon-bare .slds-button__icon {
+    fill: #ffffff !important; /* White sort icons */
+}
+
+.custom-datatable lightning-datatable th lightning-primitive-header-actions .slds-button_icon-bare:hover .slds-button__icon {
+    fill: #cccccc !important; /* Light gray on hover for visibility */
+}

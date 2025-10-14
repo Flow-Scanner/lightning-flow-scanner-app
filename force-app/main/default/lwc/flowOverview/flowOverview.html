@@ -1,6 +1,5 @@
 <template>
-    <lightning-card>
-        <div class="slds-grid slds-grid_vertical-align-center slds-p-around_xx-small toolbar-row">
+    <div slot="title" class="slds-grid slds-grid_vertical-align-center slds-p-around_xx-small toolbar-row">
 
             <!-- Icon -->
             <div class="toolbar-icon">
@@ -46,6 +45,8 @@
                 ></lightning-input>
             </div>
         </div>
+    <lightning-card>
+        
 
         <!-- Table & footer remain unchanged -->
         <template if:true={err}>
@@ -57,16 +58,18 @@
         </template>
 
         <template if:true={displayedRecords.length}>
-            <lightning-datatable
-                key-field="id"
-                data={displayedRecords}
-                columns={columns}
-                hide-checkbox-column="true"
-                onrowaction={handleRowAction}
-                onsort={handleSort}
-                sorted-by={sortedBy}
-                sorted-direction={sortedDirection}
-            ></lightning-datatable>
+            <div class="custom-datatable">
+                <lightning-datatable
+                    key-field="id"
+                    data={displayedRecords}
+                    columns={columns}
+                    hide-checkbox-column="true"
+                    onrowaction={handleRowAction}
+                    onsort={handleSort}
+                    sorted-by={sortedBy}
+                    sorted-direction={sortedDirection}
+                ></lightning-datatable>
+            </div>
         </template>
 
         <template if:true={hasMoreRecords}>
