@@ -100,7 +100,13 @@ export default class lightningFlowScannerApp extends LightningElement {
   async fetchFlows(searchTerm = "") {
     try {
       this.isLoading = true;
-      let query = `SELECT Id, DeveloperName, ActiveVersionId, LatestVersionId, ActiveVersion.Status, ActiveVersion.MasterLabel, ActiveVersion.ProcessType, LatestVersion.Status, LatestVersion.MasterLabel, LatestVersion.ProcessType FROM FlowDefinition`;
+      let query = `
+  SELECT Id, CreatedDate, DeveloperName, ActiveVersionId, LatestVersionId,
+    ActiveVersion.Status, ActiveVersion.MasterLabel, ActiveVersion.ProcessType,
+    LatestVersion.Status, LatestVersion.MasterLabel, LatestVersion.ProcessType,
+    LastModifiedDate, LastModifiedBy.Name
+  FROM FlowDefinition
+`;
 
       if (searchTerm) {
         const escapedSearchTerm = searchTerm.replace(/'/g, "\\'");
@@ -151,23 +157,36 @@ export default class lightningFlowScannerApp extends LightningElement {
     }
   }
 
-  _processFlowRecords(records) {
-    return records.map((record) => ({
-      id: record.Id,
-      developerName: record.DeveloperName,
-      developerNameUrl: `/${record.Id}`,
-      isActive: !!record.ActiveVersionId,
-      masterLabel: record.ActiveVersionId
-        ? record.ActiveVersion.MasterLabel
-        : record.LatestVersion.MasterLabel,
-      processType: record.ActiveVersionId
-        ? record.ActiveVersion.ProcessType
-        : record.LatestVersion.ProcessType,
-      versionId: record.ActiveVersionId
-        ? record.ActiveVersionId
-        : record.LatestVersionId
-    }));
-  }
+ _processFlowRecords(records) {
+    return records.map((record) => {
+        // Choose version info
+        const version = record.ActiveVersionId ? record.ActiveVersion : record.LatestVersion;
+
+        // Use LastModifiedDate or fallback to CreatedDate
+        const rawDate = record.LastModifiedDate || record.CreatedDate;
+
+        // Keep ISO format for lightning-datatable date-local type
+        const dateValue = rawDate ? new Date(rawDate).toISOString() : null;
+
+        // Normalize isActive
+        const normalizedIsActive = !!record.ActiveVersionId;
+
+        // Pick versionId: prefer ActiveVersionId if available, else LatestVersionId
+        const versionId = record.ActiveVersionId || record.LatestVersionId || null;
+
+        return {
+            id: record.Id,
+            developerName: record.DeveloperName,
+            developerNameUrl: `/${record.Id}`,
+            isActive: normalizedIsActive,
+            masterLabel: version?.MasterLabel || '',
+            processType: version?.ProcessType || '',
+            lastModifiedDate: dateValue,
+            versionId // <-- important for loadFlowMetadata
+        };
+    });
+}
+
 
   async handleSearch(event) {
     const searchTerm = event.detail.searchTerm;
