@@ -24,6 +24,38 @@ lightning-card {
     --slds-c-input-font-size: 0.875rem; /* Smaller font for compactness */
 }
 
+.toolbar-row {
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.toolbar-icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+}
+
+.toolbar-title {
+    flex: 0 0 auto;
+    line-height: 1.2rem;
+}
+
+.toolbar-item {
+    flex: 1 1 auto;
+    min-width: 120px;
+}
+
+.compact-input input {
+    height: 2rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.compact-toggle {
+    height: 2rem;
+}
+
+
 lightning-datatable {
     margin: 0 1rem;
 }

@@ -1,28 +1,74 @@
 <template>
-    <lightning-card title="Flows" icon-name="custom:custom19">
-        <div class="search-bar">
-            <lightning-input
-                type="search"
-                placeholder="Search by Name or Label..."
-                onchange={handleSearchInput}
-                class="slds-m-bottom_x-small"
-            ></lightning-input>
+    <lightning-card>
+        <div class="slds-grid slds-grid_vertical-align-center slds-p-around_xx-small toolbar-row">
+
+            <!-- Icon -->
+            <div class="toolbar-icon">
+                <lightning-icon icon-name="custom:custom19" size="small"></lightning-icon>
+            </div>
+
+            <!-- Title -->
+            <div class="toolbar-title slds-p-left_x-small">
+                <h2 class="slds-text-heading_small slds-truncate">Flows</h2>
+            </div>
+
+            <!-- Name / Label -->
+            <div class="toolbar-item slds-p-left_x-small">
+                <lightning-input
+                    type="search"
+                    placeholder="Name or Label"
+                    onkeyup={handleNameKeyUp}
+                    variant="label-hidden"
+                    class="compact-input"
+                ></lightning-input>
+            </div>
+
+            <!-- Flow Type -->
+            <div class="toolbar-item slds-p-left_x-small">
+                <lightning-input
+                    type="search"
+                    placeholder="Flow Type"
+                    onkeyup={handleTypeKeyUp}
+                    variant="label-hidden"
+                    class="compact-input"
+                ></lightning-input>
+            </div>
+
+            <!-- Active Toggle -->
+            <div class="toolbar-item slds-p-left_x-small slds-align-middle">
+                <lightning-input
+                    type="toggle"
+                    label="Active"
+                    checked={activeOnly}
+                    onchange={handleToggleChange}
+                    class="compact-toggle"
+                    variant="label-hidden"
+                ></lightning-input>
+            </div>
         </div>
+
+        <!-- Table & footer remain unchanged -->
         <template if:true={err}>
             <p class="slds-p-horizontal_small">Error fetching records: {err}</p>
         </template>
+
         <template if:false={records.length}>
             <p class="slds-p-horizontal_small">No flows available to scan</p>
         </template>
-        <template if:true={records.length}>
+
+        <template if:true={displayedRecords.length}>
             <lightning-datatable
                 key-field="id"
-                data={records}
+                data={displayedRecords}
                 columns={columns}
                 hide-checkbox-column="true"
                 onrowaction={handleRowAction}
+                onsort={handleSort}
+                sorted-by={sortedBy}
+                sorted-direction={sortedDirection}
             ></lightning-datatable>
         </template>
+
         <template if:true={hasMoreRecords}>
             <div slot="footer" class="slds-p-horizontal_small">
                 <lightning-button

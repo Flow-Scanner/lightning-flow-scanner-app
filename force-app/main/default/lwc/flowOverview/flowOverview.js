@@ -2,21 +2,51 @@ import { LightningElement, api, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 
 export default class FlowOverview extends NavigationMixin(LightningElement) {
-    @api records = [];
+    _records = [];
+
+    @api
+    get records() {
+        return this._records;
+    }
+    set records(value) {
+        this._records = Array.isArray(value) ? [...value] : [];
+        this._records = this._records.map(r => {
+            let normalizedIsActive = r.isActive;
+            if (typeof normalizedIsActive === 'string') {
+                normalizedIsActive = normalizedIsActive.toLowerCase() === 'true';
+            } else if (typeof normalizedIsActive === 'number') {
+                normalizedIsActive = normalizedIsActive !== 0;
+            } else {
+                normalizedIsActive = Boolean(normalizedIsActive);
+            }
+            return { ...r, isActive: normalizedIsActive };
+        });
+        this.applyFilters();
+    }
+
     @api hasMoreRecords;
     @track err;
+    @track displayedRecords = [];
+    @track sortedBy;
+    @track sortedDirection = 'asc';
+
+    @track nameSearchTerm = '';
+    @track typeSearchTerm = '';
+    @track activeOnly = false;
+
     @track columns = [
-        { label: 'Label', fieldName: 'masterLabel', type: 'text' },
-        { 
-            label: 'API Name', 
-            fieldName: 'developerNameUrl', 
-            type: 'url', 
-            typeAttributes: { 
-                label: { fieldName: 'developerName' }, 
-                target: '_blank' 
-            } 
+        { label: 'Label', fieldName: 'masterLabel', type: 'text', sortable: true },
+        {
+            label: 'API Name',
+            fieldName: 'developerNameUrl',
+            type: 'url',
+            sortable: true,
+            typeAttributes: {
+                label: { fieldName: 'developerName' },
+                target: '_blank'
+            }
         },
-        { label: 'Process Type', fieldName: 'processType', type: 'text' },
+        { label: 'Process Type', fieldName: 'processType', type: 'text', sortable: true },
         { label: 'Is Active', fieldName: 'isActive', type: 'boolean', cellAttributes: { alignment: 'center' } },
         {
             type: 'button',
@@ -24,7 +54,7 @@ export default class FlowOverview extends NavigationMixin(LightningElement) {
                 label: 'Scan',
                 name: 'scan',
                 variant: 'base',
-                title: 'Click to Scan Flow',
+                title: 'Click to Scan Flow'
             }
         }
     ];
@@ -33,20 +63,95 @@ export default class FlowOverview extends NavigationMixin(LightningElement) {
         const actionName = event.detail.action.name;
         const row = event.detail.row;
         if (actionName === 'scan') {
-            this.dispatchEvent(new CustomEvent('scanflow', {
-                detail: { flowId: row.id }
-            }));
+            this.dispatchEvent(new CustomEvent('scanflow', { detail: { flowId: row.id } }));
         }
     }
 
-    handleSearchInput(event) {
-        const searchTerm = event.target.value;
-        this.dispatchEvent(new CustomEvent('search', {
-            detail: { searchTerm }
-        }));
+    handleNameKeyUp(event) {
+        this.nameSearchTerm = event.target.value?.trim().toLowerCase();
+        this.applyFilters();
+    }
+
+    handleTypeKeyUp(event) {
+        this.typeSearchTerm = event.target.value?.trim().toLowerCase();
+        this.applyFilters();
+    }
+
+    handleToggleChange(event) {
+        this.activeOnly = event.target.checked;
+        this.applyFilters();
     }
 
     handleLoadMore() {
         this.dispatchEvent(new CustomEvent('loadmore'));
+    }
+
+    applyFilters() {
+        let filtered = [...this._records];
+
+        if (this.activeOnly) {
+            filtered = filtered.filter(r => r.isActive);
+        }
+
+        if (this.nameSearchTerm) {
+            const term = this.nameSearchTerm;
+            filtered = filtered.filter(r =>
+                (r.masterLabel && r.masterLabel.toLowerCase().includes(term)) ||
+                (r.developerName && r.developerName.toLowerCase().includes(term))
+            );
+        }
+
+        if (this.typeSearchTerm) {
+            const term = this.typeSearchTerm;
+            filtered = filtered.filter(r =>
+                r.processType && r.processType.toLowerCase().includes(term)
+            );
+        }
+
+        if (this.sortedBy) {
+            this._sortArray(filtered, this.sortedBy, this.sortedDirection);
+        }
+
+        this.displayedRecords = filtered;
+    }
+
+    handleSort(event) {
+        const { fieldName: sortedBy, sortDirection } = event.detail;
+        this.sortedBy = sortedBy;
+        this.sortedDirection = sortDirection;
+        const clone = [...this.displayedRecords];
+        this._sortArray(clone, sortedBy, sortDirection);
+        this.displayedRecords = clone;
+    }
+
+    _sortArray(arr, sortedBy, sortDirection) {
+        const column = this.columns.find(col => col.fieldName === sortedBy);
+        const type = column ? column.type : 'text';
+        arr.sort((a, b) => {
+            let valA = a[sortedBy];
+            let valB = b[sortedBy];
+            if (sortedBy === 'developerNameUrl') {
+                valA = a.developerName;
+                valB = b.developerName;
+            }
+            if (valA === null || valA === undefined) valA = '';
+            if (valB === null || valB === undefined) valB = '';
+            let cmp = 0;
+            switch (type) {
+                case 'boolean':
+                    cmp = (Boolean(valA) === Boolean(valB)) ? 0 : (valA ? 1 : -1);
+                    break;
+                case 'number':
+                    cmp = Number(valA) - Number(valB);
+                    break;
+                case 'date':
+                case 'datetime':
+                    cmp = new Date(valA) - new Date(valB);
+                    break;
+                default:
+                    cmp = String(valA).localeCompare(String(valB), 'en', { sensitivity: 'base' });
+            }
+            return sortDirection === 'asc' ? cmp : -cmp;
+        });
     }
 }
