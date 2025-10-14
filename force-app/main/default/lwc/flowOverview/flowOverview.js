@@ -55,20 +55,20 @@ export default class FlowOverview extends NavigationMixin(LightningElement) {
       sortable: true
     },
     {
-      label: "Last Modified Date",
-      fieldName: "lastModifiedDate",
-      type: "date-local",
-      typeAttributes: {
-        year: "numeric",
-        month: "short",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true
-      },
-      sortable: true,
-      cellAttributes: { alignment: "center" }
-    },
+  label: "Last Modified Date",
+  fieldName: "lastModifiedDate",
+  type: "date",
+  typeAttributes: {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  },
+  sortable: true,
+  cellAttributes: { alignment: "center" }
+},
     {
       label: "Is Active",
       fieldName: "isActive",

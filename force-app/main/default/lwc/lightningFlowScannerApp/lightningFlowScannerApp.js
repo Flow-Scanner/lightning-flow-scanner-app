@@ -102,8 +102,8 @@ export default class lightningFlowScannerApp extends LightningElement {
       this.isLoading = true;
       let query = `
   SELECT Id, CreatedDate, DeveloperName, ActiveVersionId, LatestVersionId,
-    ActiveVersion.Status, ActiveVersion.MasterLabel, ActiveVersion.ProcessType,
-    LatestVersion.Status, LatestVersion.MasterLabel, LatestVersion.ProcessType,
+    ActiveVersion.Status, ActiveVersion.MasterLabel, ActiveVersion.ProcessType, ActiveVersion.LastModifiedDate,
+    LatestVersion.Status, LatestVersion.MasterLabel, LatestVersion.ProcessType, LatestVersion.LastModifiedDate,
     LastModifiedDate, LastModifiedBy.Name
   FROM FlowDefinition
 `;
@@ -157,30 +157,33 @@ export default class lightningFlowScannerApp extends LightningElement {
     }
   }
 
- _processFlowRecords(records) {
+  _processFlowRecords(records) {
     return records.map((record) => {
-        const version = record.ActiveVersionId
-            ? record.ActiveVersion
-            : record.LatestVersion;
+      const version = record.ActiveVersionId
+        ? record.ActiveVersion
+        : record.LatestVersion;
 
-        const rawDate = record.LastModifiedDate || record.CreatedDate;
-        const dateValue = rawDate ? new Date(rawDate) : null;
-        const normalizedIsActive = !!record.ActiveVersionId;
-        const versionId = record.ActiveVersionId || record.LatestVersionId || null;
+      const rawDate =
+        version?.LastModifiedDate ||
+        record.LastModifiedDate ||
+        record.CreatedDate;
+      const dateValue = rawDate ? new Date(rawDate) : null;
+      const normalizedIsActive = !!record.ActiveVersionId;
+      const versionId =
+        record.ActiveVersionId || record.LatestVersionId || null;
 
-        return {
-            id: record.Id,
-            developerName: record.DeveloperName,
-            developerNameUrl: `/${record.Id}`,
-            isActive: normalizedIsActive,
-            masterLabel: version?.MasterLabel || '',
-            processType: version?.ProcessType || '',
-            lastModifiedDate: dateValue,
-            versionId
-        };
+      return {
+        id: record.Id,
+        developerName: record.DeveloperName,
+        developerNameUrl: `/${record.Id}`,
+        isActive: normalizedIsActive,
+        masterLabel: version?.MasterLabel || "",
+        processType: version?.ProcessType || "",
+        lastModifiedDate: dateValue,
+        versionId
+      };
     });
-}
-
+  }
 
   async handleSearch(event) {
     const searchTerm = event.detail.searchTerm;
