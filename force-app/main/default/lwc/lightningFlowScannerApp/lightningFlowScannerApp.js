@@ -159,19 +159,13 @@ export default class lightningFlowScannerApp extends LightningElement {
 
  _processFlowRecords(records) {
     return records.map((record) => {
-        // Choose version info
-        const version = record.ActiveVersionId ? record.ActiveVersion : record.LatestVersion;
+        const version = record.ActiveVersionId
+            ? record.ActiveVersion
+            : record.LatestVersion;
 
-        // Use LastModifiedDate or fallback to CreatedDate
         const rawDate = record.LastModifiedDate || record.CreatedDate;
-
-        // Keep ISO format for lightning-datatable date-local type
-        const dateValue = rawDate ? new Date(rawDate).toISOString() : null;
-
-        // Normalize isActive
+        const dateValue = rawDate ? new Date(rawDate) : null;
         const normalizedIsActive = !!record.ActiveVersionId;
-
-        // Pick versionId: prefer ActiveVersionId if available, else LatestVersionId
         const versionId = record.ActiveVersionId || record.LatestVersionId || null;
 
         return {
@@ -182,7 +176,7 @@ export default class lightningFlowScannerApp extends LightningElement {
             masterLabel: version?.MasterLabel || '',
             processType: version?.ProcessType || '',
             lastModifiedDate: dateValue,
-            versionId // <-- important for loadFlowMetadata
+            versionId
         };
     });
 }
