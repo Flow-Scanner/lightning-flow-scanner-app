@@ -49,12 +49,13 @@ export default class FlowOverview extends NavigationMixin(LightningElement) {
         { label: 'Process Type', fieldName: 'processType', type: 'text', sortable: true },
         { label: 'Is Active', fieldName: 'isActive', type: 'boolean', cellAttributes: { alignment: 'center' } },
         {
+            label: 'Results',
             type: 'button',
             typeAttributes: {
-                label: 'Scan',
+                label: 'Details',
                 name: 'scan',
                 variant: 'base',
-                title: 'Click to Scan Flow'
+                title: 'Click to see scan results',
             }
         }
     ];
