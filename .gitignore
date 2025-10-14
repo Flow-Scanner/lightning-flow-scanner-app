@@ -44,3 +44,5 @@ $RECYCLE.BIN/
 **/__pycache__/
 **/.venv/
 **/venv/
+
+.sfdx-project.json
