@@ -8,20 +8,69 @@ lightning-card {
     background-color: #ffffff;
     border-radius: 0.5rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --sds-c-card-header-spacing-block-end: 0;
+    --sds-c-card-body-spacing-block-start: 0;
+    --sds-c-card-header-spacing-block-start: 0;
 }
 
-.search-bar {
-    padding: 0.25rem 1rem; /* Reduced padding for less height */
-    background-color: #ffffff;
+.toolbar-row {
+    width: 100%;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background-color: #003087;
+    color: #ffffff;
+    margin-bottom: 0;
+}
+
+.toolbar-icon {
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
 }
 
-.search-bar lightning-input {
-    max-width: 300px; /* Smaller width for compact look */
-    --slds-c-input-color-border: #003087; /* Dark blue border */
-    --slds-c-input-radius-border: 0.25rem;
-    --slds-c-input-font-size: 0.875rem; /* Smaller font for compactness */
+.toolbar-icon lightning-icon {
+    --slds-c-icon-color-foreground: #ffffff;
+}
+
+.toolbar-title {
+    flex: 0 0 auto;
+    line-height: 1.2rem;
+}
+
+.toolbar-title h2 {
+    color: #ffffff;
+    margin: 0;
+}
+
+.toolbar-item {
+    flex: 1 1 auto;
+    min-width: 120px;
+}
+
+.compact-input {
+    --slds-c-input-color-background: #ffffff;
+    --slds-c-input-text-color: #003087;
+    --slds-c-input-color-border: #003087;
+    --slds-c-input-shadow-focus: 0 0 3px #00205b;
+}
+
+.compact-input input {
+    height: 2rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.compact-toggle {
+    height: 2rem;
+    --slds-c-toggle-color-background-checked: #ffffff;
+    --slds-c-toggle-color-foreground-checked: #003087;
+    --slds-c-toggle-color-background-unchecked: #cccccc;
+    --slds-c-toggle-color-foreground-unchecked: #003087; 
+    --slds-c-toggle-shadow-color-focus: #00205b;
+}
+
+.custom-datatable {
+    margin-top: 0;
 }
 
 lightning-datatable {

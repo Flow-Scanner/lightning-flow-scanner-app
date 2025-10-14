@@ -1,46 +1,39 @@
+/* === Page Layout === */
 .page {
     background-color: #f4f6f9;
     padding: 1.5rem;
     border-radius: 0.5rem;
-    max-width: 1600px; /* Increased from 1200px for wider table */
+    max-width: 1600px;
     margin: 0 auto;
-}
-
-.navigation {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    flex-direction: column;
+    height: 100%;
 }
 
-.navigation lightning-button {
-    --slds-c-button-brand-color-background: #003087; /* Dark blue, Salesforce logo-inspired */
-    --slds-c-button-brand-color-background-hover: #00205b; /* Darker on hover */
-    --slds-c-button-text-color: #ffffff;
-    --slds-c-button-radius-border: 0.25rem;
-}
-
+/* === Header Section === */
 .header {
     background-color: #ffffff;
-    padding: 1.5rem;
+    padding: 1rem;
     border-radius: 0.5rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
 }
 
 .flow-container {
     display: flex;
-    gap: 2rem;
     flex-wrap: wrap;
+    gap: 1.5rem;
 }
 
 .flow-column {
     flex: 1;
-    min-width: 200px;
+    min-width: 220px;
 }
 
 .info-item {
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
+    margin: 0.25rem 0;
     color: #333;
 }
 
@@ -48,72 +41,93 @@
     color: #003087;
 }
 
-.description {
-    font-style: italic;
-    color: #555;
-    margin-top: 1rem;
-    font-size: 0.9rem;
-}
-
+/* === Table Section === */
 .results {
-    margin-bottom: 1.5rem;
-    overflow-x: auto; /* Enable horizontal scrolling for table */
+    flex-grow: 1;
+    overflow-x: auto;
+    margin-bottom: 1rem;
 }
 
-.slds-table {
+.full-width-table {
+    width: 100%;
     background-color: #ffffff;
     border-radius: 0.25rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    min-width: 1400px; /* Ensure table is wide enough for all columns */
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    min-width: 1400px;
 }
 
-.slds-table th {
+.full-width-table th {
     background-color: #003087;
     color: #ffffff;
     font-weight: 600;
-    padding: 0.75rem;
-    white-space: nowrap; /* Prevent header text wrapping */
+    padding: 0.6rem 0.75rem;
+    white-space: nowrap;
+    text-align: left;
 }
 
-.slds-table td {
-    padding: 0.75rem;
+.full-width-table td {
+    padding: 0.6rem 0.75rem;
     color: #333;
-    max-width: 200px; /* Limit column width */
+    max-width: 220px;
     overflow: hidden;
-    text-overflow: ellipsis; /* Truncate long text with ellipsis */
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.slds-table tr:nth-child(even) {
+.full-width-table tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-.slds-table tr:hover {
+.full-width-table tr:hover {
     background-color: #e6f0ff;
 }
 
-.error {
-    color: #c23934;
-    font-weight: bold;
-    text-align: center;
-    margin: 1rem 0;
+.expression-cell {
+    max-width: 250px;
+    white-space: normal;
 }
 
-.github-star {
-    text-align: center;
-    font-size: 0.9rem;
+/* === Footer / Navigation Section === */
+.footer {
+    background-color: #ffffff;
+    font-size: 0.8rem;
     color: #555;
-    padding: 1rem 0;
     border-top: 1px solid #ddd;
+    border-radius: 0 0 0.5rem 0.5rem;
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap; /* helps responsiveness */
+    gap: 0.5rem;
 }
 
-.github-star a {
+.navigation-buttons lightning-button {
+    margin-left: 0.25rem;
+    --slds-c-button-brand-color-background: #003087;
+    --slds-c-button-brand-color-background-hover: #00205b;
+    --slds-c-button-text-color: #ffffff;
+    --slds-c-button-radius-border: 0.25rem;
+}
+
+.github-info a {
     color: #003087;
     text-decoration: none;
     font-weight: 600;
 }
 
-.github-star a:hover {
+.github-info a:hover {
     text-decoration: underline;
     color: #00205b;
+}
+
+/* === Error Message === */
+.error {
+    color: #c23934;
+    font-weight: bold;
+    text-align: center;
+    margin: 0.75rem 0;
 }
