@@ -4,24 +4,37 @@
 }
 
 .slds-table th {
-    background-color: #003087; /* Dark blue background */
-    color: #ffffff; /* White text */
+    background-color: #003087;
+    color: #ffffff;
     font-weight: bold;
     padding: 0.5rem;
+    text-align: left;
+    white-space: nowrap;
 }
 
 .slds-table td {
     padding: 0.5rem;
+    vertical-align: top;
 }
 
+/* ✅ Allow wrapping for long text like descriptions */
+.wrap-text {
+    white-space: normal !important;
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: 400px; /* keeps things readable without exploding the layout */
+}
+
+/* Toggle row and checkbox styling */
 .toggle-all-row {
-    background-color: #ffffff; /* Match table row background */
-    border-bottom: 1px solid #ddd; /* Match table borders */
+    background-color: #ffffff;
+    border-bottom: 1px solid #ddd;
 }
 
 .toggle-all-checkbox {
     --slds-c-checkbox-label-font-size: 0.875rem;
     --slds-c-checkbox-label-font-weight: bold;
-    --slds-c-checkbox-color-border: #003087; /* Dark blue border */
+    --slds-c-checkbox-color-border: #003087;
     padding-left: 0.5rem;
 }
+
