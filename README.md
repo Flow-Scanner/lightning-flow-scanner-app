@@ -7,12 +7,12 @@
 <p align="center">Scans for unsafe contexts, hardcoded IDs, and other issues to optimize your Flows.</p>
 
 <p align="center">
- <img src="media/lfsapp.gif" alt="Lightning Flow Scanner Demo" width="70%" />
+ <img src="media/lfs-app.gif" alt="Lightning Flow Scanner Demo" width="70%" />
 </p>
 
 ## Features
 
-**Lightning Flow Scanner App** integrates the Lightning Flow Scanner as a UMD module within Salesforce, enabling scanning of flow metadata for 20+ issues such as hardcoded IDs, unsafe contexts, inefficient SOQL/DML operations, recursion risks, and missing fault handling.  
+**Lightning Flow Scanner App** integrates the Lightning Flow Scanner as a UMD module within Salesforce, enabling scanning of flow metadata for 20+ issues such as hardcoded IDs, unsafe contexts, inefficient SOQL/DML operations, recursion risks, and missing fault handling.
 
 For details about all available rules, their default severities, and configuration options, visit the [Lightning Flow Scanner Core Documentation](https://flow-scanner.github.io/lightning-flow-scanner-core/).
 
@@ -54,8 +54,8 @@ src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png
 
 ## Configuration
 
-While no configuration is required, Admins can define **default severities**, **expressions**, or **disabled states** for scan rules using the `ScanRuleConfiguration__mdt` custom metadata type.  
-These overrides apply globally for all users in the org, but individual users can still adjust severities or disable rules locally in the browser — those changes only persist for their current session.  
+While no configuration is required, Admins can define **default severities**, **expressions**, or **disabled states** for scan rules using the `ScanRuleConfiguration__mdt` custom metadata type.
+These overrides apply globally for all users in the org, but individual users can still adjust severities or disable rules locally in the browser — those changes only persist for their current session.
 
 For a full list of default rules, their descriptions, and configuration parameters, see the [Core Documentation](https://flow-scanner.github.io/lightning-flow-scanner-core/).
 
