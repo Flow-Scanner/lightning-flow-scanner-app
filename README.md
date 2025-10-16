@@ -12,7 +12,9 @@
 
 ## Features
 
-**Lightning Flow Scanner App** integrates the Lightning Flow Scanner as a UMD module within Salesforce, enabling scanning of flow metadata for 20+ issues such as hardcoded IDs, unsafe contexts, inefficient SOQL/DML operations, recursion risks, and missing fault handling. For more information on the default rules and configurations available, please review the [scanner core documentation](https://flow-scanner.github.io/lightning-flow-scanner-core/).
+**Lightning Flow Scanner App** integrates the Lightning Flow Scanner as a UMD module within Salesforce, enabling scanning of flow metadata for 20+ issues such as hardcoded IDs, unsafe contexts, inefficient SOQL/DML operations, recursion risks, and missing fault handling.  
+
+For details about all available rules, their default severities, and configuration options, visit the [Lightning Flow Scanner Core Documentation](https://flow-scanner.github.io/lightning-flow-scanner-core/).
 
 ### Flow Overview:
 
@@ -53,16 +55,18 @@ src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png
 ## Configuration
 
 Admins can define **default severities**, **expressions**, or **disabled states** for scan rules using the `ScanRuleConfiguration__mdt` custom metadata type.  
-These overrides apply globally for all users in the org, but individual users can still adjust severities or disable rules locally in the browser — those changes only persist for their current session.
+These overrides apply globally for all users in the org, but individual users can still adjust severities or disable rules locally in the browser — those changes only persist for their current session.  
+
+For a full list of default rules, their descriptions, and configuration parameters, see the [Core Documentation](https://flow-scanner.github.io/lightning-flow-scanner-core/).
 
 ### To Create an Override
 
-1. Go to **Setup → Custom Metadata Types → ScanRuleConfiguration → Manage Records**  
+1. Go to **Setup → Custom Metadata Types → ScanRuleConfiguration → Manage Records**
 2. Click **New** and set the following fields:
    - **Rule Name** — must match the rule’s API name (e.g., `FlowName`)
    - **Severity** — `Error`, `Warning`, `Info`, or `Note`
    - **Expression** *(optional)* — e.g., `[A-Za-z]+_[0-9]+`
-   - **Disabled** — check to turn off the rule globally  
+   - **Disabled** — check to turn off the rule globally
 3. Once saved, the **Flow Scanner App** automatically applies these overrides at load time — no user configuration needed.
 
 <p align="center">
