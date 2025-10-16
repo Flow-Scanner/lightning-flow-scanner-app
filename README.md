@@ -50,6 +50,25 @@ src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png
 - (Optional) Configure rules in the Configuration tab.
 - View results of a Flow by clicking "details".
 
+## Configuration
+
+Admins can define **default severities**, **expressions**, or **disabled states** for scan rules using the `ScanRuleConfiguration__mdt` custom metadata type.  
+These overrides apply globally for all users in the org, but individual users can still adjust severities or disable rules locally in the browser — those changes only persist for their current session.
+
+### To Create an Override
+
+1. Go to **Setup → Custom Metadata Types → ScanRuleConfiguration → Manage Records**  
+2. Click **New** and set the following fields:
+   - **Rule Name** — must match the rule’s API name (e.g., `FlowName`)
+   - **Severity** — `Error`, `Warning`, `Info`, or `Note`
+   - **Expression** *(optional)* — e.g., `[A-Za-z]+_[0-9]+`
+   - **Disabled** — check to turn off the rule globally  
+3. Once saved, the **Flow Scanner App** automatically applies these overrides at load time — no user configuration needed.
+
+<p align="center">
+ <img src="media/overrides.png" alt="Rule Override" width="65%" />
+</p>
+
 ## Development
 
 1) Clone this repository:

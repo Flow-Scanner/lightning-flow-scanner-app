@@ -235,11 +235,7 @@ export default class lightningFlowScannerApp extends LightningElement {
     const activeRuleEntries = Object.fromEntries(
       Object.entries(rawRuleOptions.rules || {}).filter(([name, cfg]) => !cfg.disabled)
     );
-
-    // Build final rules object for the scan
     const optionsForScan = { rules: activeRuleEntries };
-
-    // Update numberOfRules based on what we are actually about to scan
     this.numberOfRules = Object.keys(optionsForScan.rules).length;
 
     const flow = new window.lightningflowscanner.Flow(
@@ -256,8 +252,6 @@ export default class lightningFlowScannerApp extends LightningElement {
       // Call the scanner with a plain object (no proxies)
       const scanResults = window.lightningflowscanner.scan([parsedFlow], optionsForScan);
       this.scanResult = scanResults[0];
-
-      // Ensure ruleResults only include rules we scanned
       const activeRuleNames = Object.keys(optionsForScan.rules || {});
 
       if (
@@ -412,17 +406,14 @@ export default class lightningFlowScannerApp extends LightningElement {
             this.rulesConfig.rules &&
             this.rulesConfig.rules[ruleName]
           ) {
-            // Severity: convert to lowercase to match UI values
             if (rec.Severity__c) {
               this.rulesConfig.rules[ruleName].severity =
                 rec.Severity__c.toLowerCase();
               console.log('MDT Overrides Applied:', JSON.stringify(this.rulesConfig, null, 2));
             }
-            // Expression: only apply when present
             if (rec.Expression__c) {
               this.rulesConfig.rules[ruleName].expression = rec.Expression__c;
             }
-            // Disabled: boolean, ensure it's a real boolean
             if (
               rec.Disabled__c !== null &&
               typeof rec.Disabled__c !== "undefined"
@@ -430,7 +421,6 @@ export default class lightningFlowScannerApp extends LightningElement {
               this.rulesConfig.rules[ruleName].disabled = !!rec.Disabled__c;
             }
 
-            // ALSO update the UI rules array so Configuration tab reflects the MDT override:
             const uiRule = this.rules.find((r) => r.name === ruleName);
             if (uiRule) {
               if (rec.Severity__c)
@@ -442,8 +432,6 @@ export default class lightningFlowScannerApp extends LightningElement {
               ) {
                 uiRule.isActive = !rec.Disabled__c;
               }
-              // we do NOT put expression on UI rule object because the config component currently doesn't surface it;
-              // expression is stored in rulesConfig (used by scans)
             }
           }
         });
