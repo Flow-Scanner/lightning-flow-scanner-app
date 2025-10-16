@@ -1,6 +1,9 @@
+/* -----------------------------
+   Datatable Header Styling
+   ----------------------------- */
 .custom-datatable lightning-datatable .slds-th__action {
     background-color: #003087 !important;
-    color: #ffffff !important;
+    color: #ffffff !important; /* Only affects table headers */
 }
 
 .custom-datatable lightning-datatable .slds-th__action:hover,
@@ -14,4 +17,17 @@
 
 .custom-datatable lightning-datatable th lightning-primitive-header-actions .slds-button_icon-bare:hover .slds-button__icon {
     fill: #cccccc !important; /* Light gray on hover for visibility */
+}
+
+/* -----------------------------
+   Toolbar Search Inputs
+   ----------------------------- */
+.toolbar-row .compact-input input {
+    color: #003087 !important;       /* Dark text for search input */
+    background-color: #ffffff !important; 
+}
+
+.toolbar-row .compact-input ::placeholder {
+    color: #5a5a5a !important;       /* Dark gray placeholder */
+    opacity: 1;
 }

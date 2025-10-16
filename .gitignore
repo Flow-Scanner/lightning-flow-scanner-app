@@ -45,4 +45,4 @@ $RECYCLE.BIN/
 **/.venv/
 **/venv/
 
-.sfdx-project.json
+sfdx-project.json

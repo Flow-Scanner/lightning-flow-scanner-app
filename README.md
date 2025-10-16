@@ -12,24 +12,31 @@
 
 ## Features
 
-**Lightning Flow Scanner App** integrates the Lightning Flow Scanner as a UMD module within Salesforce, enabling scanning of flow metadata. The app runs predefined rules and presents detailed scan results for flows, including violation details, severity levels, and relevant flow metadata.
+**Lightning Flow Scanner App** integrates the Lightning Flow Scanner as a UMD module within Salesforce, enabling scanning of flow metadata for 20+ issues such as hardcoded IDs, unsafe contexts, inefficient SOQL/DML operations, recursion risks, and missing fault handling.  
+
+For details about all available rules, their default severities, and configuration options, visit the [Lightning Flow Scanner Core Documentation](https://flow-scanner.github.io/lightning-flow-scanner-core/).
 
 ### Flow Overview:
+
 <p align="center">
- <img src="media/overview.jpg" alt="Flow Overview" width="65%" />
+ <img src="media/overview.png" alt="Flow Overview" width="65%" />
 </p>
 
 ### Violation Details:
+
 <p align="center">
- <img src="media/details.jpg" alt="Violation Details" width="65%" />
+ <img src="media/results.png" alt="Violation Results" width="65%" />
 </p>
 
 ### Rule Configuration:
+
 <p align="center">
- <img src="media/config.jpg" alt="Rule Configuration" width="65%" />
+ <img src="media/config.png" alt="Rule Configuration" width="65%" />
 </p>
 
 ## Installation
+
+### Unmanaged Package
 
 <a href="https://githubsfdeploy.herokuapp.com?owner=Flow-Scanner&repo=lightning-flow-scanner-app&ref=main">
  <img alt="Deploy to Salesforce"
@@ -38,31 +45,56 @@ src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png
 
 ## Usage
 
-1) Make sure the `LFSApp` permission set is assigned to any user that requires access to the flow scanner.
-2) Open the App:
-   - Click on the App Launcher icon in the top-left corner of your Salesforce interface.
-   - Search for "Flow Scanner" in the App Launcher search bar.
-   - Click on the "Flow Scanner" app to open it.
-3) View results of a Flow by clicking "details".
+- *Prerequisite: Ensure that the Flow Scanner permission set is assigned to users who need access.*
+- Click on the App Launcher icon in the top-left corner of your Salesforce interface.
+- Search for "Flow Scanner" in the App Launcher.
+- Click on the "Flow Scanner" app to open the Scan Flows Overview.
+- (Optional) Configure rules in the Configuration tab.
+- View results of a Flow by clicking "details".
+
+## Configuration
+
+While no configuration is required, Admins can define **default severities**, **expressions**, or **disabled states** for scan rules using the `ScanRuleConfiguration__mdt` custom metadata type.  
+These overrides apply globally for all users in the org, but individual users can still adjust severities or disable rules locally in the browser — those changes only persist for their current session.  
+
+For a full list of default rules, their descriptions, and configuration parameters, see the [Core Documentation](https://flow-scanner.github.io/lightning-flow-scanner-core/).
+
+### To Create an Override
+
+1. Go to **Setup → Custom Metadata Types → ScanRuleConfiguration → Manage Records**
+2. Click **New** and set the following fields:
+   - **Rule Name** — must match the rule’s API name (e.g., `FlowName`)
+   - **Severity** — `Error`, `Warning`, `Info`, or `Note`
+   - **Expression** *(optional)* — e.g., `[A-Za-z]+_[0-9]+`
+   - **Disabled** — check to turn off the rule globally
+3. Once saved, the **Flow Scanner App** automatically applies these overrides at load time — no user configuration needed.
+
+<p align="center">
+ <img src="media/overrides.png" alt="Rule Override" width="65%" />
+</p>
 
 ## Development
 
 1) Clone this repository:
+
 ```sh
 git clone https://github.com/Flow-Scanner/lightning-flow-scanner-app.git
 ```
 
 2) Authorize your Salesforce org to set up a connection with your local development environment:
+
 ```sh
 sf login web --set-default --alias <YourOrgAlias>
 ```
 
 3) Push Source to Your Org:
+
 ```sh
 sf project:deploy:start
 ```
 
 4) Pull Modifications from Your Org:
+
 ```sh
 sf project sync
 ```
