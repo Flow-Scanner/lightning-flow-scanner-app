@@ -19,19 +19,19 @@ For details about all available rules, their default severities, and configurati
 ### Flow Overview:
 
 <p align="center">
- <img src="media/overview.jpg" alt="Flow Overview" width="65%" />
+ <img src="media/overview.png" alt="Flow Overview" width="65%" />
 </p>
 
 ### Violation Details:
 
 <p align="center">
- <img src="media/details.jpg" alt="Violation Details" width="65%" />
+ <img src="media/results.png" alt="Violation Results" width="65%" />
 </p>
 
 ### Rule Configuration:
 
 <p align="center">
- <img src="media/config.jpg" alt="Rule Configuration" width="65%" />
+ <img src="media/config.png" alt="Rule Configuration" width="65%" />
 </p>
 
 ## Installation
