@@ -47,11 +47,24 @@ lightning-card {
     min-width: 120px;
 }
 
-.compact-input {
-    --slds-c-input-color-background: #ffffff;
-    --slds-c-input-text-color: #003087;
-    --slds-c-input-color-border: #003087;
+/* Search inputs in toolbar */
+.toolbar-item .compact-input {
+    --slds-c-input-color-background: #ffffff;  /* white input background */
+    --slds-c-input-text-color: #003087;       /* dark blue text */
+    --slds-c-input-color-border: #00205b;     /* darker border */
     --slds-c-input-shadow-focus: 0 0 3px #00205b;
+}
+
+/* Ensure input element itself uses these colors */
+.toolbar-item .compact-input input {
+    color: #003087 !important;
+    background-color: #ffffff !important;
+}
+
+/* Placeholder text visible */
+.toolbar-item .compact-input ::placeholder {
+    color: #5a5a5a !important;
+    opacity: 1;
 }
 
 .compact-input input {
