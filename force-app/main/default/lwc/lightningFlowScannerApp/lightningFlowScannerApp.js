@@ -217,86 +217,88 @@ export default class lightningFlowScannerApp extends LightningElement {
   }
 
   async scanFlow(ruleOptions) {
-    if (!this.scriptLoaded || !this.flowName || !this.flowMetadata) {
+  if (!this.scriptLoaded || !this.flowName || !this.flowMetadata) {
+    return;
+  }
+  try {
+    this.isLoading = true;
+
+    if (!window.lightningflowscanner) {
+      console.error("lightningflowscanner is not loaded");
       return;
     }
+
+    // Make a plain deep copy of ruleOptions to avoid LWC/Aura Proxy objects
+    const rawRuleOptions = JSON.parse(JSON.stringify(ruleOptions || this.rulesConfig || { rules: {} }));
+
+    // Remove rules that are explicitly disabled so scanner won't run them
+    const activeRuleEntries = Object.fromEntries(
+      Object.entries(rawRuleOptions.rules || {}).filter(([name, cfg]) => !cfg.disabled)
+    );
+
+    // Build final rules object for the scan
+    const optionsForScan = { rules: activeRuleEntries };
+
+    // Update numberOfRules based on what we are actually about to scan
+    this.numberOfRules = Object.keys(optionsForScan.rules).length;
+
+    const flow = new window.lightningflowscanner.Flow(
+      this.flowName,
+      this.flowMetadata
+    );
+
+    const uri =
+      "/services/data/v60.0/tooling/sobjects/Flow/" +
+      this.selectedFlowRecord.versionId;
+    const parsedFlow = { uri, flow };
+
     try {
-      this.isLoading = true;
+      // Call the scanner with a plain object (no proxies)
+      const scanResults = window.lightningflowscanner.scan([parsedFlow], optionsForScan);
+      this.scanResult = scanResults[0];
 
-      if (!window.lightningflowscanner) {
-        console.error("lightningflowscanner is not loaded");
-        return;
-      }
+      // Ensure ruleResults only include rules we scanned
+      const activeRuleNames = Object.keys(optionsForScan.rules || {});
 
-      this.numberOfRules =
-        ruleOptions && ruleOptions.rules
-          ? Object.keys(ruleOptions.rules).length
-          : window.lightningflowscanner.getRules().length;
-
-      const flow = new window.lightningflowscanner.Flow(
-        this.flowName,
-        this.flowMetadata
-      );
-
-      const uri =
-        "/services/data/v60.0/tooling/sobjects/Flow/" +
-        this.selectedFlowRecord.versionId;
-      const parsedFlow = { uri, flow };
-
-      try {
-        const allRuleEntries = ruleOptions.rules || {};
-        const activeRuleEntries = Object.fromEntries(
-          Object.entries(allRuleEntries).filter(([name, cfg]) => !cfg.disabled)
-        );
-
-        const scanResults = window.lightningflowscanner.scan([parsedFlow], {
-          rules: activeRuleEntries
-        });
-
-        this.scanResult = scanResults[0];
-
-        const activeRuleNames =
-          ruleOptions && ruleOptions.rules
-            ? Object.keys(ruleOptions.rules)
-            : [];
-
-        if (
-          this.scanResult &&
-          this.scanResult.ruleResults &&
-          activeRuleNames.length > 0
-        ) {
-          this.scanResult.ruleResults = this.scanResult.ruleResults.filter(
-            (ruleResult) => {
-              if (!ruleResult.ruleName) {
-                return false;
-              }
-              return activeRuleNames.includes(ruleResult.ruleName);
+      if (
+        this.scanResult &&
+        this.scanResult.ruleResults &&
+        activeRuleNames.length > 0
+      ) {
+        this.scanResult.ruleResults = this.scanResult.ruleResults.filter(
+          (ruleResult) => {
+            if (!ruleResult.ruleName) {
+              return false;
             }
-          );
-        }
-
-        this.scanResult.ruleResults = this.scanResult.ruleResults.map(
-          (ruleResult, ruleIndex) => {
-            return {
-              ...ruleResult,
-              id: `rule-${ruleIndex}`,
-              details: ruleResult.details.map((detail, detailIndex) => {
-                return {
-                  ...detail,
-                  id: `rule-${ruleIndex}-detail-${detailIndex}`
-                };
-              })
-            };
+            return activeRuleNames.includes(ruleResult.ruleName);
           }
         );
-      } catch (e) {
-        this.err = e.message;
       }
-    } catch (error) {
-      this.err = error.message;
-    } finally {
-      this.isLoading = false;
+
+      // IMPORTANT: override severity on each ruleResult with the value from optionsForScan
+      if (this.scanResult && this.scanResult.ruleResults) {
+        this.scanResult.ruleResults = this.scanResult.ruleResults.map((ruleResult, ruleIndex) => {
+          const override = optionsForScan.rules && optionsForScan.rules[ruleResult.ruleName];
+          const overriddenSeverity = override && override.severity ? override.severity : ruleResult.severity;
+          return {
+            ...ruleResult,
+            severity: overriddenSeverity,
+            id: `rule-${ruleIndex}`,
+            details: ruleResult.details.map((detail, detailIndex) => ({
+              ...detail,
+              id: `rule-${ruleIndex}-detail-${detailIndex}`
+            }))
+          };
+        });
+      }
+    } catch (e) {
+      this.err = e.message;
     }
+  } catch (error) {
+    this.err = error.message;
+  } finally {
+    this.isLoading = false;
+  }
   }
 
   handleTabClick(event) {
@@ -414,6 +416,7 @@ export default class lightningFlowScannerApp extends LightningElement {
             if (rec.Severity__c) {
               this.rulesConfig.rules[ruleName].severity =
                 rec.Severity__c.toLowerCase();
+              console.log('MDT Overrides Applied:', JSON.stringify(this.rulesConfig, null, 2));
             }
             // Expression: only apply when present
             if (rec.Expression__c) {
