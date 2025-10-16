@@ -90,6 +90,7 @@ export default class lightningFlowScannerApp extends LightningElement {
         maxRequest: "10000"
       });
 
+      await this.fetchMDTConfig();
       await this.fetchFlows();
     } catch (error) {
       this.err = error.message;
@@ -243,10 +244,15 @@ export default class lightningFlowScannerApp extends LightningElement {
       const parsedFlow = { uri, flow };
 
       try {
-        const scanResults = window.lightningflowscanner.scan(
-          [parsedFlow],
-          ruleOptions
+        const allRuleEntries = ruleOptions.rules || {};
+        const activeRuleEntries = Object.fromEntries(
+          Object.entries(allRuleEntries).filter(([name, cfg]) => !cfg.disabled)
         );
+
+        const scanResults = window.lightningflowscanner.scan([parsedFlow], {
+          rules: activeRuleEntries
+        });
+
         this.scanResult = scanResults[0];
 
         const activeRuleNames =
@@ -317,16 +323,43 @@ export default class lightningFlowScannerApp extends LightningElement {
 
   async handleRuleChange(event) {
     const updatedRules = event.detail.rules;
+    // Update UI rules array (this is the source of truth for UI changes)
     this.rules = updatedRules;
-    this.rulesConfig = {
-      rules: updatedRules
-        .filter((rule) => rule.isActive)
-        .reduce((acc, rule) => {
-          acc[rule.name] = { severity: rule.severity };
-          return acc;
-        }, {})
-    };
 
+    // Build merged rulesConfig: user changes override severity/isActive;
+    // preserve existing expression (from MDT) unless user provides one via UI (not currently supported).
+    const mergedRulesConfig = { rules: {} };
+
+    updatedRules.forEach((rule) => {
+      // create the base entry using the user's severity
+      // include disabled based on the user's isActive toggle (explicit user action)
+      if (rule.isActive) {
+        mergedRulesConfig.rules[rule.name] = { severity: rule.severity };
+      } else {
+        // If user disabled the rule in the UI, include the rule entry with disabled = true
+        mergedRulesConfig.rules[rule.name] = {
+          severity: rule.severity,
+          disabled: true
+        };
+      }
+
+      // Preserve expression from existing rulesConfig if present (usually from MDT)
+      const existing =
+        this.rulesConfig &&
+        this.rulesConfig.rules &&
+        this.rulesConfig.rules[rule.name];
+      if (existing && existing.expression) {
+        mergedRulesConfig.rules[rule.name].expression = existing.expression;
+      }
+
+      // If there was an existing disabled flag in rulesConfig and the user did NOT explicitly toggle
+      // (we consider the UI's isActive authoritative here), we already set disabled from isActive.
+    });
+
+    // Replace rulesConfig with the merged result
+    this.rulesConfig = mergedRulesConfig;
+
+    // Immediately re-scan if we have a loaded flow
     if (this.flowName && this.flowMetadata && this.selectedFlowRecord) {
       await this.scanFlow(this.rulesConfig);
     }
@@ -353,6 +386,73 @@ export default class lightningFlowScannerApp extends LightningElement {
       } catch (error) {
         this.err = error.message;
       }
+    }
+  }
+
+  async fetchMDTConfig() {
+    if (!this.conn) {
+      this.err = "Connection not ready for MDT fetch.";
+      return;
+    }
+    try {
+      const query = `
+      SELECT RuleName__c, Severity__c, Expression__c, Disabled__c
+      FROM ScanRuleConfiguration__mdt
+    `;
+      const res = await this.conn.query(query);
+
+      if (res && res.records) {
+        res.records.forEach((rec) => {
+          const ruleName = rec.RuleName__c;
+          // Only act when rule exists in our rulesConfig
+          if (
+            this.rulesConfig &&
+            this.rulesConfig.rules &&
+            this.rulesConfig.rules[ruleName]
+          ) {
+            // Severity: convert to lowercase to match UI values
+            if (rec.Severity__c) {
+              this.rulesConfig.rules[ruleName].severity =
+                rec.Severity__c.toLowerCase();
+            }
+            // Expression: only apply when present
+            if (rec.Expression__c) {
+              this.rulesConfig.rules[ruleName].expression = rec.Expression__c;
+            }
+            // Disabled: boolean, ensure it's a real boolean
+            if (
+              rec.Disabled__c !== null &&
+              typeof rec.Disabled__c !== "undefined"
+            ) {
+              this.rulesConfig.rules[ruleName].disabled = !!rec.Disabled__c;
+            }
+
+            // ALSO update the UI rules array so Configuration tab reflects the MDT override:
+            const uiRule = this.rules.find((r) => r.name === ruleName);
+            if (uiRule) {
+              if (rec.Severity__c)
+                uiRule.severity = rec.Severity__c.toLowerCase();
+              // Disabled in MDT means rule should be inactive in the UI
+              if (
+                rec.Disabled__c !== null &&
+                typeof rec.Disabled__c !== "undefined"
+              ) {
+                uiRule.isActive = !rec.Disabled__c;
+              }
+              // we do NOT put expression on UI rule object because the config component currently doesn't surface it;
+              // expression is stored in rulesConfig (used by scans)
+            }
+          }
+        });
+
+        // Force reactive update of the rules array shown in UI
+        this.rules = [...this.rules];
+        this.rulesConfig = { rules: { ...this.rulesConfig.rules } }
+      }
+      console.log("MDT Overrides Applied:", this.rulesConfig);
+    } catch (error) {
+      console.error("MDT Fetch Error:", error);
+      this.err = "Failed to load rule overrides: " + error.message;
     }
   }
 }

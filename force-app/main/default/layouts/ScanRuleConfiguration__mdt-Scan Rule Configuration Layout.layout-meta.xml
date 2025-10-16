@@ -39,7 +39,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>IsActive__c</field>
+                <field>Disabled__c</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
