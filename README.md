@@ -36,7 +36,7 @@ For details about all available rules, their default severities, and configurati
 
 ## Installation
 
-<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tXXXXXXXXXXXXXXX">
+<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK0000006iftQAA">
   <img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
 </a>
 
