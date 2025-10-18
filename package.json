@@ -1,9 +1,17 @@
 {
-  "name": "lightning-flow-scanner-app",
-  "private": true,
-  "version": "2.6.0",
-  "description": "A Salesforce App for real-time analysis of Salesforce Flow. Scans metadata for 20+ issues such as hardcoded IDs, unsafe contexts, inefficient SOQL/DML operations, recursion risks, and missing fault handling.",
-  "scripts": {
+    "name": "lightning-flow-scanner-app",
+    "version": "2.8.0",
+    "description": "A Salesforce App for real-time analysis of Salesforce Flow. Scans metadata for 20+ issues such as hardcoded IDs, unsafe contexts, inefficient SOQL/DML operations, recursion risks, and missing fault handling.",
+    "private": true,
+    "homepage": "https://flow-scanner.github.io/lightning-flow-scanner-app/",
+    "repository": {
+      "type": "git",
+      "url": "git@github.com:Flow-Scanner/lightning-flow-scanner-app.git"
+    },
+    "bugs": {
+      "url": "https://github.com/Flow-Scanner/lightning-flow-scanner-app/issues"
+    },
+    "scripts": {
     "lint": "eslint **/lwc/**/*.js",
     "test": "npm run test:unit",
     "test:unit": "sfdx-lwc-jest",
