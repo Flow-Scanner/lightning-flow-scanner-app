@@ -36,12 +36,15 @@ For details about all available rules, their default severities, and configurati
 
 ## Installation
 
-### Unmanaged Package
-
-<a href="https://githubsfdeploy.herokuapp.com?owner=Flow-Scanner&repo=lightning-flow-scanner-app&ref=main">
- <img alt="Deploy to Salesforce"
-src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
+<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tXXXXXXXXXXXXXXX">
+  <img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
 </a>
+
+Or via Salesforce CLI:
+
+```bash
+sf package install --package lightning-flow-scanner@2.6.0-1 --target-org <OrgAlias> --wait 10
+```
 
 ## Usage
 
@@ -93,7 +96,7 @@ sf project:deploy:start
 4) Assign Permission Set
 
 ```sh
-sf org assign permset --name sfflowscanner__Flow_Scanner
+sf org assign permset --name flow_scanner__Flow_Scanner
 ```
 
 4) Pull Modifications from Your Org:
