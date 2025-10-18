@@ -1,6 +1,7 @@
 {
   "orgName": "LightningFlowScannerDemo",
   "edition": "Developer",
+  "namespace": "sfflowscanner",
   "features": ["EnableSetPasswordInApi"],
   "settings": {
     "lightningExperienceSettings": {

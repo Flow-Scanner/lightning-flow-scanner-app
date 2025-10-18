@@ -217,82 +217,96 @@ export default class lightningFlowScannerApp extends LightningElement {
   }
 
   async scanFlow(ruleOptions) {
-  if (!this.scriptLoaded || !this.flowName || !this.flowMetadata) {
-    return;
-  }
-  try {
-    this.isLoading = true;
-
-    if (!window.lightningflowscanner) {
-      console.error("lightningflowscanner is not loaded");
+    if (!this.scriptLoaded || !this.flowName || !this.flowMetadata) {
       return;
     }
-
-    // Make a plain deep copy of ruleOptions to avoid LWC/Aura Proxy objects
-    const rawRuleOptions = JSON.parse(JSON.stringify(ruleOptions || this.rulesConfig || { rules: {} }));
-
-    // Remove rules that are explicitly disabled so scanner won't run them
-    const activeRuleEntries = Object.fromEntries(
-      Object.entries(rawRuleOptions.rules || {}).filter(([name, cfg]) => !cfg.disabled)
-    );
-    const optionsForScan = { rules: activeRuleEntries };
-    this.numberOfRules = Object.keys(optionsForScan.rules).length;
-
-    const flow = new window.lightningflowscanner.Flow(
-      this.flowName,
-      this.flowMetadata
-    );
-
-    const uri =
-      "/services/data/v60.0/tooling/sobjects/Flow/" +
-      this.selectedFlowRecord.versionId;
-    const parsedFlow = { uri, flow };
-
     try {
-      // Call the scanner with a plain object (no proxies)
-      const scanResults = window.lightningflowscanner.scan([parsedFlow], optionsForScan);
-      this.scanResult = scanResults[0];
-      const activeRuleNames = Object.keys(optionsForScan.rules || {});
+      this.isLoading = true;
 
-      if (
-        this.scanResult &&
-        this.scanResult.ruleResults &&
-        activeRuleNames.length > 0
-      ) {
-        this.scanResult.ruleResults = this.scanResult.ruleResults.filter(
-          (ruleResult) => {
-            if (!ruleResult.ruleName) {
-              return false;
-            }
-            return activeRuleNames.includes(ruleResult.ruleName);
-          }
+      if (!window.lightningflowscanner) {
+        console.error("lightningflowscanner is not loaded");
+        return;
+      }
+
+      // Make a plain deep copy of ruleOptions to avoid LWC/Aura Proxy objects
+      const rawRuleOptions = JSON.parse(
+        JSON.stringify(ruleOptions || this.rulesConfig || { rules: {} })
+      );
+
+      // Remove rules that are explicitly disabled so scanner won't run them
+      const activeRuleEntries = Object.fromEntries(
+        Object.entries(rawRuleOptions.rules || {}).filter(
+          ([name, cfg]) => !cfg.disabled
+        )
+      );
+      const optionsForScan = { rules: activeRuleEntries };
+      this.numberOfRules = Object.keys(optionsForScan.rules).length;
+
+      const flow = new window.lightningflowscanner.Flow(
+        this.flowName,
+        this.flowMetadata
+      );
+
+      const uri =
+        "/services/data/v60.0/tooling/sobjects/Flow/" +
+        this.selectedFlowRecord.versionId;
+      const parsedFlow = { uri, flow };
+
+      try {
+        // Call the scanner with a plain object (no proxies)
+        const scanResults = window.lightningflowscanner.scan(
+          [parsedFlow],
+          optionsForScan
         );
-      }
+        this.scanResult = scanResults[0];
+        const activeRuleNames = Object.keys(optionsForScan.rules || {});
 
-      // IMPORTANT: override severity on each ruleResult with the value from optionsForScan
-      if (this.scanResult && this.scanResult.ruleResults) {
-        this.scanResult.ruleResults = this.scanResult.ruleResults.map((ruleResult, ruleIndex) => {
-          const override = optionsForScan.rules && optionsForScan.rules[ruleResult.ruleName];
-          const overriddenSeverity = override && override.severity ? override.severity : ruleResult.severity;
-          return {
-            ...ruleResult,
-            severity: overriddenSeverity,
-            id: `rule-${ruleIndex}`,
-            details: ruleResult.details.map((detail, detailIndex) => ({
-              ...detail,
-              id: `rule-${ruleIndex}-detail-${detailIndex}`
-            }))
-          };
-        });
+        if (
+          this.scanResult &&
+          this.scanResult.ruleResults &&
+          activeRuleNames.length > 0
+        ) {
+          this.scanResult.ruleResults = this.scanResult.ruleResults.filter(
+            (ruleResult) => {
+              if (!ruleResult.ruleName) {
+                return false;
+              }
+              return activeRuleNames.includes(ruleResult.ruleName);
+            }
+          );
+        }
+
+        // IMPORTANT: override severity on each ruleResult with the value from optionsForScan
+        if (this.scanResult && this.scanResult.ruleResults) {
+          this.scanResult.ruleResults = this.scanResult.ruleResults.map(
+            (ruleResult, ruleIndex) => {
+              const override =
+                optionsForScan.rules &&
+                optionsForScan.rules[ruleResult.ruleName];
+              const overriddenSeverity =
+                override && override.severity
+                  ? override.severity
+                  : ruleResult.severity;
+              return {
+                ...ruleResult,
+                severity: overriddenSeverity,
+                id: `rule-${ruleIndex}`,
+                details: ruleResult.details.map((detail, detailIndex) => ({
+                  ...detail,
+                  id: `rule-${ruleIndex}-detail-${detailIndex}`
+                }))
+              };
+            }
+          );
+        }
+      } catch (e) {
+        this.err = e.message;
       }
-    } catch (e) {
-      this.err = e.message;
+    } catch (error) {
+      this.err = error.message;
+    } finally {
+      this.isLoading = false;
     }
-  } catch (error) {
-    this.err = error.message;
-  } finally {
-    this.isLoading = false;
-  }
   }
 
   handleTabClick(event) {
@@ -390,57 +404,61 @@ export default class lightningFlowScannerApp extends LightningElement {
       this.err = "Connection not ready for MDT fetch.";
       return;
     }
+
     try {
+      // 1️⃣ Detect namespace dynamically
+      const orgInfo = await this.conn.query(
+        "SELECT NamespacePrefix FROM Organization LIMIT 1"
+      );
+      const ns = orgInfo.records?.[0]?.NamespacePrefix || "";
+
+      // 2️⃣ Build namespaced object and field names
+      const prefix = ns ? `${ns}__` : "";
+      const MDT_NAME = `${prefix}ScanRuleConfiguration__mdt`;
+
+      // Build full field names dynamically
+      const fldRuleName = `${prefix}RuleName__c`;
+      const fldSeverity = `${prefix}Severity__c`;
+      const fldExpression = `${prefix}Expression__c`;
+      const fldDisabled = `${prefix}Disabled__c`;
+
       const query = `
-      SELECT RuleName__c, Severity__c, Expression__c, Disabled__c
-      FROM ScanRuleConfiguration__mdt
+      SELECT ${fldRuleName}, ${fldSeverity}, ${fldExpression}, ${fldDisabled}
+      FROM ${MDT_NAME}
     `;
+
       const res = await this.conn.query(query);
+      if (!res || !res.records) return;
 
-      if (res && res.records) {
-        res.records.forEach((rec) => {
-          const ruleName = rec.RuleName__c;
-          // Only act when rule exists in our rulesConfig
+      // 3️⃣ Normalize field access using computed property names
+      res.records.forEach((rec) => {
+        const ruleName = rec[fldRuleName];
+        if (this.rulesConfig?.rules?.[ruleName]) {
+          const cfg = this.rulesConfig.rules[ruleName];
+          if (rec[fldSeverity]) cfg.severity = rec[fldSeverity].toLowerCase();
+          if (rec[fldExpression]) cfg.expression = rec[fldExpression];
           if (
-            this.rulesConfig &&
-            this.rulesConfig.rules &&
-            this.rulesConfig.rules[ruleName]
-          ) {
-            if (rec.Severity__c) {
-              this.rulesConfig.rules[ruleName].severity =
-                rec.Severity__c.toLowerCase();
-              console.log('MDT Overrides Applied:', JSON.stringify(this.rulesConfig, null, 2));
-            }
-            if (rec.Expression__c) {
-              this.rulesConfig.rules[ruleName].expression = rec.Expression__c;
-            }
+            typeof rec[fldDisabled] !== "undefined" &&
+            rec[fldDisabled] !== null
+          )
+            cfg.disabled = !!rec[fldDisabled];
+
+          // Update UI rule
+          const uiRule = this.rules.find((r) => r.name === ruleName);
+          if (uiRule) {
+            if (rec[fldSeverity])
+              uiRule.severity = rec[fldSeverity].toLowerCase();
             if (
-              rec.Disabled__c !== null &&
-              typeof rec.Disabled__c !== "undefined"
-            ) {
-              this.rulesConfig.rules[ruleName].disabled = !!rec.Disabled__c;
-            }
-
-            const uiRule = this.rules.find((r) => r.name === ruleName);
-            if (uiRule) {
-              if (rec.Severity__c)
-                uiRule.severity = rec.Severity__c.toLowerCase();
-              // Disabled in MDT means rule should be inactive in the UI
-              if (
-                rec.Disabled__c !== null &&
-                typeof rec.Disabled__c !== "undefined"
-              ) {
-                uiRule.isActive = !rec.Disabled__c;
-              }
-            }
+              rec[fldDisabled] !== null &&
+              typeof rec[fldDisabled] !== "undefined"
+            )
+              uiRule.isActive = !rec[fldDisabled];
           }
-        });
+        }
+      });
 
-        // Force reactive update of the rules array shown in UI
-        this.rules = [...this.rules];
-        this.rulesConfig = { rules: { ...this.rulesConfig.rules } }
-      }
-      console.log("MDT Overrides Applied:", this.rulesConfig);
+      this.rules = [...this.rules];
+      this.rulesConfig = { rules: { ...this.rulesConfig.rules } };
     } catch (error) {
       console.error("MDT Fetch Error:", error);
       this.err = "Failed to load rule overrides: " + error.message;

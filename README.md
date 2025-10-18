@@ -14,7 +14,7 @@
 
 **Lightning Flow Scanner App** integrates the Lightning Flow Scanner as a UMD module within Salesforce, enabling scanning of flow metadata for 20+ issues such as hardcoded IDs, unsafe contexts, inefficient SOQL/DML operations, recursion risks, and missing fault handling.
 
-For details about all available rules, their default severities, and configuration options, visit the [Lightning Flow Scanner Core Documentation](https://flow-scanner.github.io/lightning-flow-scanner-core/).
+For details about all available rules, their default severities, and configuration options, visit the [Flow Scanner Documentation](https://flow-scanner.github.io/lightning-flow-scanner-core/).
 
 ### Flow Overview:
 
@@ -54,10 +54,7 @@ src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png
 
 ## Configuration
 
-While no configuration is required, Admins can define **default severities**, **expressions**, or **disabled states** for scan rules using the `ScanRuleConfiguration__mdt` custom metadata type.
-These overrides apply globally for all users in the org, but individual users can still adjust severities or disable rules locally in the browser — those changes only persist for their current session.
-
-For a full list of default rules, their descriptions, and configuration parameters, see the [Core Documentation](https://flow-scanner.github.io/lightning-flow-scanner-core/).
+While no configuration is required, Admins can define **default severities**, **expressions**, or **disabled states** for scan rules using the `ScanRuleConfiguration__mdt` custom metadata type. These overrides apply globally for all users in the org, but individual users can still adjust severities or disable rules locally in the browser — those changes only persist for their current session. For a more on configurations, review the [documentation](https://flow-scanner.github.io/lightning-flow-scanner-core/#configurations).
 
 ### To Create an Override
 
@@ -91,6 +88,12 @@ sf login web --set-default --alias <YourOrgAlias>
 
 ```sh
 sf project:deploy:start
+```
+
+4) Assign Permission Set
+
+```sh
+sf org assign permset --name sfflowscanner__Flow_Scanner
 ```
 
 4) Pull Modifications from Your Org:
