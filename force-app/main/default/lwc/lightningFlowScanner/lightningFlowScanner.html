@@ -1,7 +1,7 @@
 <template>
     <div class="page">
         <template if:false={isAllMode}>
-            <template if:true={flowName}>
+            <template if:true={hasFlowName}>
                 <div class="header slds-p-around_x-small slds-border_bottom">
                     <div class="flow-container slds-grid slds-wrap slds-gutters_x-small slds-grid_vertical-align-start">
                         <!-- Column 1 -->
@@ -28,7 +28,12 @@
         </template>
 
         <template if:true={isAllMode}>
-            <h2 class="slds-text-heading_medium slds-m-bottom_small">All Flows Scan Results</h2>
+            <div class="header slds-p-around_x-small slds-border_bottom">
+                <h2 class="slds-text-heading_medium slds-m-bottom_small">All Flows Scan Results</h2>
+                <p class="info-item"><strong># Rules Run:</strong> {numberOfRules}</p>
+                <p class="info-item"><strong>Total Flows Scanned:</strong> {allScanResults.length}</p>
+                <p class="info-item"><strong>Total Violations:</strong> {flattenedViolations.length}</p>
+            </div>
         </template>
 
         <template if:true={error}>

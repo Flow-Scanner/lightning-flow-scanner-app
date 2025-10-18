@@ -12,6 +12,7 @@ export default class lightningFlowScannerApp extends LightningElement {
   @track flowMetadata = null;
   @track flowName;
   @track scanResult;
+  @track allScanResults = []; // Store results for all flows
   @track numberOfRules;
   @track rules = [];
   @track rulesConfig = null;
@@ -19,6 +20,7 @@ export default class lightningFlowScannerApp extends LightningElement {
   @track currentFlowIndex = 0;
   @track nextRecordsUrl;
   @track hasMoreRecords = false;
+  @track isScanningAll = false;
   conn;
   scriptLoaded = false;
 
@@ -125,11 +127,7 @@ export default class lightningFlowScannerApp extends LightningElement {
         this.nextRecordsUrl = res.nextRecordsUrl;
         this.hasMoreRecords = !!res.nextRecordsUrl;
 
-        if (this.records.length > 0 && !searchTerm) {
-          this.selectedFlowRecord = this.records[0];
-          this.currentFlowIndex = 0;
-          await this.loadFlowMetadata(this.selectedFlowRecord);
-        }
+        // Don't auto-select a flow on initial load - let user choose
       }
     } catch (error) {
       this.err = error.message;
@@ -309,8 +307,145 @@ export default class lightningFlowScannerApp extends LightningElement {
     }
   }
 
-  handleTabClick(event) {
-    this.activeTab = parseInt(event.currentTarget.dataset.tab, 10);
+  async scanAllFlows() {
+    if (!this.records || this.records.length === 0) {
+      this.err = "No flows available to scan";
+      return;
+    }
+
+    try {
+      this.isScanningAll = true;
+      this.isLoading = true;
+      this.allScanResults = [];
+      this.err = null;
+
+      const rawRuleOptions = JSON.parse(
+        JSON.stringify(this.rulesConfig || { rules: {} })
+      );
+
+      const activeRuleEntries = Object.fromEntries(
+        Object.entries(rawRuleOptions.rules || {}).filter(
+          ([name, cfg]) => !cfg.disabled
+        )
+      );
+      const optionsForScan = { rules: activeRuleEntries };
+      this.numberOfRules = Object.keys(optionsForScan.rules).length;
+
+      // Scan all flows in parallel
+      const scanPromises = this.records.map(async (record, i) => {
+        try {
+          // Fetch metadata
+          const metadataRes = await this.conn.tooling.query(
+            `SELECT Id, FullName, Metadata FROM Flow WHERE Id = '${record.versionId}' LIMIT 1`
+          );
+
+          if (metadataRes && metadataRes.records.length) {
+            const flowData = metadataRes.records[0];
+            const flowName = flowData.FullName;
+            const flowMetadata = flowData.Metadata;
+
+            const flow = new window.lightningflowscanner.Flow(
+              flowName,
+              flowMetadata
+            );
+
+            const uri =
+              "/services/data/v60.0/tooling/sobjects/Flow/" + record.versionId;
+            const parsedFlow = { uri, flow };
+
+            // Scan the flow
+            const scanResults = window.lightningflowscanner.scan(
+              [parsedFlow],
+              optionsForScan
+            );
+            
+            let scanResult = scanResults[0];
+            const activeRuleNames = Object.keys(optionsForScan.rules || {});
+
+            // Filter and process results
+            if (scanResult && scanResult.ruleResults && activeRuleNames.length > 0) {
+              scanResult.ruleResults = scanResult.ruleResults.filter(
+                (ruleResult) => {
+                  if (!ruleResult.ruleName) return false;
+                  return activeRuleNames.includes(ruleResult.ruleName);
+                }
+              );
+
+              // Override severity
+              scanResult.ruleResults = scanResult.ruleResults.map(
+                (ruleResult, ruleIndex) => {
+                  const override =
+                    optionsForScan.rules &&
+                    optionsForScan.rules[ruleResult.ruleName];
+                  const overriddenSeverity =
+                    override && override.severity
+                      ? override.severity
+                      : ruleResult.severity;
+                  return {
+                    ...ruleResult,
+                    severity: overriddenSeverity,
+                    id: `flow-${i}-rule-${ruleIndex}`,
+                    details: ruleResult.details.map((detail, detailIndex) => ({
+                      ...detail,
+                      id: `flow-${i}-rule-${ruleIndex}-detail-${detailIndex}`
+                    }))
+                  };
+                }
+              );
+            }
+
+            // Return result
+            return {
+              flowName: record.masterLabel || record.developerName,
+              flowId: record.id,
+              scanResult: scanResult
+            };
+          }
+          return null;
+        } catch (flowError) {
+          console.error(`Error scanning flow ${record.developerName}:`, flowError);
+          return null; // Return null for failed scans
+        }
+      });
+
+      // Wait for all scans to complete
+      const results = await Promise.all(scanPromises);
+      
+      // Filter out null results (failed scans)
+      this.allScanResults = results.filter(result => result !== null);
+    } catch (error) {
+      this.err = "Error scanning all flows: " + error.message;
+      console.error("Error in scanAllFlows:", error);
+    } finally {
+      this.isLoading = false;
+      this.isScanningAll = false;
+    }
+  }
+
+  async handleTabClick(event) {
+    const newTab = parseInt(event.currentTarget.dataset.tab, 10);
+    
+    // If switching to Flows tab (1), reset selection
+    if (newTab === 1) {
+      this.selectedFlowRecord = null;
+      this.flowName = null;
+      this.flowMetadata = null;
+      this.scanResult = null;
+      this.allScanResults = [];
+      this.currentFlowIndex = 0;
+      this.activeTab = newTab;
+    }
+    // If switching to Results tab without having scanned a specific flow, scan all flows
+    else if (newTab === 2 && !this.selectedFlowRecord && !this.allScanResults.length) {
+      this.activeTab = newTab;
+      // Clear single flow data before scanning all
+      this.scanResult = null;
+      this.flowName = null;
+      this.flowMetadata = null;
+      await this.scanAllFlows();
+    } else {
+      this.activeTab = newTab;
+    }
   }
 
   async handleScanFlow(event) {
@@ -319,6 +454,7 @@ export default class lightningFlowScannerApp extends LightningElement {
     if (record) {
       this.isLoading = true;
       this.selectedFlowRecord = record;
+      this.allScanResults = []; // Clear all scan results when scanning single flow
       this.currentFlowIndex = this.records.findIndex(
         (rec) => rec.id === flowId
       );
@@ -327,6 +463,8 @@ export default class lightningFlowScannerApp extends LightningElement {
         this.activeTab = 2;
       } catch (error) {
         this.err = error.message;
+      } finally {
+        this.isLoading = false;
       }
     }
   }
@@ -369,8 +507,12 @@ export default class lightningFlowScannerApp extends LightningElement {
     // Replace rulesConfig with the merged result
     this.rulesConfig = mergedRulesConfig;
 
-    // Immediately re-scan if we have a loaded flow
-    if (this.flowName && this.flowMetadata && this.selectedFlowRecord) {
+    // Re-scan based on current mode
+    if (this.allScanResults.length > 0) {
+      // If we're in "all flows" mode, re-scan all
+      await this.scanAllFlows();
+    } else if (this.flowName && this.flowMetadata && this.selectedFlowRecord) {
+      // If we have a single flow loaded, re-scan it
       await this.scanFlow(this.rulesConfig);
     }
   }
@@ -390,11 +532,14 @@ export default class lightningFlowScannerApp extends LightningElement {
       this.isLoading = true;
       this.currentFlowIndex = newIndex;
       this.selectedFlowRecord = this.records[newIndex];
+      this.allScanResults = []; // Clear all scan results when navigating to single flow
       try {
         await this.loadFlowMetadata(this.selectedFlowRecord);
         this.activeTab = 2;
       } catch (error) {
         this.err = error.message;
+      } finally {
+        this.isLoading = false;
       }
     }
   }
