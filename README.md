@@ -36,14 +36,14 @@ For details about all available rules, their default severities, and configurati
 
 ## Installation
 
-<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK0000006iftQAA">
+<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK0000006ikjQAA">
   <img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
 </a>
 
 Or via Salesforce CLI:
 
 ```bash
-sf package install --package lightning-flow-scanner@2.6.0-1 --target-org <OrgAlias> --wait 10
+sf package install --package lightning-flow-scanner@2.8.0 --target-org <OrgAlias> --wait 10
 ```
 
 ## Usage
