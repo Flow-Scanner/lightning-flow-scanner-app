@@ -7,7 +7,7 @@
 <p align="center">Scans for unsafe contexts, hardcoded IDs, and other issues to optimize your Flows.</p>
 
 <p align="center">
- <img src="media/lfs-app.gif" alt="Lightning Flow Scanner Demo" width="70%" />
+ <img src="media/lfs-app.gif" alt="Lightning Flow Scanner Demo" width="82%" />
 </p>
 
 ## Features
@@ -19,19 +19,19 @@ For details about all available rules, their default severities, and configurati
 ### Flow Overview:
 
 <p align="center">
- <img src="media/overview.png" alt="Flow Overview" width="65%" />
+ <img src="media/overview.png" alt="Flow Overview" width="76%" />
 </p>
 
 ### Violation Details:
 
 <p align="center">
- <img src="media/results.png" alt="Violation Results" width="65%" />
+ <img src="media/results.png" alt="Violation Results" width="76%" />
 </p>
 
 ### Rule Configuration:
 
 <p align="center">
- <img src="media/config.png" alt="Rule Configuration" width="65%" />
+ <img src="media/config.png" alt="Rule Configuration" width="76%" />
 </p>
 
 ## Installation
@@ -70,7 +70,7 @@ While no configuration is required, Admins can define **default severities**, **
 3. Once saved, the **Flow Scanner App** automatically applies these overrides at load time — no user configuration needed.
 
 <p align="center">
- <img src="media/overrides.png" alt="Rule Override" width="65%" />
+ <img src="media/overrides.jpg" alt="Rule Override" width="76%" />
 </p>
 
 ## Development
