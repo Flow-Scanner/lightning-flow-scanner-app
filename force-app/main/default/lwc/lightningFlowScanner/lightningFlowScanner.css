@@ -1,133 +1,251 @@
 /* === Page Layout === */
 .page {
-    background-color: #f4f6f9;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    max-width: 1600px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+  background-color: #f4f6f9;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* === All Mode Container === */
+.all-mode-container {
+  background-color: #f4f6f9;
+  margin: 0;
+  padding: 0;
+}
+
+/* === Toolbar Styles (matching flow overview) === */
+:host {
+  display: block;
+  padding: 1.5rem;
+  background-color: #f4f6f9;
+}
+
+lightning-card {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --sds-c-card-header-spacing-block-end: 0;
+  --sds-c-card-body-spacing-block-start: 0;
+  --sds-c-card-header-spacing-block-start: 0;
+  margin-top: 0;
+}
+
+.toolbar-row {
+  width: 100%;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background-color: #003087;
+  color: #ffffff;
+  margin-bottom: 0;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  margin-top: -1.5rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.toolbar-icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-icon lightning-icon {
+  --slds-c-icon-color-foreground: #ffffff;
+}
+
+.toolbar-title {
+  flex: 0 0 auto;
+  line-height: 1.2rem;
+}
+
+.toolbar-title h2 {
+  color: #ffffff;
+  margin: 0;
+}
+
+.toolbar-item {
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+
+.toolbar-stats {
+  color: #ffffff;
+}
+
+/* Search inputs in toolbar */
+.toolbar-item .compact-input {
+  --slds-c-input-color-background: #ffffff;
+  --slds-c-input-text-color: #003087;
+  --slds-c-input-color-border: #00205b;
+  --slds-c-input-shadow-focus: 0 0 3px #00205b;
+}
+
+.toolbar-item .compact-input input {
+  color: #003087 !important;
+  background-color: #ffffff !important;
+}
+
+.toolbar-item .compact-input ::placeholder {
+  color: #5a5a5a !important;
+  opacity: 1;
+}
+
+.compact-input input {
+  height: 2rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.toolbar-button {
+  --slds-c-button-neutral-color-background: #ffffff;
+  --slds-c-button-neutral-color-background-hover: #f0f0f0;
+  --slds-c-button-neutral-text-color: #003087;
+  --slds-c-button-radius-border: 0.25rem;
+}
+
+.custom-datatable {
+  margin-top: 0;
+}
+
+.custom-datatable table {
+  margin: 0 1rem;
 }
 
 /* === Header Section === */
 .header {
-    background-color: #ffffff;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-    line-height: 1.4;
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .flow-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
 .flow-column {
-    flex: 1;
-    min-width: 220px;
+  flex: 1;
+  min-width: 220px;
 }
 
 .info-item {
-    margin: 0.25rem 0;
-    color: #333;
+  margin: 0.25rem 0;
+  color: #333;
 }
 
 .info-item strong {
-    color: #003087;
+  color: #003087;
 }
 
 /* === Table Section === */
 .results {
-    flex-grow: 1;
-    overflow-x: auto;
-    margin-bottom: 1rem;
+  flex-grow: 1;
+  overflow-x: auto;
+  margin-bottom: 1rem;
 }
 
 .full-width-table {
-    width: 100%;
-    background-color: #ffffff;
-    border-radius: 0.25rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-collapse: collapse;
-    font-size: 0.85rem;
-    min-width: 1400px;
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 1400px;
 }
 
 .full-width-table th {
-    background-color: #003087;
-    color: #ffffff;
-    font-weight: 600;
-    padding: 0.6rem 0.75rem;
-    white-space: nowrap;
-    text-align: left;
+  background-color: #003087;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.6rem 0.75rem;
+  white-space: nowrap;
+  text-align: left;
 }
 
 .full-width-table td {
-    padding: 0.6rem 0.75rem;
-    color: #333;
-    max-width: 220px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  padding: 0.6rem 0.75rem;
+  color: #333;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .full-width-table tr:nth-child(even) {
-    background-color: #f9f9f9;
+  background-color: #f9f9f9;
 }
 
 .full-width-table tr:hover {
-    background-color: #e6f0ff;
+  background-color: #e6f0ff;
 }
 
 .expression-cell {
-    max-width: 250px;
-    white-space: normal;
+  max-width: 250px;
+  white-space: normal;
 }
 
 /* === Footer / Navigation Section === */
 .footer {
-    background-color: #ffffff;
-    font-size: 0.8rem;
-    color: #555;
-    border-top: 1px solid #ddd;
-    border-radius: 0 0 0.5rem 0.5rem;
-    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
-    padding: 0.5rem 0.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap; /* helps responsiveness */
-    gap: 0.5rem;
+  background-color: #ffffff;
+  font-size: 0.8rem;
+  color: #555;
+  border-top: 1px solid #ddd;
+  border-radius: 0 0 0.5rem 0.5rem;
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .navigation-buttons lightning-button {
-    margin-left: 0.25rem;
-    --slds-c-button-brand-color-background: #003087;
-    --slds-c-button-brand-color-background-hover: #00205b;
-    --slds-c-button-text-color: #ffffff;
-    --slds-c-button-radius-border: 0.25rem;
+  margin-left: 0.25rem;
+  --slds-c-button-brand-color-background: #003087;
+  --slds-c-button-brand-color-background-hover: #00205b;
+  --slds-c-button-text-color: #ffffff;
+  --slds-c-button-radius-border: 0.25rem;
 }
 
 .github-info a {
-    color: #003087;
-    text-decoration: none;
-    font-weight: 600;
+  color: #003087;
+  text-decoration: none;
+  font-weight: 600;
 }
 
 .github-info a:hover {
-    text-decoration: underline;
-    color: #00205b;
+  text-decoration: underline;
+  color: #00205b;
 }
 
 /* === Error Message === */
 .error {
-    color: #c23934;
-    font-weight: bold;
-    text-align: center;
-    margin: 0.75rem 0;
+  color: #c23934;
+  font-weight: bold;
+  text-align: center;
+  margin: 0.75rem 0;
+}
+
+/* === Shared Styles === */
+.slds-p-horizontal_small {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+lightning-button {
+  --slds-c-button-brand-color-background: #003087;
+  --slds-c-button-brand-color-background-hover: #00205b;
+  --slds-c-button-text-color: #ffffff;
 }
