@@ -3,90 +3,92 @@
 
         <!-- SINGLE-FLOW MODE -->
         <template if:false={isAllMode}>
-            <template if:true={hasFlowName}>
-                <div class="header">
-                    <div class="flow-container slds-grid slds-wrap slds-gutters_x-small slds-grid_vertical-align-start">
-                        <!-- Column 1 -->
-                        <div class="flow-column slds-col slds-size_1-of-3">
-                            <p class="info-item"><strong>Name:</strong> {name}</p>
-                            <p class="info-item"><strong>Label:</strong> {metadata.label}</p>
-                            <p class="info-item"><strong>Status:</strong> {metadata.status}</p>
-                        </div>
+    <div class="single-flow-wrapper">
+        <!-- Flow Info Header -->
+        <template if:true={hasFlowName}>
+            <div class="flow-header">
+                <div class="flow-container">
+                    <!-- Column 1 -->
+                    <div class="flow-column">
+                        <p class="info-item"><strong>Name:</strong> {name}</p>
+                        <p class="info-item"><strong>Label:</strong> {metadata.label}</p>
+                        <p class="info-item"><strong>Status:</strong> {metadata.status}</p>
+                    </div>
 
-                        <!-- Column 2 -->
-                        <div class="flow-column slds-col slds-size_1-of-3">
-                            <p class="info-item"><strong>Type:</strong> {metadata.processType}</p>
-                            <p class="info-item"><strong>API Version:</strong> {metadata.apiVersion}</p>
-                            <p class="info-item"><strong># Rules Run:</strong> {numberOfRules}</p>
-                        </div>
+                    <!-- Column 2 -->
+                    <div class="flow-column">
+                        <p class="info-item"><strong>Type:</strong> {metadata.processType}</p>
+                        <p class="info-item"><strong>API Version:</strong> {metadata.apiVersion}</p>
+                        <p class="info-item"><strong># Rules Run:</strong> {numberOfRules}</p>
+                    </div>
 
-                        <!-- Column 3 (Description) -->
-                        <div class="flow-column slds-col slds-size_1-of-3">
-                            <p class="info-item"><strong>Description:</strong> {metadata.description}</p>
-                        </div>
+                    <!-- Column 3 -->
+                    <div class="flow-column">
+                        <p class="info-item"><strong>Description:</strong> {metadata.description}</p>
                     </div>
                 </div>
-            </template>
-
-            <template if:true={error}>
-                <p class="error">Error scanning Flow: {error}</p>
-            </template>
-
-            <!-- Single-flow results table -->
-            <template if:true={hasScanResults}>
-                <div class="custom-datatable">
-                    <table class="slds-table slds-table_cell-buffer slds-table_bordered full-width-table">
-                        <thead>
-                            <tr>
-                                <th>Rule Name</th>
-                                <th>Severity</th>
-                                <th>Violation Name</th>
-                                <th>Type</th>
-                                <th>Meta Type</th>
-                                <th>Data Type</th>
-                                <th>Location X</th>
-                                <th>Location Y</th>
-                                <th>Connects To</th>
-                                <th>Expression</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template for:each={scanResult.ruleResults} for:item="rule">
-                                <template for:each={rule.details} for:item="detail">
-                                    <tr key={detail.id}>
-                                        <td>{rule.ruleName}</td>
-                                        <td>{rule.severity}</td>
-                                        <td>{detail.name}</td>
-                                        <td>{detail.type}</td>
-                                        <td>{detail.metaType}</td>
-                                        <td>{detail.details.dataType}</td>
-                                        <td>{detail.details.locationX}</td>
-                                        <td>{detail.details.locationY}</td>
-                                        <td>{detail.connectsTo}</td>
-                                        <td class="expression-cell">{detail.details.expression}</td>
-                                    </tr>
-                                </template>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-            </template>
+            </div>
         </template>
+
+        <!-- Error -->
+        <template if:true={error}>
+            <p class="error">Error scanning Flow: {error}</p>
+        </template>
+
+        <!-- Table -->
+        <template if:true={hasScanResults}>
+            <div class="custom-datatable">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered full-width-table">
+                    <thead>
+                        <tr>
+                            <th>Rule Name</th>
+                            <th>Severity</th>
+                            <th>Violation Name</th>
+                            <th>Type</th>
+                            <th>Meta Type</th>
+                            <th>Data Type</th>
+                            <th>Location X</th>
+                            <th>Location Y</th>
+                            <th>Connects To</th>
+                            <th>Expression</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={scanResult.ruleResults} for:item="rule">
+                            <template for:each={rule.details} for:item="detail">
+                                <tr key={detail.id}>
+                                    <td>{rule.ruleName}</td>
+                                    <td>{rule.severity}</td>
+                                    <td>{detail.name}</td>
+                                    <td>{detail.type}</td>
+                                    <td>{detail.metaType}</td>
+                                    <td>{detail.details.dataType}</td>
+                                    <td>{detail.details.locationX}</td>
+                                    <td>{detail.details.locationY}</td>
+                                    <td>{detail.connectsTo}</td>
+                                    <td class="expression-cell">{detail.details.expression}</td>
+                                </tr>
+                            </template>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+    </div>
+</template>
+
 
         <!-- ALL-FLOWS MODE -->
         <template if:true={isAllMode}>
             <div class="all-mode-container">
                 <!-- Toolbar -->
                 <div class="toolbar-row">
-                    <!-- Icon -->
                     <div class="toolbar-icon">
                         <lightning-icon icon-name="standard:work_order" size="small"></lightning-icon>
                     </div>
-                    <!-- Title -->
                     <div class="toolbar-title">
                         <h2 class="slds-text-heading_small slds-truncate">All Scan Results</h2>
                     </div>
-                    <!-- Flow Name Filter -->
                     <div class="toolbar-item">
                         <lightning-input
                             type="search"
@@ -96,7 +98,6 @@
                             class="compact-input"
                         ></lightning-input>
                     </div>
-                    <!-- Other Fields Filter -->
                     <div class="toolbar-item">
                         <lightning-input
                             type="search"
@@ -106,13 +107,11 @@
                             class="compact-input"
                         ></lightning-input>
                     </div>
-                    <!-- Stats -->
                     <div class="toolbar-item slds-align-middle">
                         <span class="slds-text-body_small toolbar-stats">
                             <strong>Violations:</strong> {displayedViolationsCount} / {totalViolationsCount}
                         </span>
                     </div>
-                    <!-- Print Button -->
                     <div class="toolbar-item">
                         <lightning-button
                             label="Print"
@@ -125,7 +124,6 @@
                 </div>
 
                 <lightning-card>
-                    <!-- All-flows results table -->
                     <template if:true={hasFlattenedViolations}>
                         <div class="custom-datatable">
                             <table class="slds-table slds-table_cell-buffer slds-table_bordered full-width-table">
