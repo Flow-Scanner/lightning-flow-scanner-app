@@ -53,3 +53,9 @@ lightning-spinner {
     display: block;
     margin: 2rem auto;
 }
+
+.tab-content-wrapper {
+    padding: 1rem 1.5rem;  /* same on all tabs */
+    background-color: #f4f6f9;  /* matches Flow Overview background */
+    min-height: calc(100vh - 12rem); /* optional: ensures consistent height feel */
+}
