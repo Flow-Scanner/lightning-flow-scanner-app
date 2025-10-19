@@ -86,9 +86,6 @@ export default class FlowOverview extends NavigationMixin(LightningElement) {
   
   connectedCallback() {
     loadStyle(this, datatableHeaderStyles)
-      .then(() => {
-        console.log("Datatable header styles loaded successfully");
-      })
       .catch((error) => {
         console.error("Error loading datatable header styles:", error);
         this.err = "Failed to load custom styles for datatable headers.";

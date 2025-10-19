@@ -15,7 +15,6 @@ export default class LightningFlowScanner extends LightningElement {
 
   get isAllMode() {
     const result = !!this.allScanResults && this.allScanResults.length > 0;
-    console.log("isAllMode:", result, "allScanResults:", this.allScanResults);
     return result;
   }
 
@@ -32,10 +31,6 @@ export default class LightningFlowScanner extends LightningElement {
     let violations = [];
     // ALL-FLOWS mode: flatten allScanResults (existing behavior)
     if (this.isAllMode) {
-      console.log(
-        "Flattening violations from allScanResults:",
-        this.allScanResults
-      );
       this.allScanResults.forEach((item, itemIndex) => {
         const flowName = item.flowName;
         if (item.scanResult && item.scanResult.ruleResults) {
@@ -63,7 +58,6 @@ export default class LightningFlowScanner extends LightningElement {
           });
         }
       });
-      console.log("Total violations flattened (all):", violations.length);
       return violations;
     }
     // SINGLE-FLOW mode: flatten scanResult for the selected flow
@@ -75,10 +69,6 @@ export default class LightningFlowScanner extends LightningElement {
           (this.selectedFlowRecord.masterLabel ||
             this.selectedFlowRecord.developerName)) ||
         "";
-      console.log(
-        "Flattening violations from single scanResult for flow:",
-        flowName
-      );
       this.scanResult.ruleResults.forEach((rule, ruleIndex) => {
         if (rule.details) {
           rule.details.forEach((detail, detailIndex) => {
@@ -99,7 +89,6 @@ export default class LightningFlowScanner extends LightningElement {
           });
         }
       });
-      console.log("Total violations flattened (single):", violations.length);
     }
     return violations;
   }
