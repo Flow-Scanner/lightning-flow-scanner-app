@@ -76,7 +76,8 @@
         <template if:true={isAllMode}>
             <div class="all-mode-container">
                 <template if:true={allScanResults}>
-                    <div slot="title" class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread toolbar-row">
+                    <div slot="title"
+                        class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread toolbar-row">
                         <div class="toolbar-icon">
                             <lightning-icon icon-name="standard:work_order" size="small"></lightning-icon>
                         </div>
@@ -84,22 +85,13 @@
                             <h2 class="slds-text-heading_small slds-truncate">All Results</h2>
                         </div>
                         <div class="toolbar-item slds-p-left_x-small">
-                            <lightning-input
-                                type="search"
-                                placeholder="Flow Name"
-                                onkeyup={handleFlowNameFilter}
-                                variant="label-hidden"
-                                class="compact-input"
-                            ></lightning-input>
+                            <lightning-input type="search" placeholder="Flow Name" onkeyup={handleFlowNameFilter}
+                                variant="label-hidden" class="compact-input"></lightning-input>
                         </div>
                         <div class="toolbar-item slds-p-left_x-small">
-                            <lightning-input
-                                type="search"
-                                placeholder="Search All Fields"
-                                onkeyup={handleOtherFieldsFilter}
-                                variant="label-hidden"
-                                class="compact-input"
-                            ></lightning-input>
+                            <lightning-input type="search" placeholder="Search All Fields"
+                                onkeyup={handleOtherFieldsFilter} variant="label-hidden"
+                                class="compact-input"></lightning-input>
                         </div>
                         <div class="toolbar-item slds-p-left_x-small">
                             <span class="slds-text-body_small toolbar-stats">
@@ -107,13 +99,8 @@
                             </span>
                         </div>
                         <div class="toolbar-item toolbar-button-container">
-                            <lightning-button
-                                label="Export CSV"
-                                icon-name="utility:download"
-                                onclick={handleDownload}
-                                variant="brand"
-                                class="slds-button slds-button_brand"
-                            ></lightning-button>
+                            <lightning-button label="Export CSV" icon-name="utility:download" onclick={handleDownload}
+                                variant="brand" class="slds-button slds-button_brand"></lightning-button>
                         </div>
                     </div>
                     <lightning-card>
@@ -175,24 +162,18 @@
         <div class="footer">
             <div class="github-info">
                 Want to help improve&nbsp;
-                <a href="https://flow-scanner.github.io/lightning-flow-scanner-core/" target="_blank">Lightning Flow Scanner</a>
+                <a href="https://flow-scanner.github.io/lightning-flow-scanner-core/" target="_blank">Lightning Flow
+                    Scanner</a>
                 ?&nbsp;See our&nbsp;
-                <a href="https://github.com/Flow-Scanner/lightning-flow-scanner-core/blob/main/CONTRIBUTING.md" target="_blank">Contributing Guidelines</a>.
+                <a href="https://github.com/Flow-Scanner/lightning-flow-scanner-core?tab=contributing-ov-file"
+                    target="_blank">Contributing Guidelines</a>.
             </div>
             <template if:false={isAllMode}>
                 <div class="navigation-buttons">
-                    <lightning-button
-                        label="Previous Flow"
-                        variant="brand"
-                        disabled={isFirstFlow}
-                        onclick={handlePreviousFlow}
-                    ></lightning-button>
-                    <lightning-button
-                        label="Next Flow"
-                        variant="brand"
-                        disabled={isLastFlow}
-                        onclick={handleNextFlow}
-                    ></lightning-button>
+                    <lightning-button label="Previous Flow" variant="brand" disabled={isFirstFlow}
+                        onclick={handlePreviousFlow}></lightning-button>
+                    <lightning-button label="Next Flow" variant="brand" disabled={isLastFlow}
+                        onclick={handleNextFlow}></lightning-button>
                 </div>
             </template>
         </div>

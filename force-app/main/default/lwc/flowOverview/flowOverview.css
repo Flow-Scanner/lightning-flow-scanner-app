@@ -43,9 +43,14 @@ lightning-card {
     margin: 0;
 }
 
-.toolbar-item {
+/* .toolbar-item {
     flex: 1 1 auto;
     min-width: 120px;
+} */
+.toolbar-item {
+ flex: 0 0 auto;
+ min-width: 120px;
+ max-width: 200px; /* Add consistent max width for search inputs */
 }
 
 /* Search inputs in toolbar */

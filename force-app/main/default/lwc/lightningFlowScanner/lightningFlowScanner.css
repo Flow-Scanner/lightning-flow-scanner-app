@@ -95,10 +95,10 @@
     width: 100%;
     gap: 0.5rem;
     padding: 0.25rem 0.5rem;
-    background-color: #003087; /* same as header/card */
+    background-color: #003087;
     color: #ffffff;
     margin: 0 !important;
-    justify-content: space-between; /* Spread items to push button to the right */
+    justify-content: space-between;
 }
 
 .toolbar-icon { 
@@ -121,17 +121,18 @@
     color: #ffffff; 
 }
 
-.toolbar-item { 
-    flex: 0 0 auto; /* Prevent stretching */
-    min-width: 120px; 
+.toolbar-item {
+ flex: 0 0 auto;
+ min-width: 120px;
+ max-width: 200px; /* Add consistent max width for search inputs */
 }
 
 .toolbar-button-container {
     flex: 0 0 auto;
     margin-left: auto;
-    padding: 0; /* Remove padding */
-    display: flex; /* Add flex to prevent extra space */
-    align-items: center; /* Align vertically */
+    padding: 0;
+    display: flex; 
+    align-items: center; 
 }
 
 .toolbar-stats { 
