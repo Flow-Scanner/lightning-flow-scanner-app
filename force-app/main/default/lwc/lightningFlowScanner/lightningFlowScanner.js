@@ -1,239 +1,221 @@
 import { LightningElement, api } from "lwc";
 
 export default class LightningFlowScanner extends LightningElement {
-  @api name;
-  @api metadata;
-  @api scanResult;
-  @api allScanResults;
-  @api numberOfRules;
-  @api error;
-  @api records;
-  @api selectedFlowRecord;
+    @api name;
+    @api metadata;
+    @api scanResult;
+    @api allScanResults;
+    @api numberOfRules;
+    @api error;
+    @api records;
+    @api selectedFlowRecord;
 
-  flowNameFilter = "";
-  otherFieldsFilter = "";
+    flowNameFilter = "";
+    otherFieldsFilter = "";
+    sortField = null;
+    sortDirection = "asc";
+    sortIndicators = {};
 
-  get isAllMode() {
-    const result = !!this.allScanResults && this.allScanResults.length > 0;
-    return result;
-  }
+    // ----- MODE GETTERS -----
+    get isAllMode() {
+        return !!this.allScanResults && this.allScanResults.length > 0;
+    }
 
-  get hasScanResults() {
-    return (
-      !this.isAllMode &&
-      this.scanResult &&
-      this.scanResult.ruleResults &&
-      this.scanResult.ruleResults.length > 0
-    );
-  }
+    get hasScanResults() {
+        return (
+            !this.isAllMode &&
+            this.scanResult &&
+            this.scanResult.ruleResults &&
+            this.scanResult.ruleResults.length > 0
+        );
+    }
 
-  get flattenedViolations() {
-    let violations = [];
-    // ALL-FLOWS mode: flatten allScanResults (existing behavior)
-    if (this.isAllMode) {
-      this.allScanResults.forEach((item, itemIndex) => {
-        const flowName = item.flowName;
-        if (item.scanResult && item.scanResult.ruleResults) {
-          item.scanResult.ruleResults.forEach((rule, ruleIndex) => {
-            if (rule.details) {
-              rule.details.forEach((detail, detailIndex) => {
+    get flowName() {
+        if (this.isAllMode) return null;
+        return this.name || null;
+    }
+
+    get hasFlowName() {
+        return !this.isAllMode && !!this.name;
+    }
+
+    get isFirstFlow() {
+        if (!this.records || !this.selectedFlowRecord) return true;
+        return (
+            this.records.findIndex((rec) => rec.id === this.selectedFlowRecord.id) === 0
+        );
+    }
+
+    get isLastFlow() {
+        if (!this.records || !this.selectedFlowRecord) return true;
+        return (
+            this.records.findIndex((rec) => rec.id === this.selectedFlowRecord.id) ===
+            this.records.length - 1
+        );
+    }
+
+    // ----- FILTERS -----
+    handleFlowNameFilter(event) {
+        this.flowNameFilter = event.target.value;
+    }
+
+    handleOtherFieldsFilter(event) {
+        this.otherFieldsFilter = event.target.value;
+    }
+
+    // ----- NAVIGATION -----
+    handlePreviousFlow() {
+        this.dispatchEvent(
+            new CustomEvent("navigateflow", { detail: { direction: "previous" } })
+        );
+    }
+
+    handleNextFlow() {
+        this.dispatchEvent(
+            new CustomEvent("navigateflow", { detail: { direction: "next" } })
+        );
+    }
+
+    // ----- SORTING -----
+    handleSort(event) {
+        const field = event.target.dataset.field;
+        if (!field) return;
+
+        if (this.sortField === field) {
+            this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
+        } else {
+            this.sortField = field;
+            this.sortDirection = "asc";
+        }
+
+        // Update indicators
+        this.sortIndicators = {};
+        this.sortIndicators[field] = this.sortDirection === "asc" ? "▲" : "▼";
+    }
+
+    // ----- FLATTENED VIOLATIONS -----
+    get flattenedViolations() {
+        let violations = [];
+
+        const processRuleDetails = (rule, ruleIndex, flowName) => {
+            if (!rule.details) return;
+            rule.details.forEach((detail, detailIndex) => {
                 violations.push({
-                  id:
-                    detail.id ||
-                    `flow-${itemIndex}-rule-${ruleIndex}-detail-${detailIndex}`,
-                  flowName: flowName,
-                  ruleName: rule.ruleName,
-                  severity: rule.severity,
-                  name: detail.name,
-                  type: detail.type,
-                  metaType: detail.metaType,
-                  dataType: detail.details ? detail.details.dataType : "",
-                  locationX: detail.details ? detail.details.locationX : "",
-                  locationY: detail.details ? detail.details.locationY : "",
-                  connectsTo: detail.connectsTo || "",
-                  expression: detail.details ? detail.details.expression : ""
+                    id: detail.id || `flow-${flowName}-rule-${ruleIndex}-detail-${detailIndex}`,
+                    flowName: flowName,
+                    ruleName: rule.ruleName,
+                    severity: rule.severity,
+                    name: detail.name,
+                    type: detail.type,
+                    metaType: detail.metaType,
+                    dataType: detail.details ? detail.details.dataType : "",
+                    locationX: detail.details ? detail.details.locationX : "",
+                    locationY: detail.details ? detail.details.locationY : "",
+                    connectsTo: detail.connectsTo || "",
+                    expression: detail.details ? detail.details.expression : ""
                 });
-              });
-            }
-          });
-        }
-      });
-      return violations;
-    }
-    // SINGLE-FLOW mode: flatten scanResult for the selected flow
-    if (this.scanResult && this.scanResult.ruleResults) {
-      const flowName =
-        this.flowName ||
-        this.name ||
-        (this.selectedFlowRecord &&
-          (this.selectedFlowRecord.masterLabel ||
-            this.selectedFlowRecord.developerName)) ||
-        "";
-      this.scanResult.ruleResults.forEach((rule, ruleIndex) => {
-        if (rule.details) {
-          rule.details.forEach((detail, detailIndex) => {
-            violations.push({
-              id: detail.id || `rule-${ruleIndex}-detail-${detailIndex}`,
-              flowName: flowName,
-              ruleName: rule.ruleName,
-              severity: rule.severity,
-              name: detail.name,
-              type: detail.type,
-              metaType: detail.metaType,
-              dataType: detail.details ? detail.details.dataType : "",
-              locationX: detail.details ? detail.details.locationX : "",
-              locationY: detail.details ? detail.details.locationY : "",
-              connectsTo: detail.connectsTo || "",
-              expression: detail.details ? detail.details.expression : ""
             });
-          });
+        };
+
+        if (this.isAllMode) {
+            this.allScanResults.forEach((item, itemIndex) => {
+                const flowName = item.flowName;
+                item.scanResult?.ruleResults?.forEach((rule, ruleIndex) =>
+                    processRuleDetails(rule, ruleIndex, flowName)
+                );
+            });
+        } else {
+            const flowName =
+                this.flowName ||
+                (this.selectedFlowRecord &&
+                    (this.selectedFlowRecord.masterLabel ||
+                        this.selectedFlowRecord.developerName)) ||
+                "";
+            this.scanResult?.ruleResults?.forEach((rule, ruleIndex) =>
+                processRuleDetails(rule, ruleIndex, flowName)
+            );
         }
-      });
-    }
-    return violations;
-  }
 
-  get filteredViolations() {
-    let filtered = this.flattenedViolations;
-
-    // Filter by flow name
-    if (this.flowNameFilter) {
-      const flowFilter = this.flowNameFilter.toLowerCase();
-      filtered = filtered.filter((v) =>
-        (v.flowName || "").toLowerCase().includes(flowFilter)
-      );
+        return violations;
     }
 
-    // Filter by other fields (rule name, severity, violation name, type, etc.)
-    if (this.otherFieldsFilter) {
-      const otherFilter = this.otherFieldsFilter.toLowerCase();
-      filtered = filtered.filter(
-        (v) =>
-          (v.ruleName || "").toLowerCase().includes(otherFilter) ||
-          (v.severity || "").toLowerCase().includes(otherFilter) ||
-          (v.name || "").toLowerCase().includes(otherFilter) ||
-          (v.type || "").toLowerCase().includes(otherFilter) ||
-          (v.metaType || "").toLowerCase().includes(otherFilter) ||
-          (v.dataType || "").toLowerCase().includes(otherFilter) ||
-          (v.connectsTo || "").toLowerCase().includes(otherFilter) ||
-          (v.expression || "").toLowerCase().includes(otherFilter)
-      );
+    // ----- FILTERED & SORTED VIOLATIONS -----
+    get filteredViolations() {
+        let filtered = [...this.flattenedViolations];
+
+        // Flow name filter
+        if (this.flowNameFilter) {
+            const f = this.flowNameFilter.toLowerCase();
+            filtered = filtered.filter((v) =>
+                (v.flowName || "").toLowerCase().includes(f)
+            );
+        }
+
+        // Other fields filter
+        if (this.otherFieldsFilter) {
+            const f = this.otherFieldsFilter.toLowerCase();
+            filtered = filtered.filter(
+                (v) =>
+                    (v.ruleName || "").toLowerCase().includes(f) ||
+                    (v.severity || "").toLowerCase().includes(f) ||
+                    (v.name || "").toLowerCase().includes(f) ||
+                    (v.type || "").toLowerCase().includes(f) ||
+                    (v.metaType || "").toLowerCase().includes(f) ||
+                    (v.dataType || "").toLowerCase().includes(f) ||
+                    (v.connectsTo || "").toLowerCase().includes(f) ||
+                    (v.expression || "").toLowerCase().includes(f)
+            );
+        }
+
+        // Apply sorting
+        if (this.sortField) {
+            const dir = this.sortDirection === "asc" ? 1 : -1;
+            filtered.sort((a, b) => {
+                const aVal = a[this.sortField] ?? "";
+                const bVal = b[this.sortField] ?? "";
+                return aVal < bVal ? -1 * dir : aVal > bVal ? 1 * dir : 0;
+            });
+        }
+
+        return filtered;
     }
 
-    return filtered;
-  }
-
-  get hasFlattenedViolations() {
-    return this.filteredViolations.length > 0;
-  }
-
-  get totalViolationsCount() {
-    return this.flattenedViolations.length;
-  }
-
-  get displayedViolationsCount() {
-    return this.filteredViolations.length;
-  }
-
-  get flowName() {
-    // Only return flowName if we're NOT in all mode and name exists
-    if (this.isAllMode) return null;
-    return this.name || null;
-  }
-
-  get hasFlowName() {
-    return !this.isAllMode && !!this.name;
-  }
-
-  get isFirstFlow() {
-    if (!this.records || !this.selectedFlowRecord) return true;
-    return (
-      this.records.findIndex((rec) => rec.id === this.selectedFlowRecord.id) ===
-      0
-    );
-  }
-
-  get isLastFlow() {
-    if (!this.records || !this.selectedFlowRecord) return true;
-    return (
-      this.records.findIndex((rec) => rec.id === this.selectedFlowRecord.id) ===
-      this.records.length - 1
-    );
-  }
-
-  handleFlowNameFilter(event) {
-    this.flowNameFilter = event.target.value;
-  }
-
-  handleOtherFieldsFilter(event) {
-    this.otherFieldsFilter = event.target.value;
-  }
-
-  handlePreviousFlow() {
-    this.dispatchEvent(
-      new CustomEvent("navigateflow", {
-        detail: { direction: "previous" }
-      })
-    );
-  }
-
-  handleNextFlow() {
-    this.dispatchEvent(
-      new CustomEvent("navigateflow", {
-        detail: { direction: "next" }
-      })
-    );
-  }
-
-  handleDownload() {
-    if (!this.hasFlattenedViolations) {
-      console.warn("No violations to download");
-      return;
+    get hasFlattenedViolations() {
+        return this.filteredViolations.length > 0;
     }
 
-    // build csv
-    const headers = [
-      "Flow Name",
-      "Rule Name",
-      "Severity",
-      "Detail Name",
-      "Type",
-      "Meta Type",
-      "Data Type",
-      "Location X",
-      "Location Y",
-      "Connects To",
-      "Expression"
-    ];
-    const rows = this.filteredViolations.map(
-      (v) =>
-        [
-          v.flowName,
-          v.ruleName,
-          v.severity,
-          v.name,
-          v.type,
-          v.metaType,
-          v.dataType,
-          v.locationX,
-          v.locationY,
-          v.connectsTo,
-          v.expression
-        ].map((field) => `"${String(field || "").replace(/"/g, '""')}"`) // escape quotes
-    );
-    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    get totalViolationsCount() {
+        return this.flattenedViolations.length;
+    }
 
-    // Encode and download
-    const encoded = encodeURIComponent(csv);
+    get displayedViolationsCount() {
+        return this.filteredViolations.length;
+    }
 
-    const now = new Date();
-    const timestamp = now.toISOString().replace(/[:.]/g, "-"); // Replace colons/dots for filename safety
-    const filename = `FlowScanner_${timestamp}.csv`;
+    // ----- CSV DOWNLOAD -----
+    handleDownload() {
+        if (!this.hasFlattenedViolations) return;
 
-    const link = document.createElement("a");
-    link.setAttribute("href", `data:text/csv;charset=utf-8,${encoded}`);
-    link.setAttribute("download", filename);
+        const headers = [
+            "Flow Name", "Rule Name", "Severity", "Detail Name", "Type", "Meta Type",
+            "Data Type", "Location X", "Location Y", "Connects To", "Expression"
+        ];
 
-    link.click();
-  }
+        const rows = this.filteredViolations.map(v =>
+            [
+                v.flowName, v.ruleName, v.severity, v.name, v.type,
+                v.metaType, v.dataType, v.locationX, v.locationY, v.connectsTo, v.expression
+            ].map(f => `"${String(f || "").replace(/"/g, '""')}"`)
+        );
+
+        const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+        const encoded = encodeURIComponent(csv);
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+        const filename = `FlowScanner_${timestamp}.csv`;
+
+        const link = document.createElement("a");
+        link.setAttribute("href", `data:text/csv;charset=utf-8,${encoded}`);
+        link.setAttribute("download", filename);
+        link.click();
+    }
 }

@@ -274,3 +274,28 @@ lightning-datatable {
 .all-mode-container lightning-card {
     background-color: #003087;
 }
+
+/* --------------------------
+ TABLE HEADER SORT INDICATORS
+--------------------------- */
+.full-width-table th {
+    position: relative; /* for absolute positioning of indicator */
+    cursor: pointer;
+}
+
+.full-width-table th .sort-indicator {
+    display: inline-block;
+    margin-left: 0.25rem;
+    font-size: 0.75rem;
+    vertical-align: middle;
+    color: #ffffff; /* match header text */
+}
+
+/* Optional: different color for active sort */
+.full-width-table th.sorted-asc .sort-indicator {
+    color: #ffcc00; /* gold for ascending */
+}
+
+.full-width-table th.sorted-desc .sort-indicator {
+    color: #ffcc00; /* gold for descending */
+}
