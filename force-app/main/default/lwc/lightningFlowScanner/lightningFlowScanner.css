@@ -61,7 +61,6 @@
  --sds-c-card-header-spacing-block-start: 0;
 }
 
-/* Force full width for card header elements containing toolbar */
 .all-mode-container .slds-card__header {
  padding: 0 !important;
  background-color: #003087;
@@ -87,7 +86,6 @@
  max-width: 100% !important;
 }
 
-/* Override SLDS padding for full-width toolbar */
 .all-mode-container .slds-p-around_xx-small {
  padding: 0.25rem 0.5rem !important;
 }
@@ -239,7 +237,6 @@ lightning-datatable {
  gap: 0.5rem;
 }
 
-/* Ensure card header slot uses full width and no padding */
 .all-mode-container lightning-card .slds-card__header {
   padding: 0 !important;
   background-color: #003087;
@@ -247,7 +244,6 @@ lightning-datatable {
   border-radius: 0;
 }
 
-/* Remove any internal grid spacing in toolbar wrapper */
 .all-mode-container .toolbar-row.slds-grid {
   margin: 0 !important;
   width: 100% !important;

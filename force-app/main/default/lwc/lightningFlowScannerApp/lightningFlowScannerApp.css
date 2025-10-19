@@ -54,9 +54,8 @@ lightning-spinner {
     margin: 2rem auto;
 }
 
-/* parent-component.css */
 .slds-tabs_default__content {
-  padding: 0 !important;          /* remove tab content padding */
+  padding: 0 !important;
   width: 100% !important;
   box-sizing: border-box;
 }
@@ -65,4 +64,13 @@ lightning-spinner {
 c-lightning-flow-scanner {
   display: block;
   width: 100%;
+}
+
+.slds-tabs_default__nav {
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+}
+
+.slds-tabs_default__content {
+  margin-top: 0 !important;
 }
