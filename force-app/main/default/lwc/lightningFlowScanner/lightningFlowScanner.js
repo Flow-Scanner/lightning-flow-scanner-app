@@ -180,93 +180,6 @@ export default class LightningFlowScanner extends LightningElement {
     this.otherFieldsFilter = event.target.value;
   }
 
-  handlePrintAll() {
-    const violations = this.filteredViolations;
-
-    let html = `
-      <html>
-        <head>
-          <title>Flow Scan Results - ${new Date().toLocaleString()}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            h1 { color: #16325c; }
-            .summary { margin: 20px 0; padding: 10px; background-color: #f3f3f3; }
-            table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-            th, td { border: 1px solid #dddddd; padding: 8px; text-align: left; font-size: 12px; }
-            th { background-color: #16325c; color: white; font-weight: bold; }
-            tr:nth-child(even) { background-color: #f9f9f9; }
-            .expression-cell { max-width: 300px; word-wrap: break-word; }
-          </style>
-        </head>
-        <body>
-          <h1>Flow Scan Results</h1>
-          <div class="summary">
-            <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
-            <p><strong>Total Violations:</strong> ${violations.length}</p>
-            <p><strong>Rules Run:</strong> ${this.numberOfRules || "N/A"}</p>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Flow</th>
-                <th>Rule Name</th>
-                <th>Severity</th>
-                <th>Violation Name</th>
-                <th>Type</th>
-                <th>Meta Type</th>
-                <th>Data Type</th>
-                <th>Location X</th>
-                <th>Location Y</th>
-                <th>Connects To</th>
-                <th>Expression</th>
-              </tr>
-            </thead>
-            <tbody>
-    `;
-
-    violations.forEach((v) => {
-      html += `
-        <tr>
-          <td>${this.escapeHtml(v.flowName)}</td>
-          <td>${this.escapeHtml(v.ruleName)}</td>
-          <td>${this.escapeHtml(v.severity)}</td>
-          <td>${this.escapeHtml(v.name)}</td>
-          <td>${this.escapeHtml(v.type)}</td>
-          <td>${this.escapeHtml(v.metaType)}</td>
-          <td>${this.escapeHtml(v.dataType)}</td>
-          <td>${this.escapeHtml(v.locationX)}</td>
-          <td>${this.escapeHtml(v.locationY)}</td>
-          <td>${this.escapeHtml(v.connectsTo)}</td>
-          <td class="expression-cell">${this.escapeHtml(v.expression)}</td>
-        </tr>
-      `;
-    });
-
-    html += `
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `;
-
-    const printWindow = window.open("", "_blank");
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(() => {
-        printWindow.print();
-      }, 250);
-    }
-  }
-
-  escapeHtml(text) {
-    if (!text) return "";
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
   handlePreviousFlow() {
     this.dispatchEvent(
       new CustomEvent("navigateflow", {
@@ -281,5 +194,57 @@ export default class LightningFlowScanner extends LightningElement {
         detail: { direction: "next" }
       })
     );
+  }
+
+  handleDownload() {
+    if (!this.hasFlattenedViolations) {
+      console.warn("No violations to download");
+      return;
+    }
+
+    // build csv
+    const headers = [
+      "Flow Name",
+      "Rule Name",
+      "Severity",
+      "Detail Name",
+      "Type",
+      "Meta Type",
+      "Data Type",
+      "Location X",
+      "Location Y",
+      "Connects To",
+      "Expression"
+    ];
+    const rows = this.filteredViolations.map(
+      (v) =>
+        [
+          v.flowName,
+          v.ruleName,
+          v.severity,
+          v.name,
+          v.type,
+          v.metaType,
+          v.dataType,
+          v.locationX,
+          v.locationY,
+          v.connectsTo,
+          v.expression
+        ].map((field) => `"${String(field || "").replace(/"/g, '""')}"`) // escape quotes
+    );
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+
+    // Encode and download
+    const encoded = encodeURIComponent(csv);
+
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[:.]/g, "-"); // Replace colons/dots for filename safety
+    const filename = `FlowScanner_${timestamp}.csv`;
+
+    const link = document.createElement("a");
+    link.setAttribute("href", `data:text/csv;charset=utf-8,${encoded}`);
+    link.setAttribute("download", filename);
+
+    link.click();
   }
 }
