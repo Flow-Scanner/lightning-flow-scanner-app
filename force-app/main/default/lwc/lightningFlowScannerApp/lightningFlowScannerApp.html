@@ -20,24 +20,15 @@
                     onsearch={handleSearch} onloadmore={handleLoadMore}></c-flow-overview>
             </template>
             <template if:true={isTab2Active}>
-                <c-lightning-flow-scanner
-  name={flowName}
-  metadata={flowMetadata}
-  scan-result={scanResult}
-  all-scan-results={allScanResults}
-  number-of-rules={numberOfRules}
-  error={err}
-  records={records}
-  selected-flow-record={selectedFlowRecord}
-  onnavigateflow={handleNavigateFlow}
-></c-lightning-flow-scanner>
+                <c-lightning-flow-scanner name={flowName} metadata={flowMetadata} scan-result={scanResult}
+                    all-scan-results={allScanResults} number-of-rules={numberOfRules} error={err} records={records}
+                    selected-flow-record={selectedFlowRecord}
+                    onnavigateflow={handleNavigateFlow}></c-lightning-flow-scanner>
             </template>
             <template if:true={isTab3Active}>
                 <c-scan-configurator rules={rules} onrulechange={handleRuleChange}></c-scan-configurator>
             </template>
         </div>
-
-
     </div>
     <template if:true={isLoading}>
         <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
