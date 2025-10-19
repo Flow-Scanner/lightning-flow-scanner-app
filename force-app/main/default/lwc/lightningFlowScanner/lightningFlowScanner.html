@@ -1,6 +1,7 @@
 <template>
     <div class="page">
         <a class="hidden-csv-link" style="display:none"></a>
+
         <!-- SINGLE-FLOW MODE -->
         <template if:false={isAllMode}>
             <div class="single-flow-wrapper">
@@ -27,44 +28,44 @@
                         </div>
                     </div>
                 </template>
+
                 <!-- Error -->
                 <template if:true={error}>
                     <p class="error">Error scanning Flow: {error}</p>
                 </template>
+
                 <!-- Table -->
                 <template if:true={hasScanResults}>
                     <div class="custom-datatable">
                         <table class="slds-table slds-table_cell-buffer slds-table_bordered full-width-table">
                             <thead>
                                 <tr>
-                                    <th>Rule Name</th>
-                                    <th>Severity</th>
-                                    <th>Violation Name</th>
-                                    <th>Type</th>
-                                    <th>Meta Type</th>
-                                    <th>Data Type</th>
-                                    <th>Location X</th>
-                                    <th>Location Y</th>
-                                    <th>Connects To</th>
-                                    <th>Expression</th>
+                                    <th data-field="ruleName" onclick={handleSort}>Rule Name {sortIndicators.ruleName}</th>
+                                    <th data-field="severity" onclick={handleSort}>Severity {sortIndicators.severity}</th>
+                                    <th data-field="name" onclick={handleSort}>Violation Name {sortIndicators.name}</th>
+                                    <th data-field="type" onclick={handleSort}>Type {sortIndicators.type}</th>
+                                    <th data-field="metaType" onclick={handleSort}>Meta Type {sortIndicators.metaType}</th>
+                                    <th data-field="dataType" onclick={handleSort}>Data Type {sortIndicators.dataType}</th>
+                                    <th data-field="locationX" onclick={handleSort}>Location X {sortIndicators.locationX}</th>
+                                    <th data-field="locationY" onclick={handleSort}>Location Y {sortIndicators.locationY}</th>
+                                    <th data-field="connectsTo" onclick={handleSort}>Connects To {sortIndicators.connectsTo}</th>
+                                    <th data-field="expression" onclick={handleSort}>Expression {sortIndicators.expression}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <template for:each={scanResult.ruleResults} for:item="rule">
-                                    <template for:each={rule.details} for:item="detail">
-                                        <tr key={detail.id}>
-                                            <td>{rule.ruleName}</td>
-                                            <td>{rule.severity}</td>
-                                            <td>{detail.name}</td>
-                                            <td>{detail.type}</td>
-                                            <td>{detail.metaType}</td>
-                                            <td>{detail.details.dataType}</td>
-                                            <td>{detail.details.locationX}</td>
-                                            <td>{detail.details.locationY}</td>
-                                            <td>{detail.connectsTo}</td>
-                                            <td class="expression-cell">{detail.details.expression}</td>
-                                        </tr>
-                                    </template>
+                                <template for:each={filteredViolations} for:item="v">
+                                    <tr key={v.id}>
+                                        <td>{v.ruleName}</td>
+                                        <td>{v.severity}</td>
+                                        <td>{v.name}</td>
+                                        <td>{v.type}</td>
+                                        <td>{v.metaType}</td>
+                                        <td>{v.dataType}</td>
+                                        <td>{v.locationX}</td>
+                                        <td>{v.locationY}</td>
+                                        <td>{v.connectsTo}</td>
+                                        <td class="expression-cell">{v.expression}</td>
+                                    </tr>
                                 </template>
                             </tbody>
                         </table>
@@ -72,12 +73,13 @@
                 </template>
             </div>
         </template>
+
         <!-- ALL-FLOWS MODE -->
         <template if:true={isAllMode}>
             <div class="all-mode-container">
                 <template if:true={allScanResults}>
-                    <div slot="title"
-                        class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread toolbar-row">
+                    <!-- Toolbar -->
+                    <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-spread toolbar-row">
                         <div class="toolbar-icon">
                             <lightning-icon icon-name="standard:work_order" size="small"></lightning-icon>
                         </div>
@@ -103,45 +105,49 @@
                                 variant="brand" class="slds-button slds-button_brand"></lightning-button>
                         </div>
                     </div>
+
+                    <!-- Table Card -->
                     <lightning-card>
                         <template if:true={hasFlattenedViolations}>
                             <div class="custom-datatable">
                                 <table class="slds-table slds-table_cell-buffer full-width-table">
                                     <thead>
                                         <tr>
-                                            <th>Flow</th>
-                                            <th>Rule Name</th>
-                                            <th>Severity</th>
-                                            <th>Violation Name</th>
-                                            <th>Type</th>
-                                            <th>Meta Type</th>
-                                            <th>Data Type</th>
-                                            <th>Location X</th>
-                                            <th>Location Y</th>
-                                            <th>Connects To</th>
-                                            <th>Expression</th>
+                                            <th data-field="flowName" onclick={handleSort}>Flow {sortIndicators.flowName}</th>
+                                            <th data-field="ruleName" onclick={handleSort}>Rule Name {sortIndicators.ruleName}</th>
+                                            <th data-field="severity" onclick={handleSort}>Severity {sortIndicators.severity}</th>
+                                            <th data-field="name" onclick={handleSort}>Violation Name {sortIndicators.name}</th>
+                                            <th data-field="type" onclick={handleSort}>Type {sortIndicators.type}</th>
+                                            <th data-field="metaType" onclick={handleSort}>Meta Type {sortIndicators.metaType}</th>
+                                            <th data-field="dataType" onclick={handleSort}>Data Type {sortIndicators.dataType}</th>
+                                            <th data-field="locationX" onclick={handleSort}>Location X {sortIndicators.locationX}</th>
+                                            <th data-field="locationY" onclick={handleSort}>Location Y {sortIndicators.locationY}</th>
+                                            <th data-field="connectsTo" onclick={handleSort}>Connects To {sortIndicators.connectsTo}</th>
+                                            <th data-field="expression" onclick={handleSort}>Expression {sortIndicators.expression}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <template for:each={filteredViolations} for:item="violation">
-                                            <tr key={violation.id}>
-                                                <td>{violation.flowName}</td>
-                                                <td>{violation.ruleName}</td>
-                                                <td>{violation.severity}</td>
-                                                <td>{violation.name}</td>
-                                                <td>{violation.type}</td>
-                                                <td>{violation.metaType}</td>
-                                                <td>{violation.dataType}</td>
-                                                <td>{violation.locationX}</td>
-                                                <td>{violation.locationY}</td>
-                                                <td>{violation.connectsTo}</td>
-                                                <td class="expression-cell">{violation.expression}</td>
+                                        <template for:each={filteredViolations} for:item="v">
+                                            <tr key={v.id}>
+                                                <td>{v.flowName}</td>
+                                                <td>{v.ruleName}</td>
+                                                <td>{v.severity}</td>
+                                                <td>{v.name}</td>
+                                                <td>{v.type}</td>
+                                                <td>{v.metaType}</td>
+                                                <td>{v.dataType}</td>
+                                                <td>{v.locationX}</td>
+                                                <td>{v.locationY}</td>
+                                                <td>{v.connectsTo}</td>
+                                                <td class="expression-cell">{v.expression}</td>
                                             </tr>
                                         </template>
                                     </tbody>
                                 </table>
                             </div>
                         </template>
+
+                        <!-- No violations -->
                         <template if:false={hasFlattenedViolations}>
                             <template if:true={totalViolationsCount}>
                                 <p class="slds-p-horizontal_small">
@@ -158,6 +164,7 @@
                 </template>
             </div>
         </template>
+
         <!-- Footer -->
         <div class="footer">
             <div class="github-info">
@@ -168,6 +175,7 @@
                 <a href="https://github.com/Flow-Scanner/lightning-flow-scanner-core?tab=contributing-ov-file"
                     target="_blank">Contributing Guidelines</a>.
             </div>
+
             <template if:false={isAllMode}>
                 <div class="navigation-buttons">
                     <lightning-button label="Previous Flow" variant="brand" disabled={isFirstFlow}
