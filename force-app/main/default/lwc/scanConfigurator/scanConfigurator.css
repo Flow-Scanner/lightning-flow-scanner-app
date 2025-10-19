@@ -1,6 +1,7 @@
-.config-page {
-  padding: 0;
-  background-color: transparent;
+:host {
+    display: block;
+    padding: 0; 
+    background-color: transparent; 
 }
 
 lightning-card {
