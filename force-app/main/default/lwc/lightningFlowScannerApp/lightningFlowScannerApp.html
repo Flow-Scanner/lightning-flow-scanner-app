@@ -12,7 +12,6 @@
       </li>
     </ul>
    <div class="slds-tabs_default__content slds-p-around_none">
-    <div class="tab-content-wrapper">
         <template if:true={isTab1Active}>
             <c-flow-overview
                 records={records}
@@ -38,7 +37,6 @@
         <template if:true={isTab3Active}>
             <c-scan-configurator rules={rules} onrulechange={handleRuleChange}></c-scan-configurator>
         </template>
-    </div>
 </div>
 
 

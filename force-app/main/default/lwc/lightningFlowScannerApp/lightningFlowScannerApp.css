@@ -54,8 +54,15 @@ lightning-spinner {
     margin: 2rem auto;
 }
 
-.tab-content-wrapper {
-    padding: 1rem 1.5rem;  /* same on all tabs */
-    background-color: #f4f6f9;  /* matches Flow Overview background */
-    min-height: calc(100vh - 12rem); /* optional: ensures consistent height feel */
+/* parent-component.css */
+.slds-tabs_default__content {
+  padding: 0 !important;          /* remove tab content padding */
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* Ensure the child custom element uses full width */
+c-lightning-flow-scanner {
+  display: block;
+  width: 100%;
 }

@@ -8,7 +8,6 @@
  margin: 0 auto;
  padding: 0;
  background-color: transparent;
- border-radius: 0.5rem;
 }
 
 /* --------------------------
@@ -55,35 +54,61 @@
 
 .all-mode-container lightning-card {
  background-color: #ffffff;
- border-radius: 0 0 0.5rem 0.5rem;
+ border-radius: 0.5rem;
  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
- margin-top: 0;
- /* Remove all card spacing */
  --sds-c-card-header-spacing-block-end: 0;
  --sds-c-card-body-spacing-block-start: 0;
  --sds-c-card-header-spacing-block-start: 0;
- --sds-c-card-spacing-block-start: 0;
+}
+
+/* Force full width for card header elements containing toolbar */
+.all-mode-container .slds-card__header {
+ padding: 0 !important;
+ background-color: #003087;
+}
+
+.all-mode-container .slds-card__header .slds-media {
+ width: 100% !important;
+}
+
+.all-mode-container .slds-card__header .slds-media__body {
+ width: 100% !important;
+ max-width: 100% !important;
+}
+
+.all-mode-container .slds-card__header .slds-card__header-title {
+ width: 100% !important;
+ max-width: 100% !important;
+}
+
+.all-mode-container .slds-card__header .slds-truncate {
+ overflow: visible !important;
+ width: 100% !important;
+ max-width: 100% !important;
+}
+
+/* Override SLDS padding for full-width toolbar */
+.all-mode-container .slds-p-around_xx-small {
+ padding: 0.25rem 0.5rem !important;
 }
 
 /* --------------------------
  TOOLBAR (all-flows)
+ Match the overview component styling
 --------------------------- */
 .toolbar-row {
- display: flex;
- align-items: center;
- gap: 0.5rem;
- width: 100%;
- padding: 0.5rem 0.75rem;
- background-color: #003087;
- color: #ffffff;
- border-radius: 0.5rem 0.5rem 0 0;
- margin-bottom: 0;
+  width: 100%;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background-color: #003087; /* same as header/card */
+  color: #ffffff;
+  margin: 0 !important;
 }
 
 .toolbar-icon { 
+ flex: 0 0 auto;
  display: flex; 
  align-items: center; 
- flex: 0 0 auto; 
 }
 
 .toolbar-icon lightning-icon { 
@@ -155,11 +180,12 @@ lightning-datatable {
  min-width: 1400px;
  table-layout: fixed;
  border-collapse: collapse;
- margin-top: 0;
+ margin: 0;
  background-color: #ffffff;
  border-radius: 0;
  box-shadow: none;
  font-size: 0.85rem;
+ border: none !important;
 }
 
 .full-width-table thead th {
@@ -169,7 +195,7 @@ lightning-datatable {
  padding: 0.6rem 0.75rem;
  text-align: left;
  white-space: nowrap;
- border-top: 0;
+ border: none !important;
 }
 
 .full-width-table td {
@@ -211,4 +237,26 @@ lightning-datatable {
  justify-content: space-between;
  flex-wrap: wrap;
  gap: 0.5rem;
+}
+
+/* Ensure card header slot uses full width and no padding */
+.all-mode-container lightning-card .slds-card__header {
+  padding: 0 !important;
+  background-color: #003087;
+  width: 100%;
+  border-radius: 0;
+}
+
+/* Remove any internal grid spacing in toolbar wrapper */
+.all-mode-container .toolbar-row.slds-grid {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.slds-tabs_default__content {
+  background-color: #003087;
+}
+
+.all-mode-container lightning-card {
+  background-color: #003087;
 }

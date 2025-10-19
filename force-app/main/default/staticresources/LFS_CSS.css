@@ -1,38 +1,37 @@
 /* -----------------------------
-   Datatable Header Styling
-   ----------------------------- */
+ Datatable Header Styling
+ ----------------------------- */
 .custom-datatable lightning-datatable .slds-th__action {
-    background-color: #003087 !important;
-    color: #ffffff !important; /* Only affects table headers */
+ background-color: #003087 !important;
+ color: #ffffff !important;
 }
 
 .custom-datatable lightning-datatable .slds-th__action:hover,
 .custom-datatable lightning-datatable .slds-th__action:focus {
-    background-color: #00205b !important;
+ background-color: #00205b !important;
 }
 
 .custom-datatable lightning-datatable th lightning-primitive-header-actions .slds-button_icon-bare .slds-button__icon {
-    fill: #ffffff !important; /* White sort icons */
+ fill: #ffffff !important;
 }
 
 .custom-datatable lightning-datatable th lightning-primitive-header-actions .slds-button_icon-bare:hover .slds-button__icon {
-    fill: #cccccc !important; /* Light gray on hover for visibility */
+ fill: #cccccc !important;
 }
 
 .slds-table {
-  margin: 0 0;
+ margin: 0 0;
 }
 
 /* -----------------------------
-   Toolbar Search Inputs
-   ----------------------------- */
+ Toolbar Search Inputs
+ ----------------------------- */
 .toolbar-row .compact-input input {
-    color: #003087 !important;       /* Dark text for search input */
-    background-color: #ffffff !important; 
+ color: #003087 !important;
+ background-color: #ffffff !important;
 }
 
 .toolbar-row .compact-input ::placeholder {
-    color: #5a5a5a !important;       /* Dark gray placeholder */
-    opacity: 1;
+ color: #5a5a5a !important;
+ opacity: 1;
 }
-
