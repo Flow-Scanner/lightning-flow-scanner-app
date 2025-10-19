@@ -1,26 +1,65 @@
-/* === Page Layout === */
+/* --------------------------
+   Page Layout
+--------------------------- */
 .page, :host {
-  background-color: transparent;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  max-width: 1600px;
-  margin: 0 auto;
-  border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0;
+    background-color: transparent;
+    border-radius: 0.5rem;
 }
 
-/* === Toolbar === */
-.toolbar-row {
-    width: 100%;
+/* --------------------------
+   SINGLE-FLOW HEADER
+--------------------------- */
+.single-flow-wrapper .flow-header {
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
+
+.single-flow-wrapper .flow-container {
     display: flex;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.single-flow-wrapper .flow-column {
+    flex: 1;
+    min-width: 220px; /* ensures columns shrink nicely */
+}
+
+.single-flow-wrapper .info-item {
+    margin: 0.25rem 0; /* vertical spacing */
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.single-flow-wrapper .info-item strong {
+    color: #003087;
+}
+
+/* --------------------------
+   TOOLBAR (all-flows)
+--------------------------- */
+.toolbar-row {
+    display: flex;
     align-items: center;
+    gap: 0.5rem;
+    width: 100%;
     padding: 0.25rem 0.5rem;
     background-color: #003087;
     color: #ffffff;
+    margin-bottom: 0;
 }
 
-.toolbar-icon { flex: 0 0 auto; display: flex; align-items: center; }
+.toolbar-icon { display: flex; align-items: center; flex: 0 0 auto; }
 .toolbar-icon lightning-icon { --slds-c-icon-color-foreground: #ffffff; }
 
 .toolbar-title { flex: 0 0 auto; line-height: 1.2rem; }
@@ -35,12 +74,22 @@
     --slds-c-input-color-border: #00205b;
     --slds-c-input-shadow-focus: 0 0 3px #00205b;
 }
+
 .toolbar-item .compact-input input {
     color: #003087 !important;
     background-color: #ffffff !important;
 }
-.toolbar-item .compact-input ::placeholder { color: #5a5a5a !important; opacity: 1; }
-.compact-input input { height: 2rem; padding: 0.2rem 0.5rem; font-size: 0.875rem; }
+
+.toolbar-item .compact-input ::placeholder {
+    color: #5a5a5a !important;
+    opacity: 1;
+}
+
+.compact-input input {
+    height: 2rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.875rem;
+}
 
 .toolbar-button {
     --slds-c-button-neutral-color-background: #ffffff;
@@ -49,28 +98,37 @@
     --slds-c-button-radius-border: 0.25rem;
 }
 
-/* === Datatables === */
-.custom-datatable, .custom-datatable table, lightning-datatable { margin: 0; width: 100%; padding: 0; }
-.results { flex-grow: 1; overflow-x: auto; margin-top: 1rem; margin-bottom: 1rem; }
+/* --------------------------
+   DATATABLES
+--------------------------- */
+.custom-datatable,
+.custom-datatable table,
+lightning-datatable {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
 
 .full-width-table {
     width: 100%;
     min-width: 1400px;
     table-layout: fixed;
     border-collapse: collapse;
+    margin-top: 0;
     background-color: #ffffff;
     border-radius: 0.25rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     font-size: 0.85rem;
 }
 
-.full-width-table th {
+.full-width-table thead th {
     background-color: #003087;
     color: #ffffff;
     font-weight: 600;
     padding: 0.6rem 0.75rem;
     text-align: left;
     white-space: nowrap;
+    border-top: 0;
 }
 
 .full-width-table td {
@@ -80,29 +138,20 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    border-top: 1px solid #ddd;
 }
 
-.expression-cell { max-width: 250px; white-space: normal; }
+.expression-cell {
+    max-width: 250px;
+    white-space: normal;
+}
+
 .full-width-table tr:nth-child(even) { background-color: #f9f9f9; }
 .full-width-table tr:hover { background-color: #e6f0ff; }
 
-/* === Headers for Flow info === */
-.header {
-    background-color: #ffffff;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-    line-height: 1.4;
-}
-
-.flow-container { display: flex; flex-wrap: wrap; gap: 1.5rem; }
-.flow-column { flex: 1; min-width: 220px; }
-.info-item { margin: 0.25rem 0; color: #333; }
-.info-item strong { color: #003087; }
-
-/* === Footer === */
+/* --------------------------
+   FOOTER
+--------------------------- */
 .footer {
     background-color: #ffffff;
     font-size: 0.8rem;
@@ -116,31 +165,4 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.5rem;
-}
-
-.navigation-buttons lightning-button {
-    margin-left: 0.25rem;
-    --slds-c-button-brand-color-background: #003087;
-    --slds-c-button-brand-color-background-hover: #00205b;
-    --slds-c-button-text-color: #ffffff;
-    --slds-c-button-radius-border: 0.25rem;
-}
-
-.github-info a {
-    color: #003087;
-    font-weight: 600;
-    text-decoration: none;
-}
-.github-info a:hover { color: #00205b; text-decoration: underline; }
-
-/* === Error message === */
-.error { color: #c23934; font-weight: bold; text-align: center; margin: 0.75rem 0; }
-
-/* Remove vertical padding around the results container */
-.results {
-    margin-top: 1rem; /* space below toolbar */
-    margin-bottom: 1rem;
-    flex-grow: 1;
-    overflow-x: auto;
-    padding: 0; /* ensures we don't double pad */
 }
