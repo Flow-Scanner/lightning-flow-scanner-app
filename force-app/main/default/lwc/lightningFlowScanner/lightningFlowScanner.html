@@ -1,6 +1,6 @@
 <template>
     <div class="page">
-
+        <a class="hidden-csv-link" style="display:none"></a>
         <!-- SINGLE-FLOW MODE -->
         <template if:false={isAllMode}>
             <div class="single-flow-wrapper">
@@ -80,84 +80,92 @@
         <!-- ALL-FLOWS MODE -->
         <template if:true={isAllMode}>
             <div class="all-mode-container">
-                <div slot="title" class="slds-grid slds-grid_vertical-align-center slds-p-around_xx-small toolbar-row">
-                    <div class="toolbar-icon">
-                        <lightning-icon icon-name="standard:work_order" size="small"></lightning-icon>
-                    </div>
-                    <div class="toolbar-title slds-p-left_x-small">
-                        <h2 class="slds-text-heading_small slds-truncate">All Results</h2>
-                    </div>
-                    <div class="toolbar-item slds-p-left_x-small">
-                        <lightning-input type="search" placeholder="Flow Name" onkeyup={handleFlowNameFilter}
-                            variant="label-hidden" class="compact-input"></lightning-input>
-                    </div>
-                    <div class="toolbar-item slds-p-left_x-small">
-                        <lightning-input type="search" placeholder="Search All Fields" onkeyup={handleOtherFieldsFilter}
-                            variant="label-hidden" class="compact-input"></lightning-input>
-                    </div>
-                    <div class="toolbar-item slds-p-left_x-small slds-align-middle">
-                        <span class="slds-text-body_small toolbar-stats">
-                            <strong>Violations:</strong> {displayedViolationsCount} / {totalViolationsCount}
-                        </span>
-                    </div>
-                    <div class="toolbar-item slds-p-left_x-small">
-                        <lightning-button label="Print" icon-name="utility:print" onclick={handlePrintAll}
-                            variant="neutral" class="toolbar-button"></lightning-button>
-                    </div>
-                </div>
-                <lightning-card>
-
-                    <template if:true={hasFlattenedViolations}>
-                        <div class="custom-datatable">
-                            <table class="slds-table slds-table_cell-buffer full-width-table">
-                                <thead>
-                                    <tr>
-                                        <th>Flow</th>
-                                        <th>Rule Name</th>
-                                        <th>Severity</th>
-                                        <th>Violation Name</th>
-                                        <th>Type</th>
-                                        <th>Meta Type</th>
-                                        <th>Data Type</th>
-                                        <th>Location X</th>
-                                        <th>Location Y</th>
-                                        <th>Connects To</th>
-                                        <th>Expression</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template for:each={filteredViolations} for:item="violation">
-                                        <tr key={violation.id}>
-                                            <td>{violation.flowName}</td>
-                                            <td>{violation.ruleName}</td>
-                                            <td>{violation.severity}</td>
-                                            <td>{violation.name}</td>
-                                            <td>{violation.type}</td>
-                                            <td>{violation.metaType}</td>
-                                            <td>{violation.dataType}</td>
-                                            <td>{violation.locationX}</td>
-                                            <td>{violation.locationY}</td>
-                                            <td>{violation.connectsTo}</td>
-                                            <td class="expression-cell">{violation.expression}</td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
+                <template if:true={allScanResults}>
+                    <div slot="title"
+                        class="slds-grid slds-grid_vertical-align-center slds-p-around_xx-small toolbar-row">
+                        <div class="toolbar-icon">
+                            <lightning-icon icon-name="standard:work_order" size="small"></lightning-icon>
                         </div>
-                    </template>
-                    <template if:false={hasFlattenedViolations}>
-                        <template if:true={totalViolationsCount}>
-                            <p class="slds-p-horizontal_small">
-                                No violations match your search criteria. Try adjusting your filters.
-                            </p>
+                        <div class="toolbar-title slds-p-left_x-small">
+                            <h2 class="slds-text-heading_small slds-truncate">All Results</h2>
+                        </div>
+                        <div class="toolbar-item slds-p-left_x-small">
+                            <lightning-input type="search" placeholder="Flow Name" onkeyup={handleFlowNameFilter}
+                                variant="label-hidden" class="compact-input"></lightning-input>
+                        </div>
+                        <div class="toolbar-item slds-p-left_x-small">
+                            <lightning-input type="search" placeholder="Search All Fields"
+                                onkeyup={handleOtherFieldsFilter} variant="label-hidden"
+                                class="compact-input"></lightning-input>
+                        </div>
+                        <div class="toolbar-item slds-p-left_x-small slds-align-middle">
+                            <span class="slds-text-body_small toolbar-stats">
+                                <strong>Violations:</strong> {displayedViolationsCount} / {totalViolationsCount}
+                            </span>
+                        </div>
+                        <div class="toolbar-item slds-p-left_x-small">
+                            <lightning-button label="Export CSV" icon-name="utility:download" onclick={handleDownload}
+                                variant="brand" class="toolbar-button slds-m-left_small"></lightning-button>
+                        </div>
+
+                    </div>
+                    <lightning-card>
+
+                        <template if:true={hasFlattenedViolations}>
+                            <div class="custom-datatable">
+                                <table class="slds-table slds-table_cell-buffer full-width-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Flow</th>
+                                            <th>Rule Name</th>
+                                            <th>Severity</th>
+                                            <th>Violation Name</th>
+                                            <th>Type</th>
+                                            <th>Meta Type</th>
+                                            <th>Data Type</th>
+                                            <th>Location X</th>
+                                            <th>Location Y</th>
+                                            <th>Connects To</th>
+                                            <th>Expression</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={filteredViolations} for:item="violation">
+                                            <tr key={violation.id}>
+                                                <td>{violation.flowName}</td>
+                                                <td>{violation.ruleName}</td>
+                                                <td>{violation.severity}</td>
+                                                <td>{violation.name}</td>
+                                                <td>{violation.type}</td>
+                                                <td>{violation.metaType}</td>
+                                                <td>{violation.dataType}</td>
+                                                <td>{violation.locationX}</td>
+                                                <td>{violation.locationY}</td>
+                                                <td>{violation.connectsTo}</td>
+                                                <td class="expression-cell">{violation.expression}</td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
                         </template>
-                        <template if:false={totalViolationsCount}>
-                            <p class="slds-p-horizontal_small slds-text-color_success">
-                                No violations found across all scanned flows. Great job! 🎉
-                            </p>
+                        <template if:false={hasFlattenedViolations}>
+                            <template if:true={totalViolationsCount}>
+                                <p class="slds-p-horizontal_small">
+                                    No violations match your search criteria. Try adjusting your filters.
+                                </p>
+                            </template>
+                            <template if:false={totalViolationsCount}>
+                                <p class="slds-p-horizontal_small slds-text-color_success">
+                                    No violations found across all scanned flows. Great job! 🎉
+                                </p>
+                            </template>
                         </template>
-                    </template>
-                </lightning-card>
+                    </lightning-card>
+                </template>
+
+
+
 
             </div>
 
