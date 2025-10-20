@@ -4,8 +4,8 @@
       "path": "force-app",
       "default": true,
       "package": "lightning-flow-scanner",
-      "versionName": "2.8.0",
-      "versionNumber": "2.8.0.0"
+      "versionName": "2.9.0",
+      "versionNumber": "2.9.0.NEXT"
     }
   ],
   "namespace": "flow_scanner",
@@ -13,6 +13,7 @@
   "sourceApiVersion": "62.0",
   "packageAliases": {
     "lightning-flow-scanner": "0HogK0000000VOnSAM",
-    "lightning-flow-scanner@2.8.0": "04tgK0000006ikjQAA"
+    "lightning-flow-scanner@2.8.0": "04tgK0000006ikjQAA",
+    "lightning-flow-scanner@2.9.0-1": "04tgK0000006j7JQAQ"
   }
 }
