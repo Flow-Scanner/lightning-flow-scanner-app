@@ -1,7 +1,6 @@
 <template>
     <div class="page">
         <a class="hidden-csv-link" style="display:none"></a>
-
         <!-- SINGLE-FLOW MODE -->
         <template if:false={isAllMode}>
             <div class="single-flow-wrapper">
@@ -28,12 +27,10 @@
                         </div>
                     </div>
                 </template>
-
                 <!-- Error -->
                 <template if:true={error}>
                     <p class="error">Error scanning Flow: {error}</p>
                 </template>
-
                 <!-- Table -->
                 <template if:true={hasScanResults}>
                     <div class="custom-datatable">
@@ -55,16 +52,16 @@
                             <tbody>
                                 <template for:each={filteredViolations} for:item="v">
                                     <tr key={v.id}>
-                                        <td>{v.ruleName}</td>
-                                        <td>{v.severity}</td>
-                                        <td>{v.name}</td>
-                                        <td>{v.type}</td>
-                                        <td>{v.metaType}</td>
-                                        <td>{v.dataType}</td>
-                                        <td>{v.locationX}</td>
-                                        <td>{v.locationY}</td>
-                                        <td>{v.connectsTo}</td>
-                                        <td class="expression-cell">{v.expression}</td>
+                                        <td title={v.ruleName}>{v.ruleName}</td>
+                                        <td title={v.severity}>{v.severity}</td>
+                                        <td title={v.name}>{v.name}</td>
+                                        <td title={v.type}>{v.type}</td>
+                                        <td title={v.metaType}>{v.metaType}</td>
+                                        <td title={v.dataType}>{v.dataType}</td>
+                                        <td title={v.locationX}>{v.locationX}</td>
+                                        <td title={v.locationY}>{v.locationY}</td>
+                                        <td title={v.connectsTo}>{v.connectsTo}</td>
+                                        <td class="expression-cell" title={v.expression}>{v.expression}</td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -73,7 +70,6 @@
                 </template>
             </div>
         </template>
-
         <!-- ALL-FLOWS MODE -->
         <template if:true={isAllMode}>
             <div class="all-mode-container">
@@ -105,7 +101,6 @@
                                 variant="brand" class="slds-button slds-button_brand"></lightning-button>
                         </div>
                     </div>
-
                     <!-- Table Card -->
                     <lightning-card>
                         <template if:true={hasFlattenedViolations}>
@@ -129,24 +124,23 @@
                                     <tbody>
                                         <template for:each={filteredViolations} for:item="v">
                                             <tr key={v.id}>
-                                                <td>{v.flowName}</td>
-                                                <td>{v.ruleName}</td>
-                                                <td>{v.severity}</td>
-                                                <td>{v.name}</td>
-                                                <td>{v.type}</td>
-                                                <td>{v.metaType}</td>
-                                                <td>{v.dataType}</td>
-                                                <td>{v.locationX}</td>
-                                                <td>{v.locationY}</td>
-                                                <td>{v.connectsTo}</td>
-                                                <td class="expression-cell">{v.expression}</td>
+                                                <td title={v.flowName}>{v.flowName}</td>
+                                                <td title={v.ruleName}>{v.ruleName}</td>
+                                                <td title={v.severity}>{v.severity}</td>
+                                                <td title={v.name}>{v.name}</td>
+                                                <td title={v.type}>{v.type}</td>
+                                                <td title={v.metaType}>{v.metaType}</td>
+                                                <td title={v.dataType}>{v.dataType}</td>
+                                                <td title={v.locationX}>{v.locationX}</td>
+                                                <td title={v.locationY}>{v.locationY}</td>
+                                                <td title={v.connectsTo}>{v.connectsTo}</td>
+                                                <td class="expression-cell" title={v.expression}>{v.expression}</td>
                                             </tr>
                                         </template>
                                     </tbody>
                                 </table>
                             </div>
                         </template>
-
                         <!-- No violations -->
                         <template if:false={hasFlattenedViolations}>
                             <template if:true={totalViolationsCount}>
@@ -164,7 +158,6 @@
                 </template>
             </div>
         </template>
-
         <!-- Footer -->
         <div class="footer">
             <div class="github-info">
@@ -175,7 +168,6 @@
                 <a href="https://github.com/Flow-Scanner/lightning-flow-scanner-core?tab=contributing-ov-file"
                     target="_blank">Contributing Guidelines</a>.
             </div>
-
             <template if:false={isAllMode}>
                 <div class="navigation-buttons">
                     <lightning-button label="Previous Flow" variant="brand" disabled={isFirstFlow}
