@@ -47,7 +47,7 @@ For details about all available rules, their default severities, and configurati
 Or via Salesforce CLI:
 
 ```bash
-sf package install --package lightning-flow-scanner@2.9.0-1 --wait 10 --target-org tp3
+sf package install --package lightning-flow-scanner@2.9.0-1 --wait 10
 ```
 
 ## Usage
