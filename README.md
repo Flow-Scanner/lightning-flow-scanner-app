@@ -19,7 +19,7 @@ For details about all available rules, their default severities, and configurati
 ### Flow Overview:
 
 <p align="center">
- <img src="media/overview.jpg" alt="Flow Overview" width="68%" />
+ <img src="media/flowoverview.jpg" alt="Flow Overview" width="68%" />
 </p>
 
 ### Violation Details:
@@ -85,10 +85,10 @@ While no configuration is required, Admins can define **default severities**, **
 git clone https://github.com/Flow-Scanner/lightning-flow-scanner-app.git
 ```
 
-2) Authorize your Salesforce org to set up a connection with your local development environment:
+2) Create a Scratch Org
 
 ```sh
-sf login web --set-default --alias <YourOrgAlias>
+sf org:create:scratch --definition-file config/project-scratch-def.json --alias FlowScanner --duration-days 7 --set-default --json
 ```
 
 3) Push Source to Your Org:
@@ -100,7 +100,7 @@ sf project:deploy:start
 4) Assign Permission Set
 
 ```sh
-sf org assign permset --name flow_scanner__Flow_Scanner
+sf org assign permset --name Flow_Scanner
 ```
 
 4) Pull Modifications from Your Org:
@@ -109,4 +109,4 @@ sf org assign permset --name flow_scanner__Flow_Scanner
 sf project sync
 ```
 
-Want to help improve [Lightning Flow Scanner](https://flow-scanner.github.io/lightning-flow-scanner-core/)? See our [Contributing Guidelines](https://github.com/Flow-Scanner/lightning-flow-scanner-core?tab=contributing-ov-file).
+###### Want to help improve [Lightning Flow Scanner](https://flow-scanner.github.io/lightning-flow-scanner-core/)? See our [Contributing Guidelines](https://github.com/Flow-Scanner/lightning-flow-scanner-core?tab=contributing-ov-file).
