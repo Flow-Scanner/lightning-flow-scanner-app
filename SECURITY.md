@@ -12,7 +12,11 @@ If you discover a security vulnerability, please report it using [GitHub vulnera
 
 ## Data Handling
 
-This project collects zero user data. No credentials, PII, payment info, or health data is ever stored, transmitted, or shared. All analysis runs 100% client-side with no network calls to any external services.
+This tool collects zero user data. No credentials, PII, payment info, health data, or user content is ever stored, transmitted, or shared. All analysis runs 100% client-side with no network calls to external services.
+
+We temporarily use metadata (e.g., Flow metadata, timestamps) in-memory only for real-time functionality during your session. This data is never stored, logged, or transmitted and is discarded immediately when the session ends.
+
+**Note:** You may manually save scan results (e.g., reports, CSV, JSON) to your local filesystem. These files are created at your request and remain under your full control. This tool does not access, upload, or retain them.
 
 ## Dependencies
 
