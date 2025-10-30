@@ -3,8 +3,7 @@
  <img src="media/banner.png" style="width: 41%;" />
  </a>
 </p>
-
-<p align="center">Scans for unsafe contexts, hardcoded IDs, and other issues to optimize your Flows.</p>
+<p align="center"><em>Detect unsafe contexts, queries in loops, hardcoded IDs, and more to optimize your Salesforce Flows.</em></p>
 
 <p align="center">
  <img src="media/lfs-app.gif" alt="Lightning Flow Scanner Demo" width="76%" />
@@ -58,6 +57,9 @@ sf package install --package lightning-flow-scanner@2.9.0-1 --wait 10
 - Click on the "Flow Scanner" app to open the Scan Flows Overview.
 - (Optional) Configure rules in the Configuration tab.
 - View results of a Flow by clicking "details".
+
+**Privacy:** Zero user data collected. All processing is client-side.
+→ See Data Handling in our [Security Policy](https://github.com/Flow-Scanner/lightning-flow-scanner-app?tab=security-ov-file).
 
 ## Configuration
 
