@@ -52,7 +52,7 @@ export default class lightningFlowScannerApp extends LightningElement {
     try {
       await Promise.all([
         loadScript(this, LFSStaticRessource + "/jsforce.js"),
-        loadScript(this, LFSStaticRessource + "/LFS.js")
+        loadScript(this, LFSStaticRessource + "/lightning-flow-scanner-core.umd.js")
       ]);
 
       this.scriptLoaded = true;
