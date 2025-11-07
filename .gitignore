@@ -44,3 +44,6 @@ $RECYCLE.BIN/
 **/__pycache__/
 **/.venv/
 **/venv/
+
+# testing flows
+force-app/main/default/flows

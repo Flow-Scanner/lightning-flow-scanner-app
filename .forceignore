@@ -13,4 +13,3 @@ package.xml
 
 # zip & files for static resources
 force-app/main/default/staticresources/LFS_SR.zip
-force-app/main/default/staticresources/LFS_SR/**.js
