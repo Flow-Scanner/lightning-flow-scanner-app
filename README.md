@@ -14,8 +14,8 @@
 ## Table of contents
 
 - **[Usage](#usage)**
-  - [App Screens](#app-views(tabs))**
-  - [User Manual](#user-manual)**
+  - [App Screens](#app-views(tabs))
+  - [User Manual](#user-manual)
 - **[Configuration](#configuration)**
 - **[Installation](#installation)**
 - **[Development](#development)**
