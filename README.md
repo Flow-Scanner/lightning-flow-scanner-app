@@ -91,7 +91,7 @@ While no configuration is required, Admins can define **default severities**, **
 Or via Salesforce CLI:
 
 ```bash
-sf package install --package lightning-flow-scanner@2.10.0-1 --wait 10
+sf package install --package lightning-flow-scanner@2.12.0-1 --wait 10
 ```
 
 ---
