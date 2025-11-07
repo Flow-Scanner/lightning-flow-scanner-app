@@ -14,8 +14,8 @@
 ## Table of contents
 
 - **[Usage](#usage)**
-  - **[App Screens](#app-views(tabs))**
-  - **[User Manual](#user-manual)**
+  - [App Screens](#app-views(tabs))**
+  - [User Manual](#user-manual)**
 - **[Configuration](#configuration)**
 - **[Installation](#installation)**
 - **[Development](#development)**
@@ -120,12 +120,6 @@ sf project:deploy:start
 
 ```sh
 sf org assign permset --name Flow_Scanner
-```
-
-4) Pull Modifications from Your Org:
-
-```sh
-sf project sync
 ```
 
 <p><strong>Want to help improve Lightning Flow Scanner? See our <a href="https://github.com/Flow-Scanner/lightning-flow-scanner-core?tab=contributing-ov-file">Contributing Guidelines</a></strong></p>
