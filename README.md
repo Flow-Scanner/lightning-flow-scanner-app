@@ -6,7 +6,7 @@
 <p align="center"><em>Detect unsafe contexts, queries in loops, hardcoded IDs, and more to optimize Salesforce Flows.</em></p>
 
 <p align="center">
- <img src="media/lfs-app.gif" alt="Lightning Flow Scanner Demo" width="76%" />
+ <img src="media/lfs-app.gif" alt="Lightning Flow Scanner Demo" />
 </p>
 
 ---
