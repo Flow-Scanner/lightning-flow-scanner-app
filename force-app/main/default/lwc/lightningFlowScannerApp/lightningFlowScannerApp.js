@@ -1,6 +1,6 @@
 import { LightningElement, api, track } from "lwc";
 import { loadScript } from "lightning/platformResourceLoader";
-import LFSStaticRessource from "@salesforce/resourceUrl/LFS_SR";
+import LFS_SR from '@salesforce/resourceUrl/LFS_SR'
 
 export default class lightningFlowScannerApp extends LightningElement {
   @api accessToken;
@@ -50,12 +50,15 @@ export default class lightningFlowScannerApp extends LightningElement {
 
   async connectedCallback() {
     try {
-      await Promise.all([
-        loadScript(this, LFSStaticRessource + "/jsforce.js"),
-        loadScript(this, LFSStaticRessource + "/lightning-flow-scanner-core.umd.js")
-      ]);
+const baseUrl = LFS_SR;
 
-      this.scriptLoaded = true;
+            await Promise.all([
+                loadScript(this, baseUrl + '/jsforce.js'),
+                loadScript(this, baseUrl + '/lightning-flow-scanner-core.umd.js')
+            ]);
+
+            this.scriptLoaded = true;
+            console.log('Lightning Flow Scanner: BOTH SCRIPTS LOADED');
 
       if (!window.lightningflowscanner) {
         console.error("lightningflowscanner not loaded correctly");
@@ -358,7 +361,7 @@ export default class lightningFlowScannerApp extends LightningElement {
               [parsedFlow],
               optionsForScan
             );
-            
+
             let scanResult = scanResults[0];
             const activeRuleNames = Object.keys(optionsForScan.rules || {});
 
@@ -410,7 +413,7 @@ export default class lightningFlowScannerApp extends LightningElement {
 
       // Wait for all scans to complete
       const results = await Promise.all(scanPromises);
-      
+
       // Filter out null results (failed scans)
       this.allScanResults = results.filter(result => result !== null);
     } catch (error) {
@@ -424,7 +427,7 @@ export default class lightningFlowScannerApp extends LightningElement {
 
   async handleTabClick(event) {
     const newTab = parseInt(event.currentTarget.dataset.tab, 10);
-    
+
     // If switching to Flows tab (1), reset selection
     if (newTab === 1) {
       this.selectedFlowRecord = null;
