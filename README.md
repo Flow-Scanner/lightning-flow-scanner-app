@@ -84,14 +84,14 @@ While no configuration is required, Admins can define **default severities**, **
 
 ## Installation
 
-<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK0000006j7JQAQ">
+<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK00000079rNQAQ">
   <img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
 </a>
 
 Or via Salesforce CLI:
 
 ```bash
-sf package install --package lightning-flow-scanner@2.12.0-1 --wait 10
+sf package install --package 04tgK00000079rNQAQ --wait 10
 ```
 
 ---
