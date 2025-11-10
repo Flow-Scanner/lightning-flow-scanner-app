@@ -14,10 +14,6 @@
   "packageAliases": {
     "lightning-flow-scanner": "0HogK0000000VOnSAM",
     "lightning-flow-scanner@2.8.0": "04tgK0000006ikjQAA",
-    "lightning-flow-scanner@2.9.0-1": "04tgK0000006j7JQAQ",
-    "lightning-flow-scanner@2.12.0-1": "04tgK00000076ThQAI",
-    "lightning-flow-scanner@2.13.0-1": "04tgK00000079plQAA",
-    "lightning-flow-scanner@2.14.0-1": "04tgK00000079rNQAQ",
-    "lightning-flow-scanner@2.15.0-1": "04tgK00000079wDQAQ"
+    "lightning-flow-scanner@2.16.0-1": "04tgK00000079xpQAA"
   }
 }

@@ -84,14 +84,14 @@ While no configuration is required, Admins can define **default severities**, **
 
 ## Installation
 
-<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK00000079rNQAQ">
+<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK00000079xpQAA">
   <img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
 </a>
 
 Or via Salesforce CLI:
 
 ```bash
-sf package install --package 04tgK00000079rNQAQ --wait 10
+sf package install --package 04tgK00000079xpQAA --wait 10
 ```
 
 ---
