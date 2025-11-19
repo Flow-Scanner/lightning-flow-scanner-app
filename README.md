@@ -88,7 +88,7 @@ While no configuration is required, Admins can define **default severities**, **
 | **Unmanaged** | <a href="https://githubsfdeploy.herokuapp.com?owner=Flow-Scanner&repo=lightning-flow-scanner-app&ref=main"><img alt="Install Unmanaged Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
 | **Or via CLI** | `sf package install --package 04tgK0000007M73QAE --wait 10` |
 
-> After installation, complete the [Post-Installation Setup](\docs\installation.md) to configure the Connected App and assign permissions.
+> After installation, complete the [Post-Installation Setup](docs/installation.md) to configure the Connected App and assign permissions.
 
 ---
 
