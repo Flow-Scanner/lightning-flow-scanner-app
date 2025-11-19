@@ -1,6 +1,6 @@
 {
     "name": "lightning-flow-scanner-app",
-    "version": "2.11.0",
+    "version": "3.0.0",
     "description": "A Salesforce App for real-time analysis of Salesforce Flow. Scans metadata for 20+ issues such as hardcoded IDs, unsafe contexts, inefficient SOQL/DML operations, recursion risks, and missing fault handling.",
     "private": true,
     "homepage": "https://flow-scanner.github.io/lightning-flow-scanner-app/",
