@@ -11,10 +11,6 @@
     <description>Permissions necessary to use Flow Scanner</description>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Flow Scanner</label>
-    <pageAccesses>
-        <apexPage>LFS_VF_Launcher</apexPage>
-        <enabled>true</enabled>
-    </pageAccesses>
     <tabSettings>
         <tab>Lightning_Flow_Scanner</tab>
         <visibility>Visible</visibility>

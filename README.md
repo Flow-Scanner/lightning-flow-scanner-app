@@ -50,8 +50,6 @@ For details about all available rules, their default severities, and configurati
 
 ### User Manual
 
-*Prerequisite: Ensure that the Flow Scanner permission set is assigned to users who need access.*
-
 - Click on the App Launcher icon in the top-left corner of your Salesforce interface.
 - Search for "Flow Scanner" in the App Launcher.
 - Click on the "Flow Scanner" app to open the Scan Flows Overview.
@@ -84,15 +82,13 @@ While no configuration is required, Admins can define **default severities**, **
 
 ## Installation
 
-<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK00000079xpQAA">
-  <img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png">
-</a>
+| Deployment Type | Installation |
+|-----------------|----------------|
+| **Managed** (Recommended) | <a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK0000007M73QAE"><img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
+| **Unmanaged** | <a href="https://githubsfdeploy.herokuapp.com?owner=Flow-Scanner&repo=lightning-flow-scanner-app&ref=main"><img alt="Install Unmanaged Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
+| **Or via CLI** | `sf package install --package 04tgK0000007M73QAE --wait 10` |
 
-Or via Salesforce CLI:
-
-```bash
-sf package install --package 04tgK00000079xpQAA --wait 10
-```
+> After installation, complete the [Post-Installation Setup](assets\docs\installation.md) to configure the Connected App and assign permissions.
 
 ---
 

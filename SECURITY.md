@@ -3,12 +3,8 @@
 ## Security Practices
 
 - Code is open-source and peer-reviewed by the community.
-- Vulnerabilities can be reported privately via GitHub security features.
+- Vulnerabilities can be reported privately via [GitHub vulnerability reporting](https://github.com/Flow-Scanner/lightning-flow-scanner-app/security).
 - Changes to the repository are scanned and reviewed before merging.
-
-## Reporting a Vulnerability
-
-If you discover a security vulnerability, please report it using [GitHub vulnerability reporting](https://github.com/Flow-Scanner/lightning-flow-scanner-app/security).
 
 ## Data Handling
 
@@ -23,6 +19,5 @@ We temporarily use metadata (e.g., Flow metadata, timestamps) in-memory only for
 We actively track and maintain an up-to-date inventory of all third-party dependencies to ensure security and compatibility. Our dependencies include:
 
 - `lightning-flow-scanner-core` ([MIT license](https://github.com/Flow-Scanner/lightning-flow-scanner-core/blob/main/LICENSE.md)) – static analysis engine
-- `jsforce` ([MIT license](https://github.com/jsforce/jsforce/blob/main/LICENSE)) – Salesforce API connector
 
 These dependencies are packaged as static resources.

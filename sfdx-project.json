@@ -2,18 +2,16 @@
   "packageDirectories": [
     {
       "path": "force-app",
-      "default": true,
-      "package": "lightning-flow-scanner",
-      "versionName": "2.16.0",
-      "versionNumber": "2.16.0.NEXT"
+      "package": "flow-scanner",
+      "versionName": "ver 0.1",
+      "versionNumber": "0.1.0.NEXT",
+      "versionDescription": "Lightning Flow Scanner managed package"
     }
   ],
-  "namespace": "flow_scanner",
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "62.0",
   "packageAliases": {
-    "lightning-flow-scanner": "0HogK0000000VOnSAM",
-    "lightning-flow-scanner@2.8.0": "04tgK0000006ikjQAA",
-    "lightning-flow-scanner@2.16.0-1": "04tgK00000079xpQAA"
+    "flow-scanner": "0HogK0000000ZFVSA2",
+    "flow-scanner@3.0.0-2": "04tgK0000007M73QAE"
   }
 }

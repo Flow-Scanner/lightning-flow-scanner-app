@@ -1,7 +1,14 @@
 {
   "orgName": "LightningFlowScanner",
   "edition": "Developer",
-  "features": ["EnableSetPasswordInApi"],
+  "features": [
+    "API",
+    "AddCustomApps:10",
+    "AddCustomTabs:30",
+    "EnableSetPasswordInApi",
+    "AuthorApex",
+    "DebugApex"
+  ],
   "settings": {
     "lightningExperienceSettings": {
       "enableS1DesktopEnabled": true
@@ -11,8 +18,14 @@
     },
     "securitySettings": {
       "sessionSettings": {
-         "lockerServiceNext": true
-        }
-   }
+        "lockerServiceNext": true
+      }
+    },
+    "apexSettings": {
+      "enableCompileOnDeploy": true
+    },
+    "oauthOidcSettings": {
+      "blockOAuthUnPwFlow": false
+    }
   }
 }

@@ -47,3 +47,7 @@ $RECYCLE.BIN/
 
 # testing flows
 force-app/main/default/flows
+flow_scanner.crt
+flow_scanner.key
+flow_jwt_rsa.key
+sfdx-project.json

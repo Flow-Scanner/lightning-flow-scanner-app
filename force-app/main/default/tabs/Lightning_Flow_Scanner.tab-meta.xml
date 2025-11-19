@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>Lightning Flow Scanner Dashboard</description>
-    <icon>LFS/LFSI.png</icon>
+    <description>Created by Lightning App Builder</description>
+    <flexiPage>Flow_Scanner</flexiPage>
     <label>Scan Flows</label>
-    <page>LFS_VF_Launcher</page>
-    <motif>Custom85: Radar</motif>
+    <motif>Custom9: Lightning</motif>
 </CustomTab>
