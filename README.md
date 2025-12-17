@@ -84,9 +84,9 @@ While no configuration is required, Admins can define **default severities**, **
 
 | Deployment Type | Installation |
 |-----------------|----------------|
-| **Managed** (Recommended) | <a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK0000007M73QAE"><img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
+| **Managed** (Recommended) | <a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK00000088urQAA"><img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
 | **Unmanaged** | <a href="https://githubsfdeploy.herokuapp.com?owner=Flow-Scanner&repo=lightning-flow-scanner-app&ref=main"><img alt="Install Unmanaged Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
-| **Or via CLI** | `sf package install --package 04tgK0000007M73QAE --wait 10` |
+| **Or via CLI** | `sf package install --package 04tgK00000088urQAA --wait 10` |
 
 > After installation, complete the [Post-Installation Setup](assets\docs\installation.md) to configure the Connected App and assign permissions.
 

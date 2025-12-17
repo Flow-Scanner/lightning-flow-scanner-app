@@ -43,13 +43,13 @@ public with sharing class ToolingAPI {
     
     @TestVisible
     private static String getProductionAccessToken() {
-        if (!Schema.sObjectType.Flow_Scanner_OAuth_Config__mdt.fields.Consumer_Key__c.isAccessible()) {
+        if (!Schema.sObjectType.Flow_Scanner_OAuth_Config_Protected__mdt.fields.Consumer_Key__c.isAccessible()) {
             throw new AuraHandledException('Insufficient permissions to access OAuth configuration');
         }
         
-        List<Flow_Scanner_OAuth_Config__mdt> cfgs = [
+        List<Flow_Scanner_OAuth_Config_Protected__mdt> cfgs = [
             SELECT Consumer_Key__c
-            FROM Flow_Scanner_OAuth_Config__mdt
+            FROM Flow_Scanner_OAuth_Config_Protected__mdt
             WHERE DeveloperName = :MDT_DEV_NAME
             LIMIT 1
         ];
