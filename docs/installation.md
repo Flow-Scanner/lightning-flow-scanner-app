@@ -57,7 +57,7 @@ String consumerKey = 'YOUR_CONSUMER_KEY_HERE';
 if (String.isBlank(consumerKey) || consumerKey.contains('YOUR_CONSUMER_KEY_HERE')) {
     System.debug('ERROR: Please set your Consumer Key first!');
 } else {
-    Id jobId = lfscanner__.LFSSetup.configure(consumerKey);
+    Id jobId = LFSSetup.configure(consumerKey);
 }
 ```
 
