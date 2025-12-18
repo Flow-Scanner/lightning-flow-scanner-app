@@ -4,7 +4,6 @@
  */
 global class LFSSetup {
     
-    // Test seam for dependency injection
     @TestVisible
     private static IMetadataDeployer deployer = new ProductionMetadataDeployer();
     
@@ -23,40 +22,33 @@ global class LFSSetup {
             throw new IllegalArgumentException('Consumer Key exceeds 255 characters');
         }
         
+        // Validate format (alphanumeric, dots, underscores, hyphens only)
+        if (!Pattern.matches('^[a-zA-Z0-9._-]+$', consumerKey)) {
+            throw new IllegalArgumentException('Consumer Key contains invalid characters');
+        }
+        
         try {
-            // Auto-detect namespace
             String namespace = getNamespace();
             String prefix = String.isBlank(namespace) ? '' : namespace + '__';
             
-            // Create the custom metadata record
             Metadata.CustomMetadata cmd = new Metadata.CustomMetadata();
             cmd.fullName = prefix + 'Flow_Scanner_OAuth_Config_Protected__mdt.Default';
             cmd.label = 'Default';
             
-            // Set the Consumer Key field
             Metadata.CustomMetadataValue field = new Metadata.CustomMetadataValue();
             field.field = prefix + 'Consumer_Key__c';
             field.value = consumerKey;
             cmd.values.add(field);
             
-            // Deploy using injected deployer
             Id jobId = deployer.deploy(cmd);
-            
-            System.debug('✓ SUCCESS! Flow Scanner configured successfully.');
-            System.debug('Deployment Job ID: ' + jobId);
-            System.debug('⏱ Wait 30 seconds for deployment to complete, then you\'re ready!');
-            
             return jobId;
             
         } catch (Exception e) {
-            throw e;
+            // Don't expose internal exception details to users
+            throw new AuraHandledException('Configuration failed. Please verify your Consumer Key and try again.');
         }
     }
     
-    /**
-     * @description Gets the namespace of this class
-     * @return Namespace prefix (e.g., 'lfscanner') or empty string if none
-     */
     @TestVisible
     private static String getNamespace() {
         String className = LFSSetup.class.getName();
@@ -66,13 +58,11 @@ global class LFSSetup {
         return '';
     }
     
-    // Interface for metadata deployment
     @TestVisible
     private interface IMetadataDeployer {
         Id deploy(Metadata.CustomMetadata cmd);
     }
     
-    // Production implementation
     @TestVisible
     private class ProductionMetadataDeployer implements IMetadataDeployer {
         public Id deploy(Metadata.CustomMetadata cmd) {
