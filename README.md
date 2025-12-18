@@ -72,7 +72,7 @@ While no configuration is required, Admins can define **default severities**, **
 - **Expression** *(optional)* — e.g., `[A-Za-z]+_[0-9]+`
 - **Disabled** — check to turn off the rule globally
 
-3. Once saved, the **Flow Scanner App** automatically applies these overrides at load time — no user configuration needed.
+3. Once saved, the **Flow Scanner App** automatically applies these overrides at load time.
 
 <p align="center">
  <img src="media/overrides.jpg" alt="Rule Override" width="68%" />
