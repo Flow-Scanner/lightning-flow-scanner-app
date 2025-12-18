@@ -50,29 +50,15 @@ To enable server-to-server authentication for your application using JWT Bearer 
 5. Go to **Debug → Open Execute Anonymous Window**.
 6. **Copy and paste** this script:
 ```apex
-   // PASTE YOUR CONSUMER KEY HERE (between the quotes):
-   String consumerKey = '3MVG9P7Pp4QrREPlkZIJuyPabYJemVnctQsM2TEN1Xk.d29tlvzNPXcvb44ESWQ3_GIizTcGkRiivtuZZrFFI';
-   
-   // Don't edit below this line
-   if (String.isBlank(consumerKey) || consumerKey.contains('YOUR_CONSUMER_KEY_HERE')) {
-       System.debug('ERROR: Please set your Consumer Key first!');
-   } else {
-       Metadata.CustomMetadata cmd = new Metadata.CustomMetadata();
-       cmd.fullName = 'Flow_Scanner_OAuth_Config_Secure__mdt.Default';
-       cmd.label = 'Default';
-       
-       Metadata.CustomMetadataValue field = new Metadata.CustomMetadataValue();
-       field.field = 'Consumer_Key__c';
-       field.value = consumerKey;
-       cmd.values.add(field);
-       
-       Metadata.DeployContainer mdc = new Metadata.DeployContainer();
-       mdc.addMetadata(cmd);
-       
-       Id jobId = Metadata.Operations.enqueueDeployment(mdc, null);
-       System.debug('✓ SUCCESS! Consumer Key configured. Job ID: ' + jobId);
-       System.debug('Wait 10-30 seconds for deployment to complete.');
-   }
+// PASTE YOUR CONSUMER KEY HERE (between the quotes):
+String consumerKey = 'YOUR_CONSUMER_KEY_HERE';
+
+// Don't edit below this line
+if (String.isBlank(consumerKey) || consumerKey.contains('YOUR_CONSUMER_KEY_HERE')) {
+    System.debug('ERROR: Please set your Consumer Key first!');
+} else {
+    Id jobId = lfscanner__.LFSSetup.configure(consumerKey);
+}
 ```
 
 7. **Replace `YOUR_CONSUMER_KEY_HERE`** with your actual Consumer Key (the one you copied in step 3).

@@ -10,6 +10,7 @@
     }
   ],
   "sfdcLoginUrl": "https://login.salesforce.com",
+  "namespace": "lfscanner",
   "sourceApiVersion": "62.0",
   "packageAliases": {
     "flow-scanner": "0HogK0000000ZFVSA2",

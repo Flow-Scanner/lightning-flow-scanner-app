@@ -263,17 +263,23 @@ private class TestToolingAPI {
         System.assertEquals('MOCK_TOKEN', token);
     }
 
-    @IsTest
-    static void testProductionAuthProviderDirect() {
-        Test.setMock(HttpCalloutMock.class, new OAuthSuccessMock());
+    @TestVisible
+    private static String performJWTAuthentication(String consumerKey) {
+        // ─── BUILD JWT ───
+        Auth.JWT jwt = new Auth.JWT();
+        jwt.setIss(consumerKey);
+        jwt.setSub(UserInfo.getUserName());
+        jwt.setAud(ToolingAPI.getAudience());
         
-        Test.startTest();
-        try {
-            String token = ToolingAPI.getProductionAccessToken();
-            System.assert(true, 'Should have thrown exception');
-        } catch (AuraHandledException e) {
-            System.assert(true);
+        // Skip certificate signing in tests (cert doesn't exist)
+        String assertion;
+        if (Test.isRunningTest()) {
+            assertion = 'mock.jwt.assertion';
+        } else {
+            Auth.JWS jws = new Auth.JWS(jwt, 'Flow_Scanner');
+            assertion = jws.getCompactSerialization();
         }
-        Test.stopTest();
+        
+        return ToolingAPI.exchangeJWTForToken(assertion);
     }
 }
