@@ -53,11 +53,10 @@ To enable server-to-server authentication for your application using JWT Bearer 
 // PASTE YOUR CONSUMER KEY HERE (between the quotes):
 String consumerKey = 'YOUR_CONSUMER_KEY_HERE';
 
-// Don't edit below this line
 if (String.isBlank(consumerKey) || consumerKey.contains('YOUR_CONSUMER_KEY_HERE')) {
     System.debug('ERROR: Please set your Consumer Key first!');
 } else {
-    Id jobId = LFSSetup.configure(consumerKey);
+    Id jobId =  lfscanner.LFSSetup.configure(consumerKey);
 }
 ```
 
