@@ -2,19 +2,7 @@
   "packageDirectories": [
     {
       "path": "force-app",
-      "package": "flow-scanner",
-      "versionName": "v3.2",
-      "versionNumber": "3.2.0.NEXT",
-      "versionDescription": "Added ruleMode support and updated rule loading",
-      "ancestorVersion": "HIGHEST"
+      "default": true
     }
-  ],
-  "sfdcLoginUrl": "https://login.salesforce.com",
-  "namespace": "lfscanner",
-  "sourceApiVersion": "62.0",
-  "packageAliases": {
-    "flow-scanner": "0HogK0000000ZFVSA2",
-    "flow-scanner@3.0.0-2": "04tgK0000007M73QAE",
-    "flow-scanner@3.2.0-1": "04tgK0000008CLlQAM"
-  }
+  ]
 }
