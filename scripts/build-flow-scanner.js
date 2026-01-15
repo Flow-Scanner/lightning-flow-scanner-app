@@ -102,8 +102,6 @@ function setupRemoteRepo(tempDir) {
     copyDirSync(distSource, distDest);
   }
   fs.copyFileSync(path.join(coreSource, "package.json"), path.join(tempDir, "package.json"));
-
-  fs.rmSync(cloneDir, {recursive: true, force: true});
 }
 
 function findUMDFile(distDir) {
