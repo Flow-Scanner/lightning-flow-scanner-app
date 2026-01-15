@@ -92,6 +92,35 @@ function setupRemoteRepo(tempDir) {
   }
 
   copyDirSync(coreSource, tempDir);
+
+  // Resolve workspace:* dependencies before deleting the clone
+  const pkgJsonPath = path.join(tempDir, "package.json");
+  const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8"));
+
+  for (const depType of ["dependencies", "devDependencies", "peerDependencies"]) {
+    if (pkgJson[depType]) {
+      for (const [name, version] of Object.entries(pkgJson[depType])) {
+        if (typeof version === "string" && version.startsWith("workspace:")) {
+          // Find matching package in monorepo
+          const packagesDirPath = path.join(cloneDir, "packages");
+          for (const dir of fs.readdirSync(packagesDirPath)) {
+            const depPkgPath = path.join(packagesDirPath, dir, "package.json");
+            if (fs.existsSync(depPkgPath)) {
+              const depPkg = JSON.parse(fs.readFileSync(depPkgPath, "utf8"));
+              if (depPkg.name === name) {
+                const spec = version.replace("workspace:", "");
+                pkgJson[depType][name] = (spec === "^" || spec === "~") ? spec + depPkg.version : depPkg.version;
+                console.log(`Resolved ${name}: ${version} -> ${pkgJson[depType][name]}`);
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2), "utf8");
   fs.rmSync(cloneDir, {recursive: true, force: true});
 }
 
