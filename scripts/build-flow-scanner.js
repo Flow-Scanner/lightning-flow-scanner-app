@@ -95,8 +95,14 @@ function setupRemoteRepo(tempDir) {
   execSync("pnpm install", {stdio: "inherit", cwd: cloneDir});
   execSync("pnpm dist", {stdio: "inherit", cwd: cloneDir});
 
-  // Copy the built core package to tempDir
-  copyDirSync(coreSource, tempDir);
+  // Copy only what we need (dist folder and package.json) - skip node_modules
+  const distSource = path.join(coreSource, "dist");
+  const distDest = path.join(tempDir, "dist");
+  if (fs.existsSync(distSource)) {
+    copyDirSync(distSource, distDest);
+  }
+  fs.copyFileSync(path.join(coreSource, "package.json"), path.join(tempDir, "package.json"));
+
   fs.rmSync(cloneDir, {recursive: true, force: true});
 }
 
