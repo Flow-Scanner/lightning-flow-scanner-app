@@ -31,3 +31,6 @@ node_modules/
 
 # testing flows
 force-app/main/default/flows
+
+# Packaging config
+sfdx-project.base.json
