@@ -13,48 +13,45 @@
 
 ## Table of contents
 
+- **[Features](#features)**
 - **[Usage](#usage)**
-  - [App Screens](#app-views(tabs))
-  - [User Manual](#user-manual)
 - **[Configuration](#configuration)**
 - **[Installation](#installation)**
 - **[Development](#development)**
 
 ---
 
-## Usage
+## Features
 
-**Lightning Flow Scanner App** integrates the Lightning Flow Scanner as a UMD module within Salesforce, enabling scanning of flow metadata for 20+ issues such as hardcoded IDs, unsafe contexts, inefficient SOQL/DML operations, recursion risks, and missing fault handling.
-
-For details about all available rules, their default severities, and configuration options, visit the [Flow Scanner Documentation](https://flow-scanner.github.io/lightning-flow-scanner/).
-
-### App Views(Tabs)
-
-#### Flow Overview
+### Flow Overview
 
 <p align="center">
  <img src="media/flowoverview.jpg" alt="Flow Overview" width="68%" />
 </p>
 
-#### Violation Details
+### Violation Details
 
 <p align="center">
   <img src="media/allresults.jpg" alt="All Results View" width="68%" />
 </p>
 
-#### Rule Configuration:
+### Rule Configuration:
 
 <p align="center">
  <img src="media/config.jpg" alt="Rule Configuration" width="68%" />
 </p>
 
-### User Manual
+## Usage
+
+**Lightning Flow Scanner App** integrates the Lightning Flow Scanner as a UMD module within Salesforce, enabling scanning of flow metadata for 20+ issues such as hardcoded IDs, unsafe contexts, inefficient SOQL/DML operations, recursion risks, and missing fault handling.
 
 - Click on the App Launcher icon in the top-left corner of your Salesforce interface.
 - Search for "Flow Scanner" in the App Launcher.
 - Click on the "Flow Scanner" app to open the Scan Flows Overview.
 - (Optional) Configure rules in the Configuration tab.
 - View results of a Flow by clicking "details".
+
+For details about all available rules, their default severities, and configuration options, visit the [Flow Scanner Documentation](https://flow-scanner.github.io/lightning-flow-scanner/).
 
 **Privacy:** Zero user data collected. All processing is client-side. → See Data Handling in our [Security Policy](https://github.com/Flow-Scanner/lightning-flow-scanner-app?tab=security-ov-file).
 
@@ -84,7 +81,7 @@ While no configuration is required, Admins can define **default severities**, **
 
 | Deployment Type | Installation |
 |-----------------|----------------|
-| **Managed** (Recommended) | <a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK0000008CLlQAM"><img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
+| [**AppExchange(managed)**](https://appexchange.salesforce.com/appxListingDetail?listingId=80d6caf3-d4a8-41ec-b48e-da1fe3457e98) | <a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK0000008CLlQAM"><img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
 | **Unmanaged** | <a href="https://githubsfdeploy.herokuapp.com?owner=Flow-Scanner&repo=lightning-flow-scanner-app&ref=main"><img alt="Install Unmanaged Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
 | **Or via CLI** | `sf package install --package 04tgK0000008CLlQAM --wait 10` |
 
