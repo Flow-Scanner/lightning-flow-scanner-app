@@ -1,9 +1,22 @@
 import { LightningElement, api, track } from "lwc";
-import { NavigationMixin } from "lightning/navigation";
 import { loadStyle } from "lightning/platformResourceLoader";
-import datatableHeaderStyles from "@salesforce/resourceUrl/LFS_CSS";
+import toolbarStyles from "@salesforce/resourceUrl/LFS_CSS";
 
-export default class FlowOverview extends NavigationMixin(LightningElement) {
+const FIELD_TYPES = {
+  lastModifiedDate: "date",
+  isActive: "boolean"
+};
+
+const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "short",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true
+});
+
+export default class FlowOverview extends LightningElement {
   _records = [];
 
   @api get records() {
@@ -11,61 +24,12 @@ export default class FlowOverview extends NavigationMixin(LightningElement) {
   }
   @api hasMoreRecords;
   @track activeOnly = false;
-  @track columns = [
-    { label: "Label", fieldName: "masterLabel", type: "text", sortable: true },
-    {
-      label: "API Name",
-      fieldName: "developerNameUrl",
-      type: "url",
-      sortable: true,
-      typeAttributes: {
-        label: { fieldName: "developerName" },
-        target: "_blank"
-      }
-    },
-    {
-      label: "Process Type",
-      fieldName: "processType",
-      type: "text",
-      sortable: true
-    },
-    {
-      label: "Last Modified Date",
-      fieldName: "lastModifiedDate",
-      type: "date",
-      typeAttributes: {
-        year: "numeric",
-        month: "short",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true
-      },
-      sortable: true,
-      cellAttributes: { alignment: "center" }
-    },
-    {
-      label: "Is Active",
-      fieldName: "isActive",
-      type: "boolean",
-      cellAttributes: { alignment: "center" }
-    },
-    {
-      label: "Results",
-      type: "button",
-      typeAttributes: {
-        label: "Details",
-        name: "scan",
-        variant: "base",
-        title: "Click to see scan results"
-      }
-    }
-  ];
   @track displayedRecords = [];
   @track err;
   @track nameSearchTerm = "";
   @track sortedBy = "lastModifiedDate";
   @track sortedDirection = "desc";
+  @track sortIndicators = { lastModifiedDate: "▼" };
   @track typeSearchTerm = "";
 
   set records(value) {
@@ -79,27 +43,25 @@ export default class FlowOverview extends NavigationMixin(LightningElement) {
       } else {
         normalizedIsActive = Boolean(normalizedIsActive);
       }
-      return { ...r, isActive: normalizedIsActive };
+      return {
+        ...r,
+        isActive: normalizedIsActive,
+        lastModifiedFormatted: this._formatDate(r.lastModifiedDate)
+      };
     });
     this.applyFilters();
   }
-  
+
   connectedCallback() {
-    loadStyle(this, datatableHeaderStyles)
-      .catch((error) => {
-        console.error("Error loading datatable header styles:", error);
-        this.err = "Failed to load custom styles for datatable headers.";
-      });
+    loadStyle(this, toolbarStyles).catch((error) => {
+      console.error("Error loading toolbar styles:", error);
+      this.err = "Failed to load custom styles.";
+    });
   }
 
-  handleRowAction(event) {
-    const actionName = event.detail.action.name;
-    const row = event.detail.row;
-    if (actionName === "scan") {
-      this.dispatchEvent(
-        new CustomEvent("scanflow", { detail: { flowId: row.id } })
-      );
-    }
+  handleDetailsClick(event) {
+    const flowId = event.currentTarget.dataset.flowId;
+    this.dispatchEvent(new CustomEvent("scanflow", { detail: { flowId } }));
   }
 
   handleNameKeyUp(event) {
@@ -151,25 +113,37 @@ export default class FlowOverview extends NavigationMixin(LightningElement) {
     this.displayedRecords = filtered;
   }
 
-  handleSort(event) {
-    const { fieldName: sortedBy, sortDirection } = event.detail;
-    this.sortedBy = sortedBy;
-    this.sortedDirection = sortDirection;
+  handleHeaderSort(event) {
+    const field = event.currentTarget.dataset.field;
+    if (!field) return;
+
+    if (this.sortedBy === field) {
+      this.sortedDirection = this.sortedDirection === "asc" ? "desc" : "asc";
+    } else {
+      this.sortedBy = field;
+      this.sortedDirection = "asc";
+    }
+
+    this.sortIndicators = {
+      [field]: this.sortedDirection === "asc" ? "▲" : "▼"
+    };
+
     const clone = [...this.displayedRecords];
-    this._sortArray(clone, sortedBy, sortDirection);
+    this._sortArray(clone, this.sortedBy, this.sortedDirection);
     this.displayedRecords = clone;
   }
 
+  _formatDate(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? "" : DATE_FORMATTER.format(date);
+  }
+
   _sortArray(arr, sortedBy, sortDirection) {
-    const column = this.columns.find((col) => col.fieldName === sortedBy);
-    const type = column ? column.type : "text";
+    const type = FIELD_TYPES[sortedBy] || "text";
     arr.sort((a, b) => {
       let valA = a[sortedBy];
       let valB = b[sortedBy];
-      if (sortedBy === "developerNameUrl") {
-        valA = a.developerName;
-        valB = b.developerName;
-      }
       if (valA === null || valA === undefined) valA = "";
       if (valB === null || valB === undefined) valB = "";
       let cmp = 0;

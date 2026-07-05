@@ -1,16 +1,14 @@
 :host {
     display: block;
-    padding: 0; 
-    background-color: transparent; 
+    padding: 0;
+    background-color: transparent;
 }
 
-lightning-card {
+/* White body joined directly to the blue toolbar above it (no border between) */
+.table-card {
     background-color: #ffffff;
-    border-radius: 0.5rem;
+    border-radius: 0 0 0.5rem 0.5rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    --sds-c-card-header-spacing-block-end: 0;
-    --sds-c-card-body-spacing-block-start: 0;
-    --sds-c-card-header-spacing-block-start: 0;
 }
 
 .toolbar-row {
@@ -20,6 +18,7 @@ lightning-card {
     background-color: #003087;
     color: #ffffff;
     margin-bottom: 0;
+    border-radius: 0.5rem 0.5rem 0 0;
 }
 
 
@@ -91,6 +90,61 @@ lightning-card {
     margin-top: 0;
 }
 
+/* Table — same treatment as the Results tab */
+.full-width-table {
+    width: 100%;
+    margin: 0;
+    border: none;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    font-size: 0.85rem;
+}
+
+.full-width-table thead th {
+    background-color: #003087;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+}
+
+.full-width-table td {
+    padding: 0.6rem 0.75rem;
+    color: #333;
+    border-top: 1px solid #ddd;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.full-width-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.full-width-table tr:hover {
+    background-color: #e6f0ff;
+}
+
+.center-cell {
+    text-align: center;
+}
+
+.details-button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #0070d2;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.details-button:hover {
+    text-decoration: underline;
+}
+
 lightning-button {
     --slds-c-button-brand-color-background: #003087;
     --slds-c-button-brand-color-background-hover: #00205b;
@@ -100,4 +154,20 @@ lightning-button {
 .slds-p-horizontal_small {
     padding-left: 1rem;
     padding-right: 1rem;
+}
+
+/* Footer — match the Results tab styling */
+.footer {
+    background-color: #ffffff;
+    font-size: 0.8rem;
+    color: #555;
+    border-top: 1px solid #ddd;
+    border-radius: 0 0 0.5rem 0.5rem;
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }

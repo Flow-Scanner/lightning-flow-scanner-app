@@ -1,5 +1,5 @@
 <template>
-    <div slot="title" class="slds-grid slds-grid_vertical-align-center slds-p-around_xx-small toolbar-row">
+    <div class="slds-grid slds-grid_vertical-align-center slds-p-around_xx-small toolbar-row">
 
         <!-- Icon -->
         <div class="toolbar-icon">
@@ -29,10 +29,7 @@
                 class="compact-toggle" variant="label-hidden"></lightning-input>
         </div>
     </div>
-    <lightning-card>
-
-
-        <!-- Table & footer remain unchanged -->
+    <div class="table-card">
         <template if:true={err}>
             <p class="slds-p-horizontal_small">Error fetching records: {err}</p>
         </template>
@@ -43,18 +40,49 @@
 
         <template if:true={displayedRecords.length}>
             <div class="custom-datatable">
-                <lightning-datatable key-field="id" data={displayedRecords} columns={columns}
-                    hide-checkbox-column="true" onrowaction={handleRowAction} onsort={handleSort} sorted-by={sortedBy}
-                    sorted-direction={sortedDirection}></lightning-datatable>
+                <table class="slds-table slds-table_cell-buffer full-width-table">
+                    <thead>
+                        <tr>
+                            <th data-field="masterLabel" onclick={handleHeaderSort}>Label {sortIndicators.masterLabel}</th>
+                            <th data-field="developerName" onclick={handleHeaderSort}>API Name {sortIndicators.developerName}</th>
+                            <th data-field="processType" onclick={handleHeaderSort}>Process Type {sortIndicators.processType}</th>
+                            <th data-field="lastModifiedDate" onclick={handleHeaderSort}>Last Modified Date {sortIndicators.lastModifiedDate}</th>
+                            <th data-field="isActive" onclick={handleHeaderSort} class="center-cell">Is Active {sortIndicators.isActive}</th>
+                            <th>Results</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={displayedRecords} for:item="r">
+                            <tr key={r.id}>
+                                <td title={r.masterLabel}>{r.masterLabel}</td>
+                                <td title={r.developerName}>
+                                    <a href={r.developerNameUrl} target="_blank" rel="noopener noreferrer">{r.developerName}</a>
+                                </td>
+                                <td title={r.processType}>{r.processType}</td>
+                                <td class="center-cell">{r.lastModifiedFormatted}</td>
+                                <td class="center-cell">
+                                    <template if:true={r.isActive}>
+                                        <lightning-icon icon-name="utility:check" size="xx-small"
+                                            alternative-text="Active"></lightning-icon>
+                                    </template>
+                                </td>
+                                <td>
+                                    <button class="details-button" data-flow-id={r.id} onclick={handleDetailsClick}
+                                        title="Click to see scan results">Details</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
             </div>
         </template>
 
         <template if:true={hasMoreRecords}>
-            <div slot="footer" class="slds-p-horizontal_small">
+            <div class="slds-p-horizontal_small slds-p-vertical_x-small">
                 <lightning-button label="Load More" variant="brand" onclick={handleLoadMore}></lightning-button>
             </div>
         </template>
-    </lightning-card>
+    </div>
     <!-- Footer -->
     <div class="footer">
         <div class="github-info">
