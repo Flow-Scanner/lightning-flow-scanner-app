@@ -14,6 +14,7 @@
   "packageAliases": {
     "flow-scanner": "0HogK0000000ZFVSA2",
     "flow-scanner@3.0.0-2": "04tgK0000007M73QAE",
-    "flow-scanner@3.2.0-1": "04tgK0000008CLlQAM"
+    "flow-scanner@3.2.0-1": "04tgK0000008CLlQAM",
+    "flow-scanner@3.3.0-1": "04tgK000000E7ODQA0"
   }
 }
