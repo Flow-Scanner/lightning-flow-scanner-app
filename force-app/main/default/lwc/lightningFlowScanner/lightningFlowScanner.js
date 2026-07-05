@@ -78,7 +78,7 @@ export default class LightningFlowScanner extends LightningElement {
 
     // ----- SORTING -----
     handleSort(event) {
-        const field = event.target.dataset.field;
+        const field = event.currentTarget.dataset.field;
         if (!field) return;
 
         if (this.sortField === field) {
@@ -88,20 +88,21 @@ export default class LightningFlowScanner extends LightningElement {
             this.sortDirection = "asc";
         }
 
-        // Update indicators
-        this.sortIndicators = {};
-        this.sortIndicators[field] = this.sortDirection === "asc" ? "▲" : "▼";
+        this.sortIndicators = { [field]: this.sortDirection === "asc" ? "▲" : "▼" };
     }
 
     // ----- FLATTENED VIOLATIONS -----
     get flattenedViolations() {
         let violations = [];
 
-        const processRuleDetails = (rule, ruleIndex, flowName) => {
+        // flowKey keeps row keys unique across flows in all-mode — detail.id values
+        // (e.g. "res-0-0") repeat per flow, and duplicate for:each keys break LWC's
+        // list diffing when a sort reorders the rows.
+        const processRuleDetails = (rule, ruleIndex, flowName, flowKey) => {
             if (!rule.details) return;
             rule.details.forEach((detail, detailIndex) => {
                 violations.push({
-                    id: detail.id || `flow-${flowName}-rule-${ruleIndex}-detail-${detailIndex}`,
+                    id: `flow-${flowKey}-rule-${ruleIndex}-detail-${detailIndex}`,
                     flowName: flowName,
                     ruleName: rule.ruleName,
                     severity: rule.severity,
@@ -121,7 +122,7 @@ export default class LightningFlowScanner extends LightningElement {
             this.allScanResults.forEach((item, itemIndex) => {
                 const flowName = item.flowName;
                 item.scanResult?.ruleResults?.forEach((rule, ruleIndex) =>
-                    processRuleDetails(rule, ruleIndex, flowName)
+                    processRuleDetails(rule, ruleIndex, flowName, itemIndex)
                 );
             });
         } else {
@@ -132,7 +133,7 @@ export default class LightningFlowScanner extends LightningElement {
                         this.selectedFlowRecord.developerName)) ||
                 "";
             this.scanResult?.ruleResults?.forEach((rule, ruleIndex) =>
-                processRuleDetails(rule, ruleIndex, flowName)
+                processRuleDetails(rule, ruleIndex, flowName, "single")
             );
         }
 
