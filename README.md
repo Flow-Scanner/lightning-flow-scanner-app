@@ -81,9 +81,9 @@ While no configuration is required, Admins can define **default severities**, **
 
 | Deployment Type | Installation |
 |-----------------|----------------|
-| [**AppExchange(managed)**](https://appexchange.salesforce.com/appxListingDetail?listingId=80d6caf3-d4a8-41ec-b48e-da1fe3457e98) | <a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK0000008CLlQAM"><img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
+| [**AppExchange(managed)**](https://appexchange.salesforce.com/appxListingDetail?listingId=80d6caf3-d4a8-41ec-b48e-da1fe3457e98) | <a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK000000E7ODQA0"><img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
 | **Unmanaged** | <a href="https://githubsfdeploy.herokuapp.com?owner=Flow-Scanner&repo=lightning-flow-scanner-app&ref=main"><img alt="Install Unmanaged Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
-| **Or via CLI** | `sf package install --package 04tgK0000008CLlQAM --wait 10` |
+| **Or via CLI** | `sf package install --package 04tgK000000E7ODQA0 --wait 10` |
 
 > After installation, complete the [Post-Installation Setup](docs/installation.md) to configure the External Client App and assign permissions.
 
