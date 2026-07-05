@@ -44,7 +44,7 @@ public with sharing class ToolingAPI {
     @TestVisible
     private static String getProductionAccessToken() {
         if (!Schema.sObjectType.Flow_Scanner_OAuth_Config_Protected__mdt.fields.Consumer_Key__c.isAccessible()) {
-            throw new AuraHandledException('Insufficient permissions to access OAuth configuration');
+            throw auraError('Insufficient permissions to access OAuth configuration');
         }
         
         List<Flow_Scanner_OAuth_Config_Protected__mdt> cfgs = [
@@ -55,7 +55,7 @@ public with sharing class ToolingAPI {
         ];
         
         if (cfgs.isEmpty() || String.isBlank(cfgs[0].Consumer_Key__c)) {
-            throw new AuraHandledException(
+            throw auraError(
                 'OAuth configuration not found. Please set the Consumer Key in Flow Scanner OAuth Config (Default).'
             );
         }
@@ -88,13 +88,21 @@ public with sharing class ToolingAPI {
         
         HttpResponse res = new Http().send(req);
         if (res.getStatusCode() != 200) {
-            throw new AuraHandledException('OAuth authentication failed: ' + res.getBody());
+            throw auraError('OAuth authentication failed: ' + res.getBody());
         }
         
         Map<String, Object> json = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
         return (String) json.get('access_token');
     }
     
+    // AuraHandledException only carries its message to the client; getMessage() in Apex
+    // returns 'Script-thrown exception' unless setMessage is also called.
+    private static AuraHandledException auraError(String message) {
+        AuraHandledException e = new AuraHandledException(message);
+        e.setMessage(message);
+        return e;
+    }
+
     @TestVisible
     private static String getAudience() {
         String domain = URL.getOrgDomainUrl().toExternalForm();
@@ -117,7 +125,7 @@ public with sharing class ToolingAPI {
         
         HttpResponse res = new Http().send(req);
         if (res.getStatusCode() != 200) {
-            throw new AuraHandledException('Tooling API Error: ' + res.getStatusCode() + ' - ' + res.getBody());
+            throw auraError('Tooling API Error: ' + res.getStatusCode() + ' - ' + res.getBody());
         }
         
         return parseQueryResponse(res.getBody());
