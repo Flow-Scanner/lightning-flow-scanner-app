@@ -10,8 +10,68 @@ export default class scanConfigurator extends LightningElement {
         { label: 'Note', value: 'note' }
     ];
 
+    @track searchTerm = '';
+    @track showBeta = true;
+    @track sortedBy = null;
+    @track sortedDirection = 'asc';
+    @track sortIndicators = {};
+
     connectedCallback() {
         this.localRules = this.rules ? JSON.parse(JSON.stringify(this.rules)) : [];
+    }
+
+    get displayedRules() {
+        let rules = this.localRules;
+
+        if (!this.showBeta) {
+            rules = rules.filter(rule => !rule.isBeta);
+        }
+
+        if (this.searchTerm) {
+            const term = this.searchTerm.toLowerCase();
+            rules = rules.filter(
+                rule =>
+                    (rule.name || '').toLowerCase().includes(term) ||
+                    (rule.description || '').toLowerCase().includes(term)
+            );
+        }
+
+        if (this.sortedBy) {
+            const dir = this.sortedDirection === 'asc' ? 1 : -1;
+            const field = this.sortedBy;
+            rules = [...rules].sort((a, b) => {
+                if (field === 'isActive') {
+                    return (Boolean(a.isActive) === Boolean(b.isActive) ? 0 : a.isActive ? 1 : -1) * dir;
+                }
+                const valA = String(a[field] ?? '');
+                const valB = String(b[field] ?? '');
+                return valA.localeCompare(valB, 'en', { sensitivity: 'base' }) * dir;
+            });
+        }
+
+        return rules;
+    }
+
+    handleSearchKeyUp(event) {
+        this.searchTerm = event.target.value || '';
+    }
+
+    handleBetaToggle(event) {
+        this.showBeta = event.target.checked;
+    }
+
+    handleHeaderSort(event) {
+        const field = event.currentTarget.dataset.field;
+        if (!field) return;
+
+        if (this.sortedBy === field) {
+            this.sortedDirection = this.sortedDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.sortedBy = field;
+            this.sortedDirection = 'asc';
+        }
+
+        this.sortIndicators = { [field]: this.sortedDirection === 'asc' ? '▲' : '▼' };
     }
 
     get allRulesDisabled() {
