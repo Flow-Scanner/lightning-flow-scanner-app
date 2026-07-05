@@ -9,7 +9,7 @@ global class LFSSetup {
     
     /**
      * @description Configures the OAuth Consumer Key for Flow Scanner API access
-     * @param consumerKey The Consumer Key from your Connected App
+     * @param consumerKey The Consumer Key from your External Client App (or legacy Connected App)
      * @return Metadata deployment Job ID
      */
     global static Id configure(String consumerKey) {
@@ -39,6 +39,13 @@ global class LFSSetup {
             field.field = prefix + 'Consumer_Key__c';
             field.value = consumerKey;
             cmd.values.add(field);
+
+            // Stamped in the same deployment so callers can detect when an
+            // update to an already-configured key has actually been applied.
+            Metadata.CustomMetadataValue updatedAt = new Metadata.CustomMetadataValue();
+            updatedAt.field = prefix + 'Last_Updated__c';
+            updatedAt.value = Datetime.now();
+            cmd.values.add(updatedAt);
             
             Id jobId = deployer.deploy(cmd);
             return jobId;

@@ -1,0 +1,106 @@
+<template>
+    <div class="slds-p-around_medium slds-is-relative">
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading setup status" size="medium"></lightning-spinner>
+        </template>
+
+        <template if:true={status}>
+            <div class="slds-text-heading_medium slds-m-bottom_x-small">Connect Flow Scanner to the Tooling API</div>
+            <p class="slds-m-bottom_medium slds-text-color_weak">
+                One-time setup so Flow Scanner can read flow metadata via JWT authentication.
+                Full instructions:&nbsp;
+                <a href="https://github.com/Flow-Scanner/lightning-flow-scanner-app/blob/main/docs/installation.md"
+                    target="_blank" rel="noopener noreferrer">installation guide</a>.
+            </p>
+
+            <template if:false={status.isAdmin}>
+                <div class="slds-scoped-notification slds-media slds-media_center slds-theme_info slds-m-bottom_medium" role="status">
+                    <div class="slds-media__figure">
+                        <lightning-icon icon-name="utility:info" size="small" variant="inverse"></lightning-icon>
+                    </div>
+                    <div class="slds-media__body">
+                        Completing this setup requires the Customize Application permission.
+                        Ask your Salesforce admin to open this tab and finish the steps below.
+                    </div>
+                </div>
+            </template>
+
+            <ul class="slds-has-dividers_bottom-space">
+                <!-- Step 1: permission set -->
+                <li class="slds-item slds-grid slds-grid_vertical-align-center">
+                    <lightning-icon icon-name={permSetIcon} variant={permSetVariant} size="small"
+                        class="slds-m-right_small"></lightning-icon>
+                    <div class="slds-col">
+                        <div class="slds-text-title_bold">Assign the Flow Scanner permission set</div>
+                        <div class="slds-text-color_weak">{permSetHelp}</div>
+                    </div>
+                    <a href="/lightning/setup/PermSets/home" target="_blank" rel="noopener noreferrer"
+                        class="slds-button slds-button_neutral">Open Permission Sets</a>
+                </li>
+
+                <!-- Step 2: certificate -->
+                <li class="slds-item slds-grid slds-grid_vertical-align-center">
+                    <lightning-icon icon-name={certIcon} variant={certVariant} size="small"
+                        class="slds-m-right_small"></lightning-icon>
+                    <div class="slds-col">
+                        <div class="slds-text-title_bold">Create the signing certificate</div>
+                        <div class="slds-text-color_weak">
+                            Self-signed certificate with Unique Name <code>Flow_Scanner</code> (exactly),
+                            then upload its .crt file to your External Client App.
+                        </div>
+                    </div>
+                    <a href="/lightning/setup/CertificatesAndKeysManagement/home" target="_blank"
+                        rel="noopener noreferrer" class="slds-button slds-button_neutral">Open Certificates</a>
+                </li>
+
+                <!-- Step 3: external client app + consumer key -->
+                <li class="slds-item slds-grid slds-grid_vertical-align-center">
+                    <lightning-icon icon-name={keyIcon} variant={keyVariant} size="small"
+                        class="slds-m-right_small"></lightning-icon>
+                    <div class="slds-col">
+                        <div class="slds-text-title_bold">Create the External Client App and store its Consumer Key</div>
+                        <div class="slds-text-color_weak">
+                            Create an External Client App with JWT Bearer Flow enabled, copy its Consumer Key,
+                            and save it below. It is stored in protected custom metadata.
+                        </div>
+                    </div>
+                    <a href="/lightning/setup/ManageExternalClientApplication/home" target="_blank"
+                        rel="noopener noreferrer" class="slds-button slds-button_neutral">Open External Client Apps</a>
+                </li>
+            </ul>
+
+            <template if:true={status.isAdmin}>
+                <div class="slds-form-element slds-m-top_medium">
+                    <div class="slds-grid slds-gutters_x-small slds-grid_vertical-align-end">
+                        <div class="slds-col slds-size_2-of-3">
+                            <lightning-input type="password" label="Consumer Key" value={consumerKey}
+                                placeholder="3MVG…" onchange={handleKeyChange}
+                                disabled={isSaving}></lightning-input>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-button variant="brand" label={saveButtonLabel} onclick={handleSave}
+                                disabled={saveDisabled}></lightning-button>
+                            <lightning-button class="slds-m-left_x-small" label="Test Connection"
+                                onclick={handleTestConnection} disabled={testDisabled}></lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={connectionResult}>
+                <div class={connectionResultClass} role="status">
+                    <div class="slds-media__figure">
+                        <lightning-icon icon-name={connectionResultIcon} size="small" variant="inverse"></lightning-icon>
+                    </div>
+                    <div class="slds-media__body">{connectionResult.message}</div>
+                </div>
+            </template>
+        </template>
+
+        <template if:true={loadError}>
+            <div class="slds-scoped-notification slds-media slds-media_center slds-theme_error" role="alert">
+                <div class="slds-media__body">{loadError}</div>
+            </div>
+        </template>
+    </div>
+</template>
