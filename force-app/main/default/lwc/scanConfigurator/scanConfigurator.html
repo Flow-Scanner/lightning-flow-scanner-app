@@ -1,13 +1,38 @@
 <template>
-    <lightning-card>
+    <div class="slds-grid slds-grid_vertical-align-center slds-p-around_xx-small toolbar-row">
+
+        <!-- Icon -->
+        <div class="toolbar-icon">
+            <lightning-icon icon-name="standard:settings" size="small"></lightning-icon>
+        </div>
+
+        <!-- Title -->
+        <div class="toolbar-title slds-p-left_x-small">
+            <h2 class="slds-text-heading_small slds-truncate">Configuration</h2>
+        </div>
+
+        <!-- Rule search -->
+        <div class="toolbar-item slds-p-left_x-small">
+            <lightning-input type="search" placeholder="Rule Name" onkeyup={handleSearchKeyUp} variant="label-hidden"
+                class="compact-input"></lightning-input>
+        </div>
+
+        <!-- Beta rules toggle -->
+        <div class="toolbar-item slds-p-left_x-small slds-align-middle">
+            <lightning-input type="toggle" label="Beta" checked={showBeta} onchange={handleBetaToggle}
+                message-toggle-active="Beta shown" message-toggle-inactive="Beta hidden" class="compact-toggle"
+                variant="label-hidden"></lightning-input>
+        </div>
+    </div>
+    <div class="table-card">
       <template if:true={rules}>
-        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+        <table class="slds-table slds-table_cell-buffer">
           <thead>
             <tr>
-              <th>Active</th>
-              <th>Rule Name</th>
-              <th>Description</th>
-              <th>Severity</th>
+              <th data-field="isActive" onclick={handleHeaderSort}>Active {sortIndicators.isActive}</th>
+              <th data-field="name" onclick={handleHeaderSort}>Rule Name {sortIndicators.name}</th>
+              <th data-field="description" onclick={handleHeaderSort}>Description {sortIndicators.description}</th>
+              <th data-field="severity" onclick={handleHeaderSort}>Severity {sortIndicators.severity}</th>
             </tr>
           </thead>
           <tbody>
@@ -22,7 +47,7 @@
                 ></lightning-input>
               </td>
             </tr>
-            <template for:each={rules} for:item="rule">
+            <template for:each={displayedRules} for:item="rule">
               <tr key={rule.id}>
                 <td>
                   <lightning-input
@@ -32,7 +57,12 @@
                     onchange={handleRuleToggle}
                   ></lightning-input>
                 </td>
-                <td>{rule.name}</td>
+                <td>
+                  {rule.name}
+                  <template if:true={rule.isBeta}>
+                    <span class="beta-badge" title="Beta rule — disabled by default; results may change between releases">Beta</span>
+                  </template>
+                </td>
                 <td class="wrap-text">{rule.description}</td>
                 <td>
                   <lightning-combobox
@@ -53,7 +83,7 @@
           No rules available.
         </p>
       </template>
-    </lightning-card>
+    </div>
      <div class="footer">
             <div class="github-info">
                 Want to help improve&nbsp;
