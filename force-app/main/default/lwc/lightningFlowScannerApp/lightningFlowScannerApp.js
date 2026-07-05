@@ -22,16 +22,20 @@ export default class LightningFlowScannerApp extends LightningElement {
     @track currentFlowIndex = 0;
     @track isScanningAll = false;
     @track searchKey = '';
+    @track setupNeeded = false;
 
     scriptLoaded = false;
+    autoSwitchedToSetup = false;
 
     /* ────────────────────── GETTERS ────────────────────── */
     get isTab1Active() { return this.activeTab === 1; }
     get isTab2Active() { return this.activeTab === 2; }
     get isTab3Active() { return this.activeTab === 3; }
+    get isTab4Active() { return this.activeTab === 4; }
     get FlowsClass()   { return this.activeTab === 1 ? 'slds-active' : ''; }
     get AnalysisClass(){ return this.activeTab === 2 ? 'slds-active' : ''; }
     get ConfigClass()  { return this.activeTab === 3 ? 'slds-active' : ''; }
+    get SetupClass()   { return this.activeTab === 4 ? 'slds-active' : ''; }
 
     /* ────────────────────── LIFECYCLE ────────────────────── */
     async connectedCallback() {
@@ -57,14 +61,30 @@ export default class LightningFlowScannerApp extends LightningElement {
 
     /* ────────────────────── DEFAULT RULES FROM SCANNER ────────────────────── */
     loadDefaultRules() {
-        this.rules = window.lightningflowscanner.getRules().map((r, i) => ({
-            id: `rule-${i}`,
-            name: r.name,
-            description: r.description,
-            severity: r.severity,
-            category: r.category,
-            isActive: true
-        }));
+        const scanner = window.lightningflowscanner;
+        let allRules;
+        let stableNames;
+        try {
+            allRules = scanner.getRules(undefined, { betaMode: true });
+            stableNames = new Set(scanner.getRules().map(r => r.name));
+        } catch (e) {
+            // Older core bundles don't take options — no beta rules available
+            allRules = scanner.getRules();
+            stableNames = new Set(allRules.map(r => r.name));
+        }
+        this.rules = allRules.map((r, i) => {
+            const isBeta = !stableNames.has(r.name);
+            return {
+                id: `rule-${i}`,
+                name: r.name,
+                description: r.description,
+                severity: r.severity,
+                category: r.category,
+                isBeta,
+                // Beta rules are optional: off until explicitly enabled
+                isActive: !isBeta
+            };
+        });
         this.buildRulesConfig();
     }
 
@@ -119,8 +139,23 @@ export default class LightningFlowScannerApp extends LightningElement {
             }));
         } catch (e) {
             this.err = e.body?.message || e.message;
+            this.handleAuthError(this.err);
         } finally {
             this.isLoading = false;
+        }
+    }
+
+    // First-run experience: when the Tooling API rejects us because setup is
+    // incomplete, land the user on the Setup tab instead of an error.
+    handleAuthError(message) {
+        const authIssue = /OAuth configuration not found|OAuth authentication failed|Insufficient permissions to access OAuth configuration/i
+            .test(message || '');
+        if (authIssue) {
+            this.setupNeeded = true;
+            if (!this.autoSwitchedToSetup) {
+                this.autoSwitchedToSetup = true;
+                this.activeTab = 4;
+            }
         }
     }
 
@@ -166,6 +201,9 @@ export default class LightningFlowScannerApp extends LightningElement {
     prepareScanOptions() {
         const raw = JSON.parse(JSON.stringify(this.rulesConfig));
         return {
+            // Let beta rules participate when enabled; disabled rules are
+            // excluded from the config and filtered out of results either way.
+            betaMode: true,
             rules: Object.fromEntries(
                 Object.entries(raw.rules).filter(([,c]) => !c.disabled)
             )

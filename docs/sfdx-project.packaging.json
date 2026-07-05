@@ -2,9 +2,9 @@
   "packageDirectories": [
     {
       "package": "flow-scanner",
-      "versionName": "v3.2",
-      "versionNumber": "3.2.0.NEXT",
-      "versionDescription": "Added ruleMode support and updated rule loading",
+      "versionName": "v3.3",
+      "versionNumber": "3.3.0.NEXT",
+      "versionDescription": "Updated bundled core package and migrated setup from Connected App to External Client App",
       "ancestorVersion": "HIGHEST"
     }
   ],
