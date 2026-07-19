@@ -30,7 +30,8 @@
                     onnavigateflow={handleNavigateFlow}></c-lightning-flow-scanner>
             </template>
             <template if:true={isTab3Active}>
-                <c-scan-configurator rules={rules} onrulechange={handleRuleChange}></c-scan-configurator>
+                <c-scan-configurator rules={rules} onrulechange={handleRuleChange}
+                    onconfigimport={handleConfigImport}></c-scan-configurator>
             </template>
             <template if:true={isTab4Active}>
                 <template if:true={setupNeeded}>
