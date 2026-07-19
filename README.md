@@ -59,12 +59,16 @@ For details about all available rules, their default severities, and configurati
 
 ## Configuration
 
-While no configuration is required, Admins can define **default severities**, **expressions**, or **disabled states** for scan rules using the `ScanRuleConfiguration__mdt` custom metadata type. These overrides apply globally for all users in the org, but individual users can still adjust severities or disable rules locally in the browser — those changes only persist for their current session. For a more on configurations, review the [documentation](https://flow-scanner.github.io/lightning-flow-scanner/#configurations).
+While no configuration is required, you can configure rules in three ways. Session and imported settings apply for the current browser session only. For full config reference, see the [documentation](https://flow-scanner.github.io/lightning-flow-scanner/#configurations).
+
+### Org defaults (Custom Metadata)
+
+Admins can define **default severities**, **expressions**, or **disabled states** for scan rules using the `ScanRuleConfiguration__mdt` custom metadata type. These overrides apply globally for all users in the org; individual users can still adjust severities or disable rules locally in the browser.
 
 1. Go to **Setup → Custom Metadata Types → ScanRuleConfiguration → Manage Records**
 2. Click **New** and set the following fields:
 
-- **Rule Name** — must match the rule’s API name (e.g., `FlowName`)
+- **Rule Name** — legacy name (e.g. `FlowName`) or canonical rule id (e.g. `invalid-naming-convention`)
 - **Severity** — `Error`, `Warning`, `Info`, or `Note`
 - **Expression** *(optional)* — e.g., `[A-Za-z]+_[0-9]+`
 - **Disabled** — check to turn off the rule globally
@@ -74,6 +78,32 @@ While no configuration is required, Admins can define **default severities**, **
 <p align="center">
  <img src="media/overrides.jpg" alt="Rule Override" width="68%" />
 </p>
+
+### Import JSON (same format as CLI / VS Code)
+
+On the **Configuration** tab, use **Load JSON config** to import a `.flow-scanner.json` file (or any JSON using the same schema the CLI and VS Code extension read). Supported:
+
+- Per-rule `severity`, `enabled` / `disabled`, `expression`, `threshold`, `message`, `messageUrl`
+- Rule keys as **rule ids** (`excessive-cyclomatic-complexity`) or **legacy names** (`CyclomaticComplexity`)
+- Top-level `threshold`, `categories`, `exceptions`, `ignoreFlows`, and related scan options
+
+Example:
+
+```json
+{
+  "rules": {
+    "excessive-cyclomatic-complexity": { "threshold": 30, "severity": "warning" },
+    "cognitive-complexity": { "threshold": 15 },
+    "invalid-api-version": { "expression": ">=58" },
+    "invalid-naming-convention": { "expression": "[A-Za-z0-9_]+" },
+    "hardcoded-id": { "enabled": false }
+  },
+  "threshold": "warning",
+  "categories": ["problem", "suggestion"]
+}
+```
+
+Imported values feed the in-browser scan immediately (and re-scan if results are already open). They do not write back to Custom Metadata.
 
 ---
 

@@ -23,7 +23,20 @@
                 message-toggle-active="Beta shown" message-toggle-inactive="Beta hidden" class="compact-toggle"
                 variant="label-hidden"></lightning-input>
         </div>
+
+        <!-- Load a JSON config (same shape as CLI / VS Code .flow-scanner.json) -->
+        <div class="toolbar-item slds-p-left_x-small slds-align-middle import-file">
+            <lightning-input type="file" label="Load JSON config" accept=".json,application/json"
+                variant="label-hidden" onchange={handleConfigFile} class="compact-input"
+                title="Load .flow-scanner.json (same format as CLI and VS Code)"></lightning-input>
+        </div>
     </div>
+
+    <template if:true={importMessage}>
+        <div class="slds-p-horizontal_small slds-p-bottom_x-small" role="status">
+            <span class={importMessageClass}>{importMessage}</span>
+        </div>
+    </template>
     <div class="table-card">
       <template if:true={rules}>
         <table class="slds-table slds-table_cell-buffer">

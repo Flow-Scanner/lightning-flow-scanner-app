@@ -6,6 +6,20 @@ import getFlowDefinitions from '@salesforce/apex/LightningFlowScannerController.
 import getFlowMetadata    from '@salesforce/apex/LightningFlowScannerController.getFlowMetadata';
 import getMDTRules        from '@salesforce/apex/LightningFlowScannerController.getMDTRules';
 
+// Top-level keys accepted from CLI / VS Code style config files.
+const SCAN_META_KEYS = [
+    'threshold',
+    'categories',
+    'exceptions',
+    'ignoreFlows',
+    'ruleMode',
+    'systemRules',
+    'detailLevel'
+];
+
+// Per-rule keys that control enablement / severity UI rather than rule options.
+const RULE_CONTROL_KEYS = new Set(['severity', 'disabled', 'enabled']);
+
 export default class LightningFlowScannerApp extends LightningElement {
     @track activeTab = 1;
     @track records = [];
@@ -18,6 +32,11 @@ export default class LightningFlowScannerApp extends LightningElement {
     @track numberOfRules = 0;
     @track rules = [];
     @track rulesConfig = { rules: {} };
+    // Per-rule options beyond severity/active (e.g. expression, threshold),
+    // sourced from Custom Metadata or an imported JSON config. Keyed by ruleId.
+    @track ruleOptions = {};
+    // Top-level scan options from imported JSON (threshold, categories, …).
+    @track scanMeta = {};
     @track isLoading = false;
     @track currentFlowIndex = 0;
     @track isScanningAll = false;
@@ -63,20 +82,24 @@ export default class LightningFlowScannerApp extends LightningElement {
     loadDefaultRules() {
         const scanner = window.lightningflowscanner;
         let allRules;
-        let stableNames;
+        let stableIds;
         try {
             allRules = scanner.getRules(undefined, { betaMode: true });
-            stableNames = new Set(scanner.getRules().map(r => r.name));
+            stableIds = new Set(scanner.getRules().map(r => r.ruleId || r.name));
         } catch (e) {
             // Older core bundles don't take options — no beta rules available
             allRules = scanner.getRules();
-            stableNames = new Set(allRules.map(r => r.name));
+            stableIds = new Set(allRules.map(r => r.ruleId || r.name));
         }
         this.rules = allRules.map((r, i) => {
-            const isBeta = !stableNames.has(r.name);
+            const ruleId = r.ruleId || r.name;
+            const isBeta = !stableIds.has(ruleId);
             return {
                 id: `rule-${i}`,
-                name: r.name,
+                // Legacy PascalCase name (MDT / older configs); also used in the table.
+                name: r.name || ruleId,
+                // Canonical id used by CLI / VS Code JSON configs.
+                ruleId,
                 description: r.description,
                 severity: r.severity,
                 category: r.category,
@@ -93,16 +116,16 @@ export default class LightningFlowScannerApp extends LightningElement {
         try {
             const mdtRows = await getMDTRules();
             mdtRows.forEach(m => {
-                const ruleName = m.ruleName;
-                const ui = this.rules.find(r => r.name === ruleName);
-                if (ui) {
-                    if (m.severity)   ui.severity  = m.severity.toLowerCase();
-                    if (m.disabled != null) ui.isActive = !m.disabled;
+                const rule = this.findRule(m.ruleName);
+                if (rule) {
+                    if (m.severity) rule.severity = m.severity.toLowerCase();
+                    if (m.disabled != null) rule.isActive = !m.disabled;
                 }
-                if (!this.rulesConfig.rules[ruleName]) this.rulesConfig.rules[ruleName] = {};
-                if (m.severity)   this.rulesConfig.rules[ruleName].severity   = m.severity.toLowerCase();
-                if (m.expression) this.rulesConfig.rules[ruleName].expression = m.expression;
-                if (m.disabled != null) this.rulesConfig.rules[ruleName].disabled = m.disabled;
+                // Persist expression into ruleOptions so buildRulesConfig() carries it
+                // through to the scan instead of discarding it on rebuild.
+                if (m.expression) {
+                    this.setRuleOption(m.ruleName, 'expression', m.expression);
+                }
             });
             this.rules = [...this.rules];           // force UI refresh
             this.buildRulesConfig();
@@ -112,14 +135,118 @@ export default class LightningFlowScannerApp extends LightningElement {
         }
     }
 
+    // Match either canonical ruleId (kebab-case) or legacy name (PascalCase).
+    findRule(identifier) {
+        if (!identifier) return undefined;
+        return this.rules.find(
+            r => r.ruleId === identifier || r.name === identifier
+        );
+    }
+
+    // Canonical storage key for per-rule options (prefer ruleId).
+    optionKeyFor(identifier) {
+        const rule = this.findRule(identifier);
+        return rule?.ruleId || identifier;
+    }
+
     buildRulesConfig() {
         const cfg = { rules: {} };
         this.rules.forEach(r => {
-            cfg.rules[r.name] = r.isActive
-                ? { severity: r.severity }
-                : { severity: r.severity, disabled: true };
+            const key = r.ruleId || r.name;
+            const opts =
+                this.ruleOptions[r.ruleId] ||
+                this.ruleOptions[r.name] ||
+                {};
+            cfg.rules[key] = r.isActive
+                ? { severity: r.severity, ...opts }
+                : { severity: r.severity, ...opts, disabled: true };
         });
         this.rulesConfig = cfg;
+    }
+
+    // Store a single per-rule option immutably so @track picks up the change.
+    setRuleOption(identifier, key, value) {
+        const storageKey = this.optionKeyFor(identifier);
+        this.ruleOptions = {
+            ...this.ruleOptions,
+            [storageKey]: { ...this.ruleOptions[storageKey], [key]: value }
+        };
+    }
+
+    /* ────────────────────── JSON CONFIG IMPORT ────────────────────── */
+    // Accepts a config in the same shape the CLI / VS Code extension read, e.g.
+    // {
+    //   "rules": {
+    //     "excessive-cyclomatic-complexity": { "threshold": 30 },
+    //     "CyclomaticComplexity": { "severity": "error" }   // legacy name also ok
+    //   },
+    //   "threshold": "error",
+    //   "categories": ["problem"],
+    //   "exceptions": { ... }
+    // }
+    // A bare rules map (without the top-level "rules" key) is also tolerated.
+    async handleConfigImport(event) {
+        const config = event.detail.config;
+        if (!config || typeof config !== 'object') return;
+
+        const hasRulesKey =
+            Object.prototype.hasOwnProperty.call(config, 'rules') &&
+            config.rules !== null &&
+            typeof config.rules === 'object' &&
+            !Array.isArray(config.rules);
+
+        const rulesMap = hasRulesKey ? config.rules : this.isBareRulesMap(config) ? config : null;
+
+        // Top-level scan options (only when using full document shape).
+        if (hasRulesKey || !rulesMap) {
+            const meta = { ...this.scanMeta };
+            SCAN_META_KEYS.forEach(k => {
+                if (config[k] !== undefined) meta[k] = config[k];
+            });
+            this.scanMeta = meta;
+        }
+
+        if (rulesMap) {
+            Object.entries(rulesMap).forEach(([identifier, raw]) => {
+                const ruleCfg = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+                const ui = this.findRule(identifier);
+                if (ui) {
+                    if (ruleCfg.severity) {
+                        ui.severity = String(ruleCfg.severity).toLowerCase();
+                    }
+                    if (ruleCfg.disabled === true || ruleCfg.enabled === false) {
+                        ui.isActive = false;
+                    } else if (ruleCfg.disabled === false || ruleCfg.enabled === true) {
+                        ui.isActive = true;
+                    }
+                }
+                // Carry every remaining field (expression, threshold, message, …)
+                // into the scan under the canonical ruleId key.
+                Object.entries(ruleCfg).forEach(([key, value]) => {
+                    if (RULE_CONTROL_KEYS.has(key)) return;
+                    this.setRuleOption(identifier, key, value);
+                });
+            });
+        }
+
+        this.rules = [...this.rules]; // force UI refresh
+        this.buildRulesConfig();
+        if (this.allScanResults.length) await this.scanAllFlows();
+        else if (this.selectedFlowRecord) await this.scanCurrentFlow();
+    }
+
+    // Heuristic: object whose values look like rule configs (not a full document).
+    isBareRulesMap(obj) {
+        if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
+        // If it only has top-level meta keys, it's not a bare rules map.
+        const keys = Object.keys(obj);
+        if (keys.length === 0) return false;
+        if (keys.every(k => SCAN_META_KEYS.includes(k))) return false;
+        // At least one value should be a plain object or boolean-ish disable flag.
+        return keys.some(k => {
+            const v = obj[k];
+            return v && typeof v === 'object' && !Array.isArray(v);
+        });
     }
 
     /* ────────────────────── FLOWS ────────────────────── */
@@ -184,7 +311,7 @@ export default class LightningFlowScannerApp extends LightningElement {
         this.isLoading = true;
         try {
             const opts = this.prepareScanOptions();
-            this.numberOfRules = Object.keys(opts.rules).length;
+            this.numberOfRules = Object.keys(opts.rules || {}).length;
 
             const flow = new window.lightningflowscanner.Flow(this.flowName, this.flowMetadata);
             const uri = `/services/data/v62.0/tooling/sobjects/Flow/${this.selectedFlowRecord.versionId}`;
@@ -200,25 +327,44 @@ export default class LightningFlowScannerApp extends LightningElement {
 
     prepareScanOptions() {
         const raw = JSON.parse(JSON.stringify(this.rulesConfig));
+        const rules = Object.fromEntries(
+            Object.entries(raw.rules || {}).filter(([, c]) => !c.disabled)
+        );
+        // Strip the app-only `disabled` flag; core uses `enabled: false` and we
+        // already filter disabled rules out so they never reach the engine.
+        Object.values(rules).forEach(c => {
+            if (c && typeof c === 'object') delete c.disabled;
+        });
         return {
             // Let beta rules participate when enabled; disabled rules are
             // excluded from the config and filtered out of results either way.
             betaMode: true,
-            rules: Object.fromEntries(
-                Object.entries(raw.rules).filter(([,c]) => !c.disabled)
-            )
+            ...this.scanMeta,
+            rules
         };
     }
 
     postProcessScanResult(res, opts) {
         if (!res?.ruleResults) return res;
-        const activeNames = Object.keys(opts.rules);
+        const activeNames = new Set(Object.keys(opts.rules || {}));
+        // Also accept matches by legacy name / ruleId on the result.
+        const isActive = (ruleName) => {
+            if (activeNames.has(ruleName)) return true;
+            const rule = this.findRule(ruleName);
+            if (!rule) return false;
+            return activeNames.has(rule.ruleId) || activeNames.has(rule.name);
+        };
         return {
             ...res,
             ruleResults: res.ruleResults
-                .filter(r => r.ruleName && activeNames.includes(r.ruleName))
+                .filter(r => r.ruleName && isActive(r.ruleName))
                 .map((r, i) => {
-                    const ov = opts.rules[r.ruleName];
+                    const ov =
+                        opts.rules[r.ruleName] ||
+                        (this.findRule(r.ruleName)
+                            ? opts.rules[this.findRule(r.ruleName).ruleId] ||
+                              opts.rules[this.findRule(r.ruleName).name]
+                            : undefined);
                     return {
                         ...r,
                         severity: ov?.severity ?? r.severity,
@@ -240,9 +386,9 @@ export default class LightningFlowScannerApp extends LightningElement {
         this.allScanResults = [];
         try {
             const opts = this.prepareScanOptions();
-            this.numberOfRules = Object.keys(opts.rules).length;
+            this.numberOfRules = Object.keys(opts.rules || {}).length;
 
-            const promises = this.records.map(async (rec, i) => {
+            const promises = this.records.map(async (rec) => {
                 try {
                     const meta = await getFlowMetadata({ versionId: rec.versionId });
                     const flow = new window.lightningflowscanner.Flow(meta.fullName, meta.metadata);
@@ -273,7 +419,7 @@ export default class LightningFlowScannerApp extends LightningElement {
         this.selectedFlowRecord = rec;
         this.allScanResults = [];
         this.currentFlowIndex = this.records.indexOf(rec);
-        this.loadFlowMetadata(rec).then(() => this.activeTab = 2);
+        this.loadFlowMetadata(rec).then(() => { this.activeTab = 2; });
     }
 
     handleTabClick(event) {
@@ -306,7 +452,7 @@ export default class LightningFlowScannerApp extends LightningElement {
             this.currentFlowIndex = idx;
             this.selectedFlowRecord = this.records[idx];
             this.allScanResults = [];
-            this.loadFlowMetadata(this.selectedFlowRecord).then(() => this.activeTab = 2);
+            this.loadFlowMetadata(this.selectedFlowRecord).then(() => { this.activeTab = 2; });
         }
     }
 }

@@ -154,3 +154,18 @@
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+/* JSON config file picker sits in the toolbar */
+.import-file {
+  min-width: 10rem;
+}
+
+/* Import config feedback message */
+.import-msg {
+  font-size: 0.8rem;
+}
+.import-msg_success {
+  color: #2e7d32;
+}
+.import-msg_error {
+  color: #c62828;
+}
