@@ -31,7 +31,13 @@
             </template>
             <template if:true={isTab3Active}>
                 <c-scan-configurator rules={rulesForDisplay} onrulechange={handleRuleChange}
-                    onconfigimport={handleConfigImport} onoptionchange={handleOptionChange}></c-scan-configurator>
+                    onconfigimport={handleConfigImport} onoptionchange={handleOptionChange}
+                    onopenwizard={handleWizardOpen} onconfigexport={handleConfigExport}
+                    onconfigreset={handleConfigReset} onconfigsave={handleConfigSave}></c-scan-configurator>
+                <template if:true={showWizard}>
+                    <c-config-wizard rules={rulesForDisplay} initial-rule-mode={currentRuleMode}
+                        onapply={handleWizardApply} onclose={handleWizardClose}></c-config-wizard>
+                </template>
             </template>
             <template if:true={isTab4Active}>
                 <template if:true={setupNeeded}>

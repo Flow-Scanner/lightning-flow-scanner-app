@@ -6,12 +6,20 @@
 
         <template if:true={status}>
             <div class="slds-text-heading_medium slds-m-bottom_x-small">Connect Flow Scanner to the Tooling API</div>
-            <p class="slds-m-bottom_medium slds-text-color_weak">
-                One-time setup so Flow Scanner can read flow metadata via JWT authentication.
-                Full instructions:&nbsp;
-                <a href="https://github.com/Flow-Scanner/lightning-flow-scanner-app/blob/main/docs/installation.md"
-                    target="_blank" rel="noopener noreferrer">installation guide</a>.
-            </p>
+            <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_medium">
+                <p class="slds-col slds-text-color_weak">
+                    One-time setup so Flow Scanner can read flow metadata via JWT authentication.
+                    Each step below is explained in full detail in the installation guide.
+                </p>
+                <div class="slds-col slds-grow-none slds-p-left_small">
+                    <a class="slds-button slds-button_brand"
+                        href="https://github.com/Flow-Scanner/lightning-flow-scanner-app/blob/main/docs/installation.md"
+                        target="_blank" rel="noopener noreferrer"
+                        title="Opens the step-by-step installation guide in a new tab">
+                        Open Installation Guide
+                    </a>
+                </div>
+            </div>
 
             <template if:false={status.isAdmin}>
                 <div class="slds-scoped-notification slds-media slds-media_center slds-theme_info slds-m-bottom_medium" role="status">
@@ -31,7 +39,7 @@
                     <lightning-icon icon-name={permSetIcon} variant={permSetVariant} size="small"
                         class="slds-m-right_small"></lightning-icon>
                     <div class="slds-col">
-                        <div class="slds-text-title_bold">Assign the Flow Scanner permission set</div>
+                        <div class="slds-text-title_bold">1. Assign the Flow Scanner permission set</div>
                         <div class="slds-text-color_weak">{permSetHelp}</div>
                     </div>
                     <a href="/lightning/setup/PermSets/home" target="_blank" rel="noopener noreferrer"
@@ -43,29 +51,66 @@
                     <lightning-icon icon-name={certIcon} variant={certVariant} size="small"
                         class="slds-m-right_small"></lightning-icon>
                     <div class="slds-col">
-                        <div class="slds-text-title_bold">Create the signing certificate</div>
+                        <div class="slds-text-title_bold">2. Create and download the signing certificate</div>
                         <div class="slds-text-color_weak">
-                            Self-signed certificate with Unique Name <code>Flow_Scanner</code> (exactly),
-                            then upload its .crt file to your External Client App.
+                            Create a self-signed certificate with Unique Name <code>Flow_Scanner</code> (exactly)
+                            and click <b>Download Certificate</b>. You&rsquo;ll upload the .crt file while creating
+                            the External Client App in step 3.
                         </div>
                     </div>
                     <a href="/lightning/setup/CertificatesAndKeysManagement/home" target="_blank"
                         rel="noopener noreferrer" class="slds-button slds-button_neutral">Open Certificates</a>
                 </li>
 
-                <!-- Step 3: external client app + consumer key -->
+                <!-- Step 3: external client app (not auto-verifiable; turns green after a successful Test Connection) -->
                 <li class="slds-item slds-grid slds-grid_vertical-align-center">
-                    <lightning-icon icon-name={keyIcon} variant={keyVariant} size="small"
+                    <lightning-icon icon-name={manualStepIcon} variant={manualStepVariant} size="small"
                         class="slds-m-right_small"></lightning-icon>
                     <div class="slds-col">
-                        <div class="slds-text-title_bold">Create the External Client App and store its Consumer Key</div>
+                        <div class="slds-text-title_bold">3. Create the External Client App</div>
                         <div class="slds-text-color_weak">
-                            Create an External Client App with JWT Bearer Flow enabled, copy its Consumer Key,
-                            and save it below. It is stored in protected custom metadata.
+                            Create an External Client App with <b>Enable OAuth</b> checked and both scopes:
+                            <code>Manage user data via APIs (api)</code> and
+                            <code>Perform requests at any time (refresh_token, offline_access)</code>.
+                            Enable the <b>JWT Bearer Flow</b> and upload the .crt file from step 2 as its
+                            digital signature.
                         </div>
                     </div>
                     <a href="/lightning/setup/ManageExternalClientApplication/home" target="_blank"
                         rel="noopener noreferrer" class="slds-button slds-button_neutral">Open External Client Apps</a>
+                </li>
+
+                <!-- Step 4: OAuth policies (not auto-verifiable; turns green after a successful Test Connection) -->
+                <li class="slds-item slds-grid slds-grid_vertical-align-center">
+                    <lightning-icon icon-name={manualStepIcon} variant={manualStepVariant} size="small"
+                        class="slds-m-right_small"></lightning-icon>
+                    <div class="slds-col">
+                        <div class="slds-text-title_bold">4. Pre-authorize users in the app&rsquo;s OAuth policies</div>
+                        <div class="slds-text-color_weak">
+                            On the app&rsquo;s <b>Policies</b> tab, set <b>Permitted Users</b> to
+                            <b>Admin approved users are pre-authorized</b>, then assign the profiles or
+                            permission sets of everyone who will use Flow Scanner &mdash; including yourself.
+                            Without this, authentication fails with <code>invalid_app_access</code>.
+                        </div>
+                    </div>
+                    <a href="/lightning/setup/ManageExternalClientApplication/home" target="_blank"
+                        rel="noopener noreferrer" class="slds-button slds-button_neutral">Open External Client Apps</a>
+                </li>
+
+                <!-- Step 5: consumer key -->
+                <li class="slds-item slds-grid slds-grid_vertical-align-center">
+                    <lightning-icon icon-name={keyIcon} variant={keyVariant} size="small"
+                        class="slds-m-right_small"></lightning-icon>
+                    <div class="slds-col">
+                        <div class="slds-text-title_bold">5. Save the Consumer Key and test the connection</div>
+                        <div class="slds-text-color_weak">
+                            Copy the Consumer Key from the app&rsquo;s <b>Settings</b> tab
+                            (<b>OAuth Settings &rarr; Consumer Key and Secret</b>) and save it below &mdash;
+                            it is stored in protected custom metadata. The connection is then verified
+                            automatically (also on every visit to this tab); steps 3 and 4 turn green when
+                            it succeeds. Re-run it any time with <b>Test Connection</b>.
+                        </div>
+                    </div>
                 </li>
             </ul>
 
@@ -84,6 +129,12 @@
                                 onclick={handleTestConnection} disabled={testDisabled}></lightning-button>
                         </div>
                     </div>
+                </div>
+            </template>
+
+            <template if:true={isVerifying}>
+                <div class="slds-text-color_weak slds-m-top_small" role="status">
+                    Verifying connection&hellip;
                 </div>
             </template>
 

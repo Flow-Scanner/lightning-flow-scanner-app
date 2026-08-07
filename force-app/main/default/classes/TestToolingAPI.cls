@@ -203,8 +203,30 @@ private class TestToolingAPI {
         }
         Test.stopTest();
     }
-        
-    @IsTest 
+
+    @IsTest
+    static void testOauthHint() {
+        System.assert(
+            ToolingAPI.oauthHint('{"error":"invalid_app_access","error_description":"user is not admin approved to access this app"}')
+                .contains('Admin approved users are pre-authorized'),
+            'invalid_app_access should point to the Policies tab');
+        System.assert(
+            ToolingAPI.oauthHint('{"error":"invalid_request","error_description":"refresh_token scope is required and the connected app should be installed and preauthorized."}')
+                .contains('refresh_token, offline_access'),
+            'missing scope should point to the OAuth scopes');
+        System.assert(
+            ToolingAPI.oauthHint('{"error":"invalid_client_id","error_description":"client identifier invalid"}')
+                .contains('Consumer Key'),
+            'invalid_client_id should point to the Consumer Key');
+        System.assert(
+            ToolingAPI.oauthHint('{"error":"invalid_grant","error_description":"invalid assertion"}')
+                .contains('certificate'),
+            'invalid_grant should point to the certificate');
+        System.assertEquals('', ToolingAPI.oauthHint('{"error":"unknown_error"}'));
+        System.assertEquals('', ToolingAPI.oauthHint(null));
+    }
+
+    @IsTest
     static void testParseQueryResponse() {
         String mockResponse = '{"totalSize":3,"done":true,"records":[{"Id":"1"},{"Id":"2"},{"Id":"3"}]}';
         

@@ -56,6 +56,30 @@ describe('c-scan-configurator', () => {
         }
     });
 
+    it('toolbar buttons dispatch wizard, export, and reset events', async () => {
+        const element = createComponent();
+        await Promise.resolve();
+
+        const handlers = {
+            openwizard: jest.fn(),
+            configsave: jest.fn(),
+            configexport: jest.fn(),
+            configreset: jest.fn()
+        };
+        Object.entries(handlers).forEach(([name, fn]) => element.addEventListener(name, fn));
+
+        const buttons = [...element.shadowRoot.querySelectorAll('lightning-button')];
+        buttons.find(b => b.label === 'Configure Rules').click();
+        buttons.find(b => b.label === 'Save to Org').click();
+        buttons.find(b => b.label === 'Export').click();
+        buttons.find(b => b.label === 'Reset').click();
+
+        expect(handlers.openwizard).toHaveBeenCalledTimes(1);
+        expect(handlers.configsave).toHaveBeenCalledTimes(1);
+        expect(handlers.configexport).toHaveBeenCalledTimes(1);
+        expect(handlers.configreset).toHaveBeenCalledTimes(1);
+    });
+
     it('renders rules from the api property', async () => {
         const element = createComponent();
         await Promise.resolve();

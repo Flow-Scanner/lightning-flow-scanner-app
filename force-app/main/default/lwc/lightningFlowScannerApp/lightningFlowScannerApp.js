@@ -1,10 +1,13 @@
 import { LightningElement, track } from 'lwc';
 import { loadScript } from 'lightning/platformResourceLoader';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import LFS_Core from '@salesforce/resourceUrl/LFS_Core';
 
 import getFlowDefinitions from '@salesforce/apex/LightningFlowScannerController.getFlowDefinitions';
 import getFlowMetadata    from '@salesforce/apex/LightningFlowScannerController.getFlowMetadata';
 import getMDTRules        from '@salesforce/apex/LightningFlowScannerController.getMDTRules';
+import getSavedConfig     from '@salesforce/apex/LFSConfigController.getSavedConfig';
+import saveConfig         from '@salesforce/apex/LFSConfigController.saveConfig';
 
 // Top-level keys accepted from CLI / VS Code style config files.
 const SCAN_META_KEYS = [
@@ -49,6 +52,7 @@ export default class LightningFlowScannerApp extends LightningElement {
     // Top-level scan options from imported JSON (threshold, categories, …).
     @track scanMeta = {};
     @track isLoading = false;
+    @track showWizard = false;
     @track currentFlowIndex = 0;
     @track isScanningAll = false;
     @track searchKey = '';
@@ -73,6 +77,7 @@ export default class LightningFlowScannerApp extends LightningElement {
             await this.loadScannerCore();
             await this.loadDefaultRules();
             await this.loadMDTOverrides();
+            await this.loadSavedConfig();
             await this.loadFlows();
         } catch (e) {
             this.err = e.message || e.body?.message;
@@ -257,7 +262,10 @@ export default class LightningFlowScannerApp extends LightningElement {
     // the config run; everything else is deactivated. Severities outside
     // error|warning|note are ignored (core would silently break on them).
     async handleConfigImport(event) {
-        const config = event.detail.config;
+        await this.applyConfig(event.detail.config);
+    }
+
+    async applyConfig(config) {
         if (!config || typeof config !== 'object') return;
 
         const hasRulesKey =
@@ -324,6 +332,90 @@ export default class LightningFlowScannerApp extends LightningElement {
 
         this.rules = [...this.rules]; // force UI refresh
         this.buildRulesConfig();
+        if (this.allScanResults.length) await this.scanAllFlows();
+        else if (this.selectedFlowRecord) await this.scanCurrentFlow();
+    }
+
+    /* ────────────────────── ORG PERSISTENCE ────────────────────── */
+    // The saved config is the same JSON document as .flow-scanner.json, so it
+    // applies through the regular import pipeline on startup.
+    async loadSavedConfig() {
+        try {
+            const saved = await getSavedConfig();
+            if (saved?.configJson) {
+                await this.applyConfig(JSON.parse(saved.configJson));
+            }
+        } catch (e) {
+            // A broken saved config should not block the app from loading.
+            console.error('Saved config load error:', e);
+        }
+    }
+
+    async handleConfigSave() {
+        try {
+            await saveConfig({ configJson: JSON.stringify(this.buildExportConfig()) });
+            this.toast(
+                'Configuration save started',
+                'Deploying to the org takes 10–30 seconds. Once applied, it loads automatically for everyone who opens Flow Scanner.',
+                'success'
+            );
+        } catch (e) {
+            this.toast('Save failed', e.body?.message || e.message, 'error');
+        }
+    }
+
+    toast(title, message, variant) {
+        this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
+    }
+
+    /* ────────────────────── WIZARD / EXPORT / RESET ────────────────────── */
+    get currentRuleMode() {
+        return this.scanMeta.ruleMode === 'isolated' ? 'isolated' : 'merged';
+    }
+
+    handleWizardOpen()  { this.showWizard = true; }
+    handleWizardClose() { this.showWizard = false; }
+
+    // The wizard emits a config in the same shape as an imported
+    // .flow-scanner.json, so it applies through the regular import pipeline.
+    // Cleared options are removed first — imports can only set values.
+    async handleWizardApply(event) {
+        this.showWizard = false;
+        const { config, clearedOptions } = event.detail;
+        (clearedOptions || []).forEach(({ identifier, name }) => this.clearRuleOption(identifier, name));
+        await this.handleConfigImport({ detail: { config } });
+    }
+
+    // Download the current configuration as .flow-scanner.json in the shape the
+    // CLI and VS Code extension read: in isolated mode only active rules are
+    // listed; in merged mode inactive rules carry enabled: false.
+    buildExportConfig() {
+        const isolated = this.scanMeta.ruleMode === 'isolated';
+        const rules = {};
+        this.rules.forEach(r => {
+            if (isolated && !r.isActive) return;
+            const opts = this.ruleOptions[r.ruleId] || this.ruleOptions[r.name] || {};
+            const entry = { severity: r.severity, ...opts };
+            if (!isolated && !r.isActive) entry.enabled = false;
+            rules[r.ruleId] = entry;
+        });
+        return { ...this.scanMeta, rules };
+    }
+
+    handleConfigExport() {
+        const json = JSON.stringify(this.buildExportConfig(), null, 2);
+        const link = document.createElement('a');
+        link.setAttribute('href', `data:application/json;charset=utf-8,${encodeURIComponent(json)}`);
+        link.setAttribute('download', '.flow-scanner.json');
+        link.click();
+    }
+
+    // Back to core defaults plus org Custom Metadata overrides.
+    async handleConfigReset() {
+        this.ruleOptions = {};
+        this.scanMeta = {};
+        this.loadDefaultRules();
+        await this.loadMDTOverrides();
         if (this.allScanResults.length) await this.scanAllFlows();
         else if (this.selectedFlowRecord) await this.scanCurrentFlow();
     }

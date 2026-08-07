@@ -1,6 +1,7 @@
 import { createElement } from '@lwc/engine-dom';
 import SetupAssistant from 'c/setupAssistant';
 import getSetupStatus from '@salesforce/apex/LFSSetupController.getSetupStatus';
+import testConnection from '@salesforce/apex/LFSSetupController.testConnection';
 
 jest.mock(
     '@salesforce/apex/LFSSetupController.getSetupStatus',
@@ -47,8 +48,52 @@ describe('c-setup-assistant', () => {
         await flushPromises();
 
         const items = element.shadowRoot.querySelectorAll('li.slds-item');
-        expect(items.length).toBe(3);
+        expect(items.length).toBe(5);
         expect(element.shadowRoot.querySelector('lightning-input')).not.toBeNull();
+    });
+
+    it('auto-verifies the connection on load and marks the manual steps green', async () => {
+        getSetupStatus.mockResolvedValue({ ...ADMIN_STATUS, consumerKeyConfigured: true });
+        testConnection.mockResolvedValue({ success: true, message: 'Connected' });
+
+        const element = createElement('c-setup-assistant', { is: SetupAssistant });
+        document.body.appendChild(element);
+        await flushPromises();
+
+        // No click needed: a saved Consumer Key triggers automatic verification.
+        expect(testConnection).toHaveBeenCalledTimes(1);
+        const manualIcons =
+            [...element.shadowRoot.querySelectorAll('li.slds-item lightning-icon')].slice(2, 4);
+        expect(manualIcons.every((icon) => icon.iconName === 'utility:success')).toBe(true);
+        expect(element.shadowRoot.querySelector('.slds-theme_success')).not.toBeNull();
+    });
+
+    it('shows the failure and keeps manual steps neutral when auto-verification fails', async () => {
+        getSetupStatus.mockResolvedValue({ ...ADMIN_STATUS, consumerKeyConfigured: true });
+        testConnection.mockResolvedValue({ success: false, message: 'OAuth authentication failed' });
+
+        const element = createElement('c-setup-assistant', { is: SetupAssistant });
+        document.body.appendChild(element);
+        await flushPromises();
+
+        const manualIcons =
+            [...element.shadowRoot.querySelectorAll('li.slds-item lightning-icon')].slice(2, 4);
+        expect(manualIcons.every((icon) => icon.iconName === 'utility:record')).toBe(true);
+        const errorBox = element.shadowRoot.querySelector('.slds-theme_error');
+        expect(errorBox.textContent).toContain('OAuth authentication failed');
+    });
+
+    it('does not auto-verify when no Consumer Key is configured', async () => {
+        getSetupStatus.mockResolvedValue(ADMIN_STATUS);
+
+        const element = createElement('c-setup-assistant', { is: SetupAssistant });
+        document.body.appendChild(element);
+        await flushPromises();
+
+        expect(testConnection).not.toHaveBeenCalled();
+        const manualIcons =
+            [...element.shadowRoot.querySelectorAll('li.slds-item lightning-icon')].slice(2, 4);
+        expect(manualIcons.every((icon) => icon.iconName === 'utility:record')).toBe(true);
     });
 
     it('hides the consumer key input for non-admins and shows a notice', async () => {

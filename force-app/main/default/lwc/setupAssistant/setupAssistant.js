@@ -14,6 +14,7 @@ export default class SetupAssistant extends LightningElement {
     consumerKey = '';
     isLoading = false;
     isSaving = false;
+    isVerifying = false;
     connectionResult;
 
     pollAttempts = 0;
@@ -26,6 +27,23 @@ export default class SetupAssistant extends LightningElement {
         this.isLoading = true;
         await this.refreshStatus();
         this.isLoading = false;
+        this.autoVerifyConnection();
+    }
+
+    // A successful JWT token exchange proves the External Client App and its
+    // OAuth policies (steps 3–4) are configured — those can't be inspected
+    // from Apex directly. Run the check automatically once setup looks
+    // complete, so the checklist reflects reality without a manual click.
+    async autoVerifyConnection() {
+        if (!this.status?.consumerKeyConfigured || !this.status?.isAdmin) return;
+        this.isVerifying = true;
+        try {
+            this.connectionResult = await testConnection();
+        } catch (e) {
+            this.connectionResult = { success: false, message: e.body?.message || e.message };
+        } finally {
+            this.isVerifying = false;
+        }
     }
 
     disconnectedCallback() {
@@ -55,6 +73,12 @@ export default class SetupAssistant extends LightningElement {
 
     get keyIcon()    { return this.status?.consumerKeyConfigured ? 'utility:success' : 'utility:warning'; }
     get keyVariant() { return this.status?.consumerKeyConfigured ? 'success' : 'warning'; }
+
+    // The External Client App and its OAuth policies can't be inspected from Apex
+    // (that requires the Tooling API access being set up here), so these steps only
+    // turn green once Test Connection proves the whole chain works.
+    get manualStepIcon()    { return this.connectionResult?.success ? 'utility:success' : 'utility:record'; }
+    get manualStepVariant() { return this.connectionResult?.success ? 'success' : undefined; }
 
     get saveButtonLabel() { return this.isSaving ? 'Saving…' : 'Save Consumer Key'; }
     get saveDisabled()    { return this.isSaving || !this.consumerKey; }
@@ -126,7 +150,8 @@ export default class SetupAssistant extends LightningElement {
             this.stopPolling();
             this.isSaving = false;
             this.consumerKey = '';
-            this.toast('Consumer Key saved', 'Use Test Connection to verify the setup end to end.', 'success');
+            this.toast('Consumer Key saved', 'Verifying the connection…', 'success');
+            this.autoVerifyConnection();
         } else if (this.pollAttempts >= MAX_POLL_ATTEMPTS) {
             this.stopPolling();
             this.isSaving = false;

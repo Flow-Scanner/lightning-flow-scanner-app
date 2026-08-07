@@ -1,5 +1,7 @@
 import { createElement } from '@lwc/engine-dom';
 import LightningFlowScannerApp from 'c/lightningFlowScannerApp';
+import getSavedConfig from '@salesforce/apex/LFSConfigController.getSavedConfig';
+import saveConfig from '@salesforce/apex/LFSConfigController.saveConfig';
 
 jest.mock(
     'lightning/platformResourceLoader',
@@ -22,6 +24,16 @@ jest.mock(
 jest.mock(
     '@salesforce/apex/LightningFlowScannerController.getMDTRules',
     () => ({ default: jest.fn().mockResolvedValue([]) }),
+    { virtual: true }
+);
+jest.mock(
+    '@salesforce/apex/LFSConfigController.getSavedConfig',
+    () => ({ default: jest.fn().mockResolvedValue(null) }),
+    { virtual: true }
+);
+jest.mock(
+    '@salesforce/apex/LFSConfigController.saveConfig',
+    () => ({ default: jest.fn().mockResolvedValue('0Af000000000001AAA') }),
     { virtual: true }
 );
 
@@ -158,6 +170,163 @@ describe('c-lightning-flow-scanner-app config import', () => {
         });
 
         expect(rulesByName(element).CyclomaticComplexity.options[0].value).toBe(40);
+    });
+
+    it('wizard apply routes through the import pipeline and clears options', async () => {
+        const element = await createApp();
+        // Seed an option override so the wizard's clear takes effect.
+        await importConfig(element, { rules: { CyclomaticComplexity: { threshold: 40 } } });
+
+        const configurator = element.shadowRoot.querySelector('c-scan-configurator');
+        configurator.dispatchEvent(new CustomEvent('openwizard'));
+        await flushPromises();
+
+        const wizard = element.shadowRoot.querySelector('c-config-wizard');
+        expect(wizard).not.toBeNull();
+        wizard.dispatchEvent(
+            new CustomEvent('apply', {
+                detail: {
+                    config: { ruleMode: 'merged', rules: { 'missing-flow-description': { enabled: false } } },
+                    clearedOptions: [{ identifier: 'excessive-cyclomatic-complexity', name: 'threshold' }]
+                }
+            })
+        );
+        await flushPromises();
+
+        expect(element.shadowRoot.querySelector('c-config-wizard')).toBeNull();
+        const rules = rulesByName(element);
+        expect(rules.FlowDescription.isActive).toBe(false);
+        expect(rules.CyclomaticComplexity.options[0].value).toBe('');
+    });
+
+    it('export downloads the current config as .flow-scanner.json', async () => {
+        const element = await createApp();
+        await importConfig(element, {
+            rules: {
+                'missing-flow-description': { enabled: false },
+                CyclomaticComplexity: { threshold: 40 }
+            }
+        });
+
+        let anchor;
+        const clickSpy = jest
+            .spyOn(HTMLAnchorElement.prototype, 'click')
+            .mockImplementation(function captureAnchor() { anchor = this; });
+
+        const configurator = element.shadowRoot.querySelector('c-scan-configurator');
+        configurator.dispatchEvent(new CustomEvent('configexport'));
+        await flushPromises();
+        clickSpy.mockRestore();
+
+        expect(anchor.getAttribute('download')).toBe('.flow-scanner.json');
+        const exported = JSON.parse(decodeURIComponent(anchor.getAttribute('href').split(',')[1]));
+        expect(exported.rules['missing-flow-description']).toMatchObject({ enabled: false });
+        expect(exported.rules['excessive-cyclomatic-complexity']).toMatchObject({ threshold: 40 });
+        // Beta rules that are off are exported as disabled in merged mode.
+        expect(exported.rules['hardcoded-secret']).toMatchObject({ enabled: false });
+    });
+
+    it('isolated export lists only active rules', async () => {
+        const element = await createApp();
+        await importConfig(element, {
+            ruleMode: 'isolated',
+            rules: { CyclomaticComplexity: { threshold: 30 } }
+        });
+
+        let anchor;
+        const clickSpy = jest
+            .spyOn(HTMLAnchorElement.prototype, 'click')
+            .mockImplementation(function captureAnchor() { anchor = this; });
+        const configurator = element.shadowRoot.querySelector('c-scan-configurator');
+        configurator.dispatchEvent(new CustomEvent('configexport'));
+        await flushPromises();
+        clickSpy.mockRestore();
+
+        const exported = JSON.parse(decodeURIComponent(anchor.getAttribute('href').split(',')[1]));
+        expect(exported.ruleMode).toBe('isolated');
+        expect(Object.keys(exported.rules)).toEqual(['excessive-cyclomatic-complexity']);
+        expect(exported.rules['excessive-cyclomatic-complexity']).toMatchObject({ threshold: 30 });
+    });
+
+    it('reset restores core defaults and clears imported state', async () => {
+        const element = await createApp();
+        await importConfig(element, {
+            ruleMode: 'isolated',
+            threshold: 'error',
+            rules: {
+                'missing-flow-description': { severity: 'note' },
+                CyclomaticComplexity: { threshold: 40 }
+            }
+        });
+        expect(rulesByName(element).CyclomaticComplexity.options[0].value).toBe(40);
+
+        const configurator = element.shadowRoot.querySelector('c-scan-configurator');
+        configurator.dispatchEvent(new CustomEvent('configreset'));
+        await flushPromises();
+
+        const rules = rulesByName(element);
+        expect(rules.FlowDescription.severity).toBe('error');
+        expect(rules.FlowDescription.isActive).toBe(true);
+        expect(rules.CyclomaticComplexity.options[0].value).toBe('');
+        expect(rules.HardcodedSecret.isActive).toBe(false);
+
+        // scanMeta was cleared: a fresh export carries no isolated ruleMode.
+        let anchor;
+        const clickSpy = jest
+            .spyOn(HTMLAnchorElement.prototype, 'click')
+            .mockImplementation(function captureAnchor() { anchor = this; });
+        configurator.dispatchEvent(new CustomEvent('configexport'));
+        await flushPromises();
+        clickSpy.mockRestore();
+        const exported = JSON.parse(decodeURIComponent(anchor.getAttribute('href').split(',')[1]));
+        expect(exported.ruleMode).toBeUndefined();
+        expect(exported.threshold).toBeUndefined();
+    });
+
+    it('applies the org-saved configuration on startup', async () => {
+        getSavedConfig.mockResolvedValueOnce({
+            configJson: JSON.stringify({
+                rules: {
+                    'missing-flow-description': { severity: 'note', enabled: false },
+                    CyclomaticComplexity: { threshold: 35 }
+                }
+            }),
+            lastUpdated: '2026-08-07T00:00:00.000Z'
+        });
+
+        const element = await createApp();
+        const rules = rulesByName(element);
+        expect(rules.FlowDescription.severity).toBe('note');
+        expect(rules.FlowDescription.isActive).toBe(false);
+        expect(rules.CyclomaticComplexity.options[0].value).toBe(35);
+    });
+
+    it('a corrupt saved configuration does not block startup', async () => {
+        getSavedConfig.mockResolvedValueOnce({ configJson: 'not json at all' });
+        const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        const element = await createApp();
+        errorSpy.mockRestore();
+
+        // App still renders with core defaults.
+        const rules = rulesByName(element);
+        expect(rules.FlowDescription.severity).toBe('error');
+        expect(rules.FlowDescription.isActive).toBe(true);
+    });
+
+    it('save to org sends the current configuration JSON', async () => {
+        const element = await createApp();
+        await importConfig(element, {
+            rules: { CyclomaticComplexity: { threshold: 40 } }
+        });
+
+        const configurator = element.shadowRoot.querySelector('c-scan-configurator');
+        configurator.dispatchEvent(new CustomEvent('configsave'));
+        await flushPromises();
+
+        expect(saveConfig).toHaveBeenCalledTimes(1);
+        const sent = JSON.parse(saveConfig.mock.calls[0][0].configJson);
+        expect(sent.rules['excessive-cyclomatic-complexity']).toMatchObject({ threshold: 40 });
     });
 
     it('ignores severities outside error|warning|note and normalizes case', async () => {

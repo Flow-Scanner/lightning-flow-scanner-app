@@ -30,6 +30,25 @@
                 variant="label-hidden" onchange={handleConfigFile} class="compact-input"
                 title="Load .flow-scanner.json or .flow-scanner.yml (same format as CLI and VS Code)"></lightning-input>
         </div>
+
+        <!-- Guided configuration + export / reset -->
+        <div class="toolbar-item toolbar-action slds-p-left_x-small slds-align-middle">
+            <lightning-button variant="brand" label="Configure Rules" icon-name="utility:setup"
+                onclick={handleOpenWizard}
+                title="Guided setup of rule mode, rule selection, and options"></lightning-button>
+        </div>
+        <div class="toolbar-item toolbar-action slds-p-left_x-small slds-align-middle">
+            <lightning-button label="Save to Org" icon-name="utility:save" onclick={handleSave}
+                title="Store the current configuration org-wide; it loads automatically for everyone who opens Flow Scanner (admins only)"></lightning-button>
+        </div>
+        <div class="toolbar-item toolbar-action slds-p-left_x-small slds-align-middle">
+            <lightning-button label="Export" icon-name="utility:download" onclick={handleExport}
+                title="Download the current configuration as .flow-scanner.json (usable by the CLI and VS Code)"></lightning-button>
+        </div>
+        <div class="toolbar-item toolbar-action slds-p-left_x-small slds-align-middle">
+            <lightning-button label="Reset" icon-name="utility:refresh" onclick={handleReset}
+                title="Discard session changes and reload core defaults plus org metadata overrides"></lightning-button>
+        </div>
     </div>
 
     <template if:true={importMessage}>

@@ -183,6 +183,11 @@ export default class scanConfigurator extends LightningElement {
         this.importError = isError;
     }
 
+    handleOpenWizard() { this.dispatchEvent(new CustomEvent('openwizard')); }
+    handleSave()       { this.dispatchEvent(new CustomEvent('configsave')); }
+    handleExport()     { this.dispatchEvent(new CustomEvent('configexport')); }
+    handleReset()      { this.dispatchEvent(new CustomEvent('configreset')); }
+
     // Commit an option edit on blur (Enter triggers blur below). Only
     // dispatches when the value actually changed, so tabbing through the
     // table doesn't fire rescans.

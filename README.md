@@ -59,7 +59,7 @@ For details about all available rules, their default severities, and configurati
 
 ## Configuration
 
-While no configuration is required, you can configure rules in three ways. Session and imported settings apply for the current browser session only. For full config reference, see the [documentation](https://flow-scanner.github.io/lightning-flow-scanner/#configurations).
+While no configuration is required, you can configure rules in several ways: inline in the Configuration tab, through the guided **Configure Rules** wizard, by importing a config file, or via Custom Metadata org defaults. Use **Save to Org** to persist the current configuration org-wide (admins only) — it loads automatically for everyone who opens the app; unsaved changes apply to the current browser session only. For full config reference, see the [documentation](https://flow-scanner.github.io/lightning-flow-scanner/#configurations).
 
 ### Org defaults (Custom Metadata)
 
@@ -104,7 +104,16 @@ Example:
 }
 ```
 
-Imported values feed the in-browser scan immediately (and re-scan if results are already open). They do not write back to Custom Metadata.
+Imported values feed the in-browser scan immediately (and re-scan if results are already open).
+
+### Configure Rules wizard, export, and org-wide saving
+
+The **Configuration** tab toolbar also offers:
+
+- **Configure Rules** — a guided wizard (like the VS Code extension's *Configure Scanner*): choose merged or isolated rule mode, opt into beta rules, select rules, and set thresholds/expressions with validation, then review and apply.
+- **Save to Org** — stores the current configuration in the `Flow_Scanner_Saved_Config__mdt` custom metadata type (deployed via the Metadata API, takes 10–30 seconds; requires Customize Application). Saved configuration loads automatically for everyone who opens Flow Scanner, layered on top of `ScanRuleConfiguration__mdt` defaults.
+- **Export** — downloads the current configuration as `.flow-scanner.json`, directly usable by the CLI and the VS Code extension.
+- **Reset** — discards session changes and returns to core defaults plus Custom Metadata overrides.
 
 ### Edit rule options in the app
 
