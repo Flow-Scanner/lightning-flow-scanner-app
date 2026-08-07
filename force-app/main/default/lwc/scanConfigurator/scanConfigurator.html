@@ -46,11 +46,12 @@
               <th data-field="name" onclick={handleHeaderSort}>Rule Name {sortIndicators.name}</th>
               <th data-field="description" onclick={handleHeaderSort}>Description {sortIndicators.description}</th>
               <th data-field="severity" onclick={handleHeaderSort}>Severity {sortIndicators.severity}</th>
+              <th title="Rule options (expression, threshold). Empty uses the core default.">Options</th>
             </tr>
           </thead>
           <tbody>
             <tr class="toggle-all-row">
-              <td colspan="4">
+              <td colspan="5">
                 <lightning-input
                   type="checkbox"
                   label={toggleAllLabel}
@@ -84,6 +85,26 @@
                     options={severityOptions}
                     onchange={handleSeverityChange}
                   ></lightning-combobox>
+                </td>
+                <td class="options-cell">
+                  <template if:true={rule.options}>
+                    <template for:each={rule.options} for:item="opt">
+                      <lightning-input
+                        key={opt.name}
+                        type="text"
+                        variant="label-hidden"
+                        class="option-input"
+                        data-rule-id={rule.id}
+                        data-option={opt.name}
+                        data-option-type={opt.type}
+                        value={opt.value}
+                        placeholder={opt.placeholder}
+                        title={opt.description}
+                        onblur={handleOptionBlur}
+                        onkeydown={handleOptionKeyDown}
+                      ></lightning-input>
+                    </template>
+                  </template>
                 </td>
               </tr>
             </template>

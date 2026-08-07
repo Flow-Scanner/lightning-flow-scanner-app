@@ -159,6 +159,18 @@
   min-width: 10rem;
 }
 
+/* Inline rule option editors (expression, threshold) */
+.options-cell {
+  min-width: 9rem;
+  max-width: 14rem;
+}
+.option-input {
+  display: block;
+}
+.option-input:not(:first-child) {
+  margin-top: 0.25rem;
+}
+
 /* Import config feedback message */
 .import-msg {
   font-size: 0.8rem;

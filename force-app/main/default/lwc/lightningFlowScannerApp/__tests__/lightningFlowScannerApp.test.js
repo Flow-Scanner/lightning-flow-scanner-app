@@ -27,7 +27,16 @@ jest.mock(
 
 const STABLE_RULES = [
     { name: 'FlowDescription', ruleId: 'missing-flow-description', description: 'd', severity: 'error', category: 'problem' },
-    { name: 'CyclomaticComplexity', ruleId: 'excessive-cyclomatic-complexity', description: 'd', severity: 'note', category: 'problem' }
+    {
+        name: 'CyclomaticComplexity',
+        ruleId: 'excessive-cyclomatic-complexity',
+        description: 'd',
+        severity: 'note',
+        category: 'problem',
+        configurableOptions: [
+            { name: 'threshold', type: 'number', description: 'Max complexity', defaultValue: 25 }
+        ]
+    }
 ];
 const BETA_RULES = [
     ...STABLE_RULES,
@@ -116,6 +125,39 @@ describe('c-lightning-flow-scanner-app config import', () => {
         const rules = rulesByName(element);
         expect(rules.FlowDescription.isActive).toBe(true);
         expect(rules.CyclomaticComplexity.isActive).toBe(false);
+    });
+
+    it('applies, coerces, and clears inline option edits', async () => {
+        const element = await createApp();
+        const configurator = element.shadowRoot.querySelector('c-scan-configurator');
+
+        const emit = detail =>
+            configurator.dispatchEvent(new CustomEvent('optionchange', { detail }));
+
+        emit({ identifier: 'excessive-cyclomatic-complexity', name: 'threshold', value: '30', type: 'number' });
+        await flushPromises();
+        expect(rulesByName(element).CyclomaticComplexity.options[0].value).toBe(30);
+
+        // Non-numeric input for a number option is ignored.
+        emit({ identifier: 'excessive-cyclomatic-complexity', name: 'threshold', value: 'lots', type: 'number' });
+        await flushPromises();
+        expect(rulesByName(element).CyclomaticComplexity.options[0].value).toBe(30);
+
+        // Clearing falls back to the core default (empty value, placeholder 25).
+        emit({ identifier: 'excessive-cyclomatic-complexity', name: 'threshold', value: '', type: 'number' });
+        await flushPromises();
+        const option = rulesByName(element).CyclomaticComplexity.options[0];
+        expect(option.value).toBe('');
+        expect(option.placeholder).toBe('25');
+    });
+
+    it('imported option values appear in the inline editors', async () => {
+        const element = await createApp();
+        await importConfig(element, {
+            rules: { CyclomaticComplexity: { threshold: 40 } }
+        });
+
+        expect(rulesByName(element).CyclomaticComplexity.options[0].value).toBe(40);
     });
 
     it('ignores severities outside error|warning|note and normalizes case', async () => {

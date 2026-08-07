@@ -9,7 +9,16 @@ const SAMPLE_RULES = [
         description: 'Too many loops',
         severity: 'note',
         isActive: true,
-        isBeta: false
+        isBeta: false,
+        options: [
+            {
+                name: 'threshold',
+                type: 'number',
+                description: 'Maximum cyclomatic complexity',
+                value: '',
+                placeholder: '25'
+            }
+        ]
     },
     {
         id: 'rule-1',
@@ -183,6 +192,40 @@ describe('c-scan-configurator', () => {
         expect(element.applyImportedText('[]', 'array.json')).toBe(false);
         expect(element.applyImportedText('"string"', 'str.json')).toBe(false);
         expect(handler).not.toHaveBeenCalled();
+    });
+
+    it('renders inline option editors only for rules with options', async () => {
+        const element = createComponent();
+        await Promise.resolve();
+
+        const inputs = element.shadowRoot.querySelectorAll('.option-input');
+        expect(inputs.length).toBe(1);
+        expect(inputs[0].dataset.option).toBe('threshold');
+        expect(inputs[0].placeholder).toBe('25');
+    });
+
+    it('dispatches optionchange on blur when the value changed', async () => {
+        const element = createComponent();
+        await Promise.resolve();
+
+        const handler = jest.fn();
+        element.addEventListener('optionchange', handler);
+
+        const input = element.shadowRoot.querySelector('.option-input');
+        input.value = '30';
+        input.dispatchEvent(new CustomEvent('blur'));
+
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(handler.mock.calls[0][0].detail).toEqual({
+            identifier: 'excessive-cyclomatic-complexity',
+            name: 'threshold',
+            value: '30',
+            type: 'number'
+        });
+
+        // Blur without an edit stays silent.
+        input.dispatchEvent(new CustomEvent('blur'));
+        expect(handler).toHaveBeenCalledTimes(1);
     });
 
     it('syncs local table when parent rules property is replaced', async () => {

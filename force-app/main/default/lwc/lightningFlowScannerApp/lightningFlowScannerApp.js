@@ -114,12 +114,40 @@ export default class LightningFlowScannerApp extends LightningElement {
                 description: r.description,
                 severity: r.severity,
                 category: r.category,
+                // Core-published option metadata (e.g. expression, threshold)
+                // drives the inline editors in the configurator.
+                configurableOptions: (r.configurableOptions || []).map(o => ({
+                    name: o.name,
+                    type: o.type,
+                    description: o.description,
+                    defaultValue: o.defaultValue
+                })),
                 isBeta,
                 // Beta rules are optional: off until explicitly enabled
                 isActive: !isBeta
             };
         });
         this.buildRulesConfig();
+    }
+
+    // Rules with current option values merged in for the configurator UI.
+    // Empty value = no override; the placeholder shows core's default.
+    get rulesForDisplay() {
+        return this.rules.map(r => {
+            if (!r.configurableOptions?.length) return r;
+            const overrides =
+                this.ruleOptions[r.ruleId] ||
+                this.ruleOptions[r.name] ||
+                {};
+            return {
+                ...r,
+                options: r.configurableOptions.map(o => ({
+                    ...o,
+                    value: overrides[o.name] ?? '',
+                    placeholder: String(o.defaultValue ?? '')
+                }))
+            };
+        });
     }
 
     /* ────────────────────── MDT OVERRIDES (IMPERATIVE) ────────────────────── */
@@ -183,6 +211,34 @@ export default class LightningFlowScannerApp extends LightningElement {
             ...this.ruleOptions,
             [storageKey]: { ...this.ruleOptions[storageKey], [key]: value }
         };
+    }
+
+    // Remove an option override so the rule falls back to core's default.
+    clearRuleOption(identifier, key) {
+        const storageKey = this.optionKeyFor(identifier);
+        const existing = this.ruleOptions[storageKey];
+        if (!existing || !(key in existing)) return;
+        const rest = { ...existing };
+        delete rest[key];
+        this.ruleOptions = { ...this.ruleOptions, [storageKey]: rest };
+    }
+
+    // Inline option edit from the configurator (expression, threshold, …).
+    async handleOptionChange(event) {
+        const { identifier, name, value, type } = event.detail;
+        if (!identifier || !name) return;
+        if (value === '' || value == null) {
+            this.clearRuleOption(identifier, name);
+        } else if (type === 'number') {
+            const num = Number(value);
+            if (!Number.isFinite(num)) return;
+            this.setRuleOption(identifier, name, num);
+        } else {
+            this.setRuleOption(identifier, name, value);
+        }
+        this.buildRulesConfig();
+        if (this.allScanResults.length) await this.scanAllFlows();
+        else if (this.selectedFlowRecord) await this.scanCurrentFlow();
     }
 
     /* ────────────────────── JSON CONFIG IMPORT ────────────────────── */

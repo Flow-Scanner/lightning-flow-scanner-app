@@ -183,6 +183,36 @@ export default class scanConfigurator extends LightningElement {
         this.importError = isError;
     }
 
+    // Commit an option edit on blur (Enter triggers blur below). Only
+    // dispatches when the value actually changed, so tabbing through the
+    // table doesn't fire rescans.
+    handleOptionBlur(event) {
+        const rowId = event.target.dataset.ruleId;
+        const name = event.target.dataset.option;
+        const type = event.target.dataset.optionType;
+        const value = event.target.value ?? '';
+        const rule = (this.localRules || []).find(r => r.id === rowId);
+        const option = rule && (rule.options || []).find(o => o.name === name);
+        if (!option || String(option.value ?? '') === String(value)) return;
+
+        this.localRules = this.localRules.map(r => {
+            if (r.id !== rowId) return r;
+            return {
+                ...r,
+                options: r.options.map(o => (o.name === name ? { ...o, value } : o))
+            };
+        });
+        this.dispatchEvent(
+            new CustomEvent('optionchange', {
+                detail: { identifier: rule.ruleId || rule.name, name, value, type }
+            })
+        );
+    }
+
+    handleOptionKeyDown(event) {
+        if (event.key === 'Enter') event.target.blur();
+    }
+
     handleSeverityChange(event) {
         const ruleId = event.target.dataset.ruleId;
         const newSeverity = event.target.value;

@@ -106,6 +106,10 @@ Example:
 
 Imported values feed the in-browser scan immediately (and re-scan if results are already open). They do not write back to Custom Metadata.
 
+### Edit rule options in the app
+
+Rules with configurable options (e.g. the naming `expression` or complexity `threshold`) show an inline editor in the **Options** column of the Configuration tab. An empty field uses the core default (shown as placeholder); press Enter or click away to apply a value and re-scan. Editors are generated from the scanner core's rule metadata, so newly added configurable rules appear automatically.
+
 ---
 
 ## Installation
