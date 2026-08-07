@@ -110,6 +110,51 @@ describe('c-scan-configurator', () => {
         expect(config.rules).toBeUndefined();
     });
 
+    it('dispatches configimport for a YAML document (VS Code .flow-scanner.yml)', async () => {
+        const element = createComponent();
+        await Promise.resolve();
+
+        const handler = jest.fn();
+        element.addEventListener('configimport', handler);
+
+        const ok = element.applyImportedText(
+            [
+                'rules:',
+                '  excessive-cyclomatic-complexity:',
+                '    threshold: 30',
+                '  invalid-api-version:',
+                "    expression: '>=58'",
+                'threshold: error',
+                'ruleMode: isolated'
+            ].join('\n'),
+            '.flow-scanner.yml'
+        );
+
+        expect(ok).toBe(true);
+        expect(handler).toHaveBeenCalledTimes(1);
+        const config = handler.mock.calls[0][0].detail.config;
+        expect(config.rules['excessive-cyclomatic-complexity'].threshold).toBe(30);
+        expect(config.rules['invalid-api-version'].expression).toBe('>=58');
+        expect(config.ruleMode).toBe('isolated');
+    });
+
+    it('rejects unparseable YAML with an error message and no event', async () => {
+        const element = createComponent();
+        await Promise.resolve();
+
+        const handler = jest.fn();
+        element.addEventListener('configimport', handler);
+
+        const ok = element.applyImportedText('rules: &anchor oops', '.flow-scanner.yml');
+
+        expect(ok).toBe(false);
+        expect(handler).not.toHaveBeenCalled();
+        await Promise.resolve();
+        const msg = element.shadowRoot.querySelector('.import-msg');
+        expect(msg.textContent).toMatch(/Could not parse \.flow-scanner\.yml/);
+        expect(msg.className).toMatch(/import-msg_error/);
+    });
+
     it('rejects invalid JSON with an error message and no event', async () => {
         const element = createComponent();
         await Promise.resolve();

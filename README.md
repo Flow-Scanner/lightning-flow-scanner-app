@@ -69,7 +69,7 @@ Admins can define **default severities**, **expressions**, or **disabled states*
 2. Click **New** and set the following fields:
 
 - **Rule Name** — legacy name (e.g. `FlowName`) or canonical rule id (e.g. `invalid-naming-convention`)
-- **Severity** — `Error`, `Warning`, `Info`, or `Note`
+- **Severity** — `Error`, `Warning`, or `Note` (other values are ignored)
 - **Expression** *(optional)* — e.g., `[A-Za-z]+_[0-9]+`
 - **Disabled** — check to turn off the rule globally
 
@@ -79,13 +79,14 @@ Admins can define **default severities**, **expressions**, or **disabled states*
  <img src="media/overrides.jpg" alt="Rule Override" width="68%" />
 </p>
 
-### Import JSON (same format as CLI / VS Code)
+### Import a config file (same format as CLI / VS Code)
 
-On the **Configuration** tab, use **Load JSON config** to import a `.flow-scanner.json` file (or any JSON using the same schema the CLI and VS Code extension read). Supported:
+On the **Configuration** tab, use **Load config** to import a `.flow-scanner.json` or `.flow-scanner.yml` file — the same files the CLI reads and the VS Code extension writes. Supported:
 
-- Per-rule `severity`, `enabled` / `disabled`, `expression`, `threshold`, `message`, `messageUrl`
+- Per-rule `severity` (`error` / `warning` / `note`; anything else is ignored), `enabled` / `disabled`, `expression`, `threshold`, `message`, `messageUrl`
 - Rule keys as **rule ids** (`excessive-cyclomatic-complexity`) or **legacy names** (`CyclomaticComplexity`)
 - Top-level `threshold`, `categories`, `exceptions`, `ignoreFlows`, and related scan options
+- `ruleMode: "isolated"` — only the rules named in the config run; all others are deactivated
 
 Example:
 

@@ -20,6 +20,17 @@ const SCAN_META_KEYS = [
 // Per-rule keys that control enablement / severity UI rather than rule options.
 const RULE_CONTROL_KEYS = new Set(['severity', 'disabled', 'enabled']);
 
+// Core's severity set. Core itself does not validate — an unknown severity
+// written into a rule silently fails threshold filtering — so we validate here
+// and ignore anything else.
+const VALID_SEVERITIES = new Set(['error', 'warning', 'note']);
+
+function normalizeSeverity(value) {
+    if (typeof value !== 'string') return undefined;
+    const severity = value.toLowerCase();
+    return VALID_SEVERITIES.has(severity) ? severity : undefined;
+}
+
 export default class LightningFlowScannerApp extends LightningElement {
     @track activeTab = 1;
     @track records = [];
@@ -118,7 +129,8 @@ export default class LightningFlowScannerApp extends LightningElement {
             mdtRows.forEach(m => {
                 const rule = this.findRule(m.ruleName);
                 if (rule) {
-                    if (m.severity) rule.severity = m.severity.toLowerCase();
+                    const severity = normalizeSeverity(m.severity);
+                    if (severity) rule.severity = severity;
                     if (m.disabled != null) rule.isActive = !m.disabled;
                 }
                 // Persist expression into ruleOptions so buildRulesConfig() carries it
@@ -185,6 +197,9 @@ export default class LightningFlowScannerApp extends LightningElement {
     //   "exceptions": { ... }
     // }
     // A bare rules map (without the top-level "rules" key) is also tolerated.
+    // `ruleMode: "isolated"` matches core semantics: only the rules named in
+    // the config run; everything else is deactivated. Severities outside
+    // error|warning|note are ignored (core would silently break on them).
     async handleConfigImport(event) {
         const config = event.detail.config;
         if (!config || typeof config !== 'object') return;
@@ -203,7 +218,28 @@ export default class LightningFlowScannerApp extends LightningElement {
             SCAN_META_KEYS.forEach(k => {
                 if (config[k] !== undefined) meta[k] = config[k];
             });
+            // Core string-compares ruleMode against lowercase "isolated".
+            if (typeof meta.ruleMode === 'string') meta.ruleMode = meta.ruleMode.toLowerCase();
             this.scanMeta = meta;
+        }
+
+        // In isolated mode the config's rule keys are the complete set of
+        // rules to run — deactivate everything else, then let explicit
+        // per-rule enabled/disabled flags below refine the named ones.
+        const isolated =
+            hasRulesKey &&
+            rulesMap &&
+            Object.keys(rulesMap).length > 0 &&
+            String(config.ruleMode || '').toLowerCase() === 'isolated';
+        if (isolated) {
+            const named = new Set();
+            Object.keys(rulesMap).forEach(identifier => {
+                const rule = this.findRule(identifier);
+                if (rule) named.add(rule.ruleId);
+            });
+            this.rules.forEach(r => {
+                r.isActive = named.has(r.ruleId);
+            });
         }
 
         if (rulesMap) {
@@ -211,8 +247,9 @@ export default class LightningFlowScannerApp extends LightningElement {
                 const ruleCfg = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
                 const ui = this.findRule(identifier);
                 if (ui) {
-                    if (ruleCfg.severity) {
-                        ui.severity = String(ruleCfg.severity).toLowerCase();
+                    const severity = normalizeSeverity(ruleCfg.severity);
+                    if (severity) {
+                        ui.severity = severity;
                     }
                     if (ruleCfg.disabled === true || ruleCfg.enabled === false) {
                         ui.isActive = false;

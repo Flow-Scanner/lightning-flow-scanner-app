@@ -1,12 +1,13 @@
 import { LightningElement, api, track } from 'lwc';
+import { parseConfigText } from 'c/configParser';
 
 export default class scanConfigurator extends LightningElement {
     _rules;
     @track localRules;
+    // Core's severity set is error | warning | note — there is no "info".
     severityOptions = [
         { label: 'Error', value: 'error' },
         { label: 'Warning', value: 'warning' },
-        { label: 'Info', value: 'info' },
         { label: 'Note', value: 'note' }
     ];
 
@@ -145,15 +146,16 @@ export default class scanConfigurator extends LightningElement {
         reader.readAsText(file);
     }
 
-    // Parse a JSON config string and, if valid, emit it for the app to apply.
-    // @api so unit tests can exercise parse/dispatch without a FileReader.
-    // Accepts the same document shape as the CLI / VS Code extension
-    // (.flow-scanner.json), or a bare `{ "<ruleId>": { ... } }` rules map.
+    // Parse a JSON or YAML config string and, if valid, emit it for the app to
+    // apply. @api so unit tests can exercise parse/dispatch without a FileReader.
+    // Accepts the same document shapes the CLI / VS Code extension read
+    // (.flow-scanner.json / .flow-scanner.yml), or a bare
+    // `{ "<ruleId>": { ... } }` rules map.
     @api
     applyImportedText(text, sourceName) {
         let config;
         try {
-            config = JSON.parse(text);
+            config = parseConfigText(text, sourceName);
         } catch (e) {
             this.setImportMessage(
                 `Could not parse ${sourceName || 'configuration'}: ${e.message}`,
@@ -163,7 +165,7 @@ export default class scanConfigurator extends LightningElement {
         }
         if (!config || typeof config !== 'object' || Array.isArray(config)) {
             this.setImportMessage(
-                `${sourceName || 'Configuration'} must be a JSON object`,
+                `${sourceName || 'Configuration'} must be a JSON or YAML object`,
                 true
             );
             return false;
