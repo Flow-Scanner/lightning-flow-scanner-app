@@ -43,10 +43,13 @@ public with sharing class ToolingAPI {
     
     @TestVisible
     private static String getProductionAccessToken() {
-        if (!Schema.sObjectType.Flow_Scanner_OAuth_Config_Protected__mdt.fields.Consumer_Key__c.isAccessible()) {
-            throw auraError('Insufficient permissions to access OAuth configuration');
-        }
-        
+        // No FLS check here on purpose. Flow_Scanner_OAuth_Config_Protected__mdt is a
+        // *protected* custom metadata type, so its records are only readable by Apex inside
+        // this package's namespace — that namespace boundary is the security control, not
+        // the running user's field permissions. isAccessible() returns false for every
+        // non-admin subscriber user, which blocked anyone without Customize Application
+        // from authenticating at all. Setup actions that *write* this config stay
+        // admin-gated in LFSSetupController.requireAdmin().
         List<Flow_Scanner_OAuth_Config_Protected__mdt> cfgs = [
             SELECT Consumer_Key__c
             FROM Flow_Scanner_OAuth_Config_Protected__mdt

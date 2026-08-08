@@ -105,9 +105,9 @@ public with sharing class LFSSetupController {
     }
 
     private static Flow_Scanner_OAuth_Config_Protected__mdt getConfig() {
-        if (!Schema.sObjectType.Flow_Scanner_OAuth_Config_Protected__mdt.fields.Consumer_Key__c.isAccessible()) {
-            return null;
-        }
+        // See ToolingAPI.getProductionAccessToken(): the protected custom metadata type is
+        // namespace-scoped, so no FLS gate is needed here. Gating on isAccessible() made
+        // getSetupStatus() report "not configured" to every non-admin.
         List<Flow_Scanner_OAuth_Config_Protected__mdt> cfgs = [
             SELECT Consumer_Key__c, Last_Updated__c
             FROM Flow_Scanner_OAuth_Config_Protected__mdt
