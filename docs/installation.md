@@ -36,16 +36,25 @@ To enable server-to-server authentication for your application using JWT Bearer 
    - Leave all other flows (Client Credentials, Token Exchange, Device Flow, etc.) unchecked.
 5. Click **Save**.
 
-### Step 4 – Configure the Consumer Key (1 minute)
+### Step 4 – Pre-Authorize the App's Users (1 minute)
+
+The JWT Bearer Flow has no interactive login screen where a user could approve the app, so every user must be pre-authorized by an admin. Without this step, authentication fails with `invalid_app_access: user is not admin approved to access this app`.
+
+1. In **External Client App Manager → Flow Scanner JWT**, open the **Policies** tab and click **Edit**.
+2. Under **OAuth Policies**, set **Permitted Users** to **Admin approved users are pre-authorized** → **Save**.
+3. Still on the **Policies** tab, assign the profiles or permission sets that should use Flow Scanner (e.g. **System Administrator**) — including your own, or your Test Connection in the next step will fail.
+   - If you need more granularity, create a custom (unmanaged) Permission Set and assign it here instead.
+
+### Step 5 – Configure the Consumer Key (1 minute)
 1. Open the app in **External Client App Manager → Flow Scanner JWT**.
 2. On the **Settings** tab, expand **OAuth Settings** and click **Consumer Key and Secret** (verify identity once).
 3. **Copy the Consumer Key** (starts with `3MVG…`).
 4. Open the **Flow Scanner** app (App Launcher → search for `Flow Scanner`) and go to its **Setup** tab.
 5. Paste the Consumer Key into the **Consumer Key** field and click **Save Consumer Key**.
 6. Wait for the confirmation (the deployment takes 10–30 seconds; the step turns green automatically).
-7. Click **Test Connection** to verify the end-to-end JWT authentication.
+7. The app then verifies the end-to-end JWT authentication automatically — steps 3 and 4 in the checklist turn green when it succeeds. If it fails, the error message names the setup step to fix. You can re-run the check any time with **Test Connection**.
 
-The Setup tab also shows a checklist of the other steps (permission set, certificate) with links into Setup, so you can see at a glance what's still missing.
+The Setup tab shows this same checklist (permission set, certificate, External Client App, OAuth policies, Consumer Key) with links into Setup, so you can see at a glance what's still missing. The connection check also runs automatically every time an admin opens the tab, so the checklist always reflects the real state.
 
 > **Note:** The Consumer Key is stored securely in protected custom metadata and is not visible in the UI.
 
@@ -73,12 +82,6 @@ if (String.isBlank(consumerKey) || consumerKey.contains('YOUR_CONSUMER_KEY_HERE'
 
 </details>
 
-### Step 5 – Pre-Authorize the External Client App (optional, to avoid consent screen)
-1. In **External Client App Manager → Flow Scanner JWT**, open the **Policies** tab and click **Edit**.
-2. Under **OAuth Policies**, set **Permitted Users** to **Admin approved users are pre-authorized** → **Save**.
-3. Still on the **Policies** tab, assign the profiles or permission sets that should use Flow Scanner (e.g. **System Administrator**).
-   - This allows those users to use the app without prompts. If you need more granularity, create a custom (unmanaged) Permission Set and assign it here instead.
-
 **The app is now ready to use!** Assigned users can run Flow Scanner features, and JWT authentication will handle Tooling API calls seamlessly.
 
 ---
@@ -92,7 +95,7 @@ Salesforce is restricting the *creation of new* Connected Apps, not the use of e
 If you do want to migrate to an External Client App:
 
 1. Create the External Client App as described in [Step 3](#step-3--create-the-external-client-app). You can upload the **same** `Flow_Scanner` certificate you already use — both apps can hold it during the transition.
-2. Pre-authorize the new app first ([Step 5](#step-5--pre-authorize-the-external-client-app-optional-to-avoid-consent-screen)) so there's no consent gap when you switch.
-3. Save the new app's Consumer Key in the Flow Scanner **Setup** tab ([Step 4](#step-4--configure-the-consumer-key-1-minute)). Only one key is stored, so this is the moment the switch happens.
-4. Click **Test Connection**. If anything is off, saving the old Consumer Key again switches you straight back to the Connected App.
+2. Pre-authorize the new app first ([Step 4](#step-4--pre-authorize-the-apps-users-1-minute)) so there's no authorization gap when you switch.
+3. Save the new app's Consumer Key in the Flow Scanner **Setup** tab ([Step 5](#step-5--configure-the-consumer-key-1-minute)). Only one key is stored, so this is the moment the switch happens.
+4. The app verifies the connection automatically after the save. If anything is off, saving the old Consumer Key again switches you straight back to the Connected App.
 5. Once the test passes, delete the old Connected App.

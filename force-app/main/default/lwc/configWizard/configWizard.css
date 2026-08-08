@@ -1,0 +1,27 @@
+.wizard-content {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.rule-list {
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+.beta-badge {
+    display: inline-block;
+    margin-left: 0.375rem;
+    padding: 0 0.375rem;
+    border-radius: 0.625rem;
+    background: #f3f3f3;
+    color: #706e6b;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    vertical-align: middle;
+}
+
+.review-list .slds-item_label {
+    width: 8rem;
+}

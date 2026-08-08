@@ -1,0 +1,137 @@
+<template>
+    <section role="dialog" tabindex="-1" aria-modal="true" aria-label="Configure Rules"
+        class="slds-modal slds-fade-in-open slds-modal_medium">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <h2 class="slds-modal__title slds-hyphenate">Configure Rules</h2>
+            </header>
+
+            <div class="slds-modal__content slds-p-around_medium wizard-content">
+                <lightning-progress-indicator current-step={stepValue} type="base" variant="base">
+                    <lightning-progress-step label="Mode" value="1"></lightning-progress-step>
+                    <lightning-progress-step label="Rules" value="2"></lightning-progress-step>
+                    <lightning-progress-step label="Options" value="3"></lightning-progress-step>
+                    <lightning-progress-step label="Review" value="4"></lightning-progress-step>
+                </lightning-progress-indicator>
+
+                <!-- Step 1: rule mode + beta opt-in -->
+                <template if:true={isStepMode}>
+                    <div class="slds-m-top_medium">
+                        <lightning-radio-group name="ruleMode" label="Rule mode" options={ruleModeOptions}
+                            value={ruleMode} type="radio" onchange={handleRuleModeChange}></lightning-radio-group>
+                        <p class="slds-text-color_weak slds-m-top_x-small">{ruleModeHelp}</p>
+                        <lightning-input type="toggle" label="Include beta rules" checked={includeBeta}
+                            data-id="beta-toggle" onchange={handleBetaChange} class="slds-m-top_medium"
+                            message-toggle-active="Beta rules can be selected in the next step"
+                            message-toggle-inactive="Beta rules stay disabled"></lightning-input>
+                    </div>
+                </template>
+
+                <!-- Step 2: rule selection -->
+                <template if:true={isStepRules}>
+                    <div class="slds-m-top_medium">
+                        <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                            <lightning-input type="search" variant="label-hidden" placeholder="Search rules"
+                                class="slds-col slds-size_1-of-2" onkeyup={handleSearch}></lightning-input>
+                            <div class="slds-col slds-text-align_right">
+                                <span class="slds-text-color_weak slds-m-right_small">{selectionSummary}</span>
+                                <lightning-button label="Select All" onclick={handleSelectAll}></lightning-button>
+                                <lightning-button label="Deselect All" onclick={handleDeselectAll}
+                                    class="slds-m-left_x-small"></lightning-button>
+                            </div>
+                        </div>
+                        <ul class="slds-has-dividers_bottom-space rule-list">
+                            <template for:each={selectableRules} for:item="rule">
+                                <li key={rule.ruleId} class="slds-item slds-grid slds-grid_vertical-align-center">
+                                    <lightning-input type="checkbox" variant="label-hidden" checked={rule.checked}
+                                        data-rule-id={rule.ruleId} onchange={handleRuleCheck}
+                                        class="slds-m-right_small"></lightning-input>
+                                    <div class="slds-col">
+                                        <div>
+                                            <span class="slds-text-title_bold">{rule.name}</span>
+                                            <template if:true={rule.isBeta}>
+                                                <span class="beta-badge"
+                                                    title="Beta rule — results may change between releases">Beta</span>
+                                            </template>
+                                        </div>
+                                        <div class="slds-text-color_weak slds-text-body_small">{rule.description}</div>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </template>
+
+                <!-- Step 3: per-rule options (thresholds, expressions) -->
+                <template if:true={isStepOptions}>
+                    <div class="slds-m-top_medium">
+                        <template if:true={hasOptionRules}>
+                            <p class="slds-text-color_weak slds-m-bottom_small">
+                                Leave a field empty to use the core default.
+                            </p>
+                            <template for:each={optionRules} for:item="rule">
+                                <div key={rule.ruleId} class="slds-box slds-box_x-small slds-m-bottom_small">
+                                    <div class="slds-text-title_bold slds-m-bottom_x-small">{rule.name}</div>
+                                    <template for:each={rule.optionEditors} for:item="opt">
+                                        <lightning-input key={opt.name} type={opt.inputType} label={opt.name}
+                                            field-level-help={opt.description} value={opt.value}
+                                            placeholder={opt.placeholder} data-rule-id={rule.ruleId}
+                                            data-option={opt.name} data-option-type={opt.type}
+                                            onchange={handleOptionInput}
+                                            class="slds-m-bottom_x-small"></lightning-input>
+                                    </template>
+                                </div>
+                            </template>
+                        </template>
+                        <template if:false={hasOptionRules}>
+                            <p class="slds-text-color_weak">
+                                None of the selected rules have configurable options. Continue to review.
+                            </p>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Step 4: review -->
+                <template if:true={isStepReview}>
+                    <dl class="slds-list_horizontal slds-wrap slds-m-top_medium review-list">
+                        <dt class="slds-item_label slds-text-color_weak">Rule mode</dt>
+                        <dd class="slds-item_detail">{reviewModeLabel}</dd>
+                        <dt class="slds-item_label slds-text-color_weak">Beta rules</dt>
+                        <dd class="slds-item_detail">{reviewBetaLabel}</dd>
+                        <dt class="slds-item_label slds-text-color_weak">Enabled rules</dt>
+                        <dd class="slds-item_detail">{selectionSummary}</dd>
+                    </dl>
+                    <template if:true={hasReviewOverrides}>
+                        <div class="slds-text-title_bold slds-m-top_small">Option overrides</div>
+                        <ul class="slds-list_dotted">
+                            <template for:each={reviewOverrides} for:item="override">
+                                <li key={override.key}>{override.label}</li>
+                            </template>
+                        </ul>
+                    </template>
+                    <p class="slds-text-color_weak slds-m-top_small">
+                        Applying updates the Configuration tab and re-runs any open scan. Use
+                        <b>Export</b> in the toolbar afterwards to download the result as
+                        <code>.flow-scanner.json</code>.
+                    </p>
+                </template>
+            </div>
+
+            <footer class="slds-modal__footer">
+                <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+                <template if:true={showBack}>
+                    <lightning-button label="Back" onclick={handleBack} class="slds-m-left_x-small"></lightning-button>
+                </template>
+                <template if:true={showNext}>
+                    <lightning-button variant="brand" label="Next" onclick={handleNext}
+                        class="slds-m-left_x-small"></lightning-button>
+                </template>
+                <template if:true={isStepReview}>
+                    <lightning-button variant="brand" label="Apply" onclick={handleApply}
+                        class="slds-m-left_x-small"></lightning-button>
+                </template>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>

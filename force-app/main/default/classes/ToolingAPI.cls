@@ -88,13 +88,39 @@ public with sharing class ToolingAPI {
         
         HttpResponse res = new Http().send(req);
         if (res.getStatusCode() != 200) {
-            throw auraError('OAuth authentication failed: ' + res.getBody());
+            throw auraError('OAuth authentication failed: ' + res.getBody() + oauthHint(res.getBody()));
         }
         
         Map<String, Object> json = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
         return (String) json.get('access_token');
     }
     
+    // Salesforce's raw OAuth errors don't say which setup step is wrong; map the
+    // common JWT Bearer Flow failures to the exact fix.
+    @TestVisible
+    private static String oauthHint(String body) {
+        if (body == null) {
+            return '';
+        }
+        if (body.contains('invalid_app_access')) {
+            return ' Fix: on the External Client App\'s Policies tab, set Permitted Users to '
+                + '"Admin approved users are pre-authorized" and assign your profile or permission set.';
+        }
+        if (body.containsIgnoreCase('refresh_token scope')) {
+            return ' Fix: add the OAuth scope "Perform requests at any time (refresh_token, offline_access)" '
+                + 'to the External Client App, alongside "Manage user data via APIs (api)".';
+        }
+        if (body.contains('invalid_client_id')) {
+            return ' Fix: verify the saved Consumer Key matches the app. Newly created apps can take '
+                + 'up to 10 minutes to become active.';
+        }
+        if (body.contains('invalid_grant')) {
+            return ' Fix: verify the certificate uploaded to the app is the .crt of the Flow_Scanner '
+                + 'certificate, and that your user\'s profile or permission set is assigned to the app.';
+        }
+        return '';
+    }
+
     // AuraHandledException only carries its message to the client; getMessage() in Apex
     // returns 'Script-thrown exception' unless setMessage is also called.
     private static AuraHandledException auraError(String message) {

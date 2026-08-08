@@ -13,7 +13,10 @@
 
 .toolbar-row {
   width: 100%;
-  gap: 0.5rem;
+  /* slds-grid is nowrap by default; with search, toggles, and four action
+     buttons the row must be allowed to break onto extra lines. */
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
   padding: 0.25rem 0.5rem;
   background-color: #003087;
   color: #ffffff;
@@ -42,9 +45,16 @@
 }
 
 .toolbar-item {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   min-width: 120px;
   max-width: 200px;
+}
+
+/* Action buttons size to their label — the 120px floor would otherwise force
+   overly wide items and premature overflow when the viewport narrows. */
+.toolbar-action {
+  min-width: 0;
+  max-width: none;
 }
 
 .toolbar-item .compact-input {
@@ -153,4 +163,31 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+/* JSON config file picker sits in the toolbar */
+.import-file {
+  min-width: 10rem;
+}
+
+/* Inline rule option editors (expression, threshold) */
+.options-cell {
+  min-width: 9rem;
+  max-width: 14rem;
+}
+.option-input {
+  display: block;
+}
+.option-input:not(:first-child) {
+  margin-top: 0.25rem;
+}
+
+/* Import config feedback message */
+.import-msg {
+  font-size: 0.8rem;
+}
+.import-msg_success {
+  color: #2e7d32;
+}
+.import-msg_error {
+  color: #c62828;
 }
