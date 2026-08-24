@@ -183,6 +183,30 @@ lightning-datatable {
     text-align: left;
     white-space: nowrap;
     border: none !important;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.custom-datatable {
+    /* Resized columns can push the table past its container */
+    overflow-x: auto;
+}
+
+.col-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+}
+
+.col-resizer:hover,
+.col-resizer:active {
+    background-color: rgba(255, 255, 255, 0.35);
 }
 
 .full-width-table td {
