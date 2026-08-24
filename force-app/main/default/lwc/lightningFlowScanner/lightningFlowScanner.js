@@ -1,5 +1,7 @@
 import { LightningElement, api } from "lwc";
 
+const MIN_COLUMN_WIDTH = 60;
+
 export default class LightningFlowScanner extends LightningElement {
     @api name;
     @api metadata;
@@ -15,6 +17,23 @@ export default class LightningFlowScanner extends LightningElement {
     sortField = null;
     sortDirection = "asc";
     sortIndicators = {};
+
+    // Widths are kept per table (single-flow vs all-flows mode) since the two
+    // tables have different columns.
+    _colWidths = { single: {}, all: {} };
+    _tableFixed = { single: false, all: false };
+    _resizing = null;
+    _suppressNextSort = false;
+
+    renderedCallback() {
+        // Re-renders (sorting, filtering, mode switches) rebuild the table DOM,
+        // so any user-chosen column widths must be reapplied afterwards.
+        this._applyColWidths();
+    }
+
+    disconnectedCallback() {
+        this._teardownResizeListeners();
+    }
 
     // ----- MODE GETTERS -----
     get isAllMode() {
@@ -78,6 +97,10 @@ export default class LightningFlowScanner extends LightningElement {
 
     // ----- SORTING -----
     handleSort(event) {
+        if (this._suppressNextSort) {
+            this._suppressNextSort = false;
+            return;
+        }
         const field = event.currentTarget.dataset.field;
         if (!field) return;
 
@@ -89,6 +112,92 @@ export default class LightningFlowScanner extends LightningElement {
         }
 
         this.sortIndicators = { [field]: this.sortDirection === "asc" ? "▲" : "▼" };
+    }
+
+    // ----- COLUMN RESIZING -----
+    handleResizerClick(event) {
+        event.stopPropagation();
+    }
+
+    handleResizeStart(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const th = event.currentTarget.closest("th");
+        const table = th && th.closest("table");
+        if (!table) return;
+        const key = table.dataset.tableKey;
+        const headers = Array.from(table.querySelectorAll("thead th"));
+        const widths = this._colWidths[key];
+
+        // Freeze the current layout widths so untouched columns keep their
+        // size while one column is dragged.
+        headers.forEach((el, i) => {
+            if (widths[i] === undefined) {
+                widths[i] = el.getBoundingClientRect().width;
+            }
+        });
+        this._tableFixed[key] = true;
+
+        const index = headers.indexOf(th);
+        this._resizing = {
+            key,
+            index,
+            startX: event.clientX,
+            startWidth: widths[index]
+        };
+        this._applyColWidths();
+
+        this._onResizeMove = (e) => this._handleResizeMove(e);
+        this._onResizeEnd = () => this._handleResizeEnd();
+        window.addEventListener("mousemove", this._onResizeMove);
+        window.addEventListener("mouseup", this._onResizeEnd);
+    }
+
+    _handleResizeMove(event) {
+        if (!this._resizing) return;
+        const delta = event.clientX - this._resizing.startX;
+        this._colWidths[this._resizing.key][this._resizing.index] = Math.max(
+            MIN_COLUMN_WIDTH,
+            this._resizing.startWidth + delta
+        );
+        this._applyColWidths();
+    }
+
+    _handleResizeEnd() {
+        this._resizing = null;
+        // A click fires on the header right after mouseup — don't let it sort.
+        this._suppressNextSort = true;
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        setTimeout(() => {
+            this._suppressNextSort = false;
+        }, 0);
+        this._teardownResizeListeners();
+    }
+
+    _teardownResizeListeners() {
+        if (this._onResizeMove) {
+            window.removeEventListener("mousemove", this._onResizeMove);
+            this._onResizeMove = null;
+        }
+        if (this._onResizeEnd) {
+            window.removeEventListener("mouseup", this._onResizeEnd);
+            this._onResizeEnd = null;
+        }
+    }
+
+    _applyColWidths() {
+        const table = this.template.querySelector("table[data-table-key]");
+        if (!table) return;
+        const key = table.dataset.tableKey;
+        const widths = this._colWidths[key];
+        if (this._tableFixed[key]) {
+            table.style.tableLayout = "fixed";
+        }
+        Array.from(table.querySelectorAll("thead th")).forEach((el, i) => {
+            if (widths[i] !== undefined) {
+                el.style.width = `${widths[i]}px`;
+            }
+        });
     }
 
     // ----- FLATTENED VIOLATIONS -----
@@ -108,7 +217,6 @@ export default class LightningFlowScanner extends LightningElement {
                     severity: rule.severity,
                     name: detail.name,
                     type: detail.type,
-                    metaType: detail.metaType,
                     dataType: detail.details ? detail.details.dataType : "",
                     locationX: detail.details ? detail.details.locationX : "",
                     locationY: detail.details ? detail.details.locationY : "",
@@ -161,7 +269,6 @@ export default class LightningFlowScanner extends LightningElement {
                     (v.severity || "").toLowerCase().includes(f) ||
                     (v.name || "").toLowerCase().includes(f) ||
                     (v.type || "").toLowerCase().includes(f) ||
-                    (v.metaType || "").toLowerCase().includes(f) ||
                     (v.dataType || "").toLowerCase().includes(f) ||
                     (v.connectsTo || "").toLowerCase().includes(f) ||
                     (v.expression || "").toLowerCase().includes(f)
@@ -198,14 +305,14 @@ export default class LightningFlowScanner extends LightningElement {
         if (!this.hasFlattenedViolations) return;
 
         const headers = [
-            "Flow Name", "Rule Name", "Severity", "Detail Name", "Type", "Meta Type",
+            "Flow Name", "Rule Name", "Severity", "Detail Name", "Type",
             "Data Type", "Location X", "Location Y", "Connects To", "Expression"
         ];
 
         const rows = this.filteredViolations.map(v =>
             [
                 v.flowName, v.ruleName, v.severity, v.name, v.type,
-                v.metaType, v.dataType, v.locationX, v.locationY, v.connectsTo, v.expression
+                v.dataType, v.locationX, v.locationY, v.connectsTo, v.expression
             ].map(f => `"${String(f || "").replace(/"/g, '""')}"`)
         );
 

@@ -34,19 +34,28 @@
                 <!-- Table -->
                 <template if:true={hasScanResults}>
                     <div class="custom-datatable">
-                        <table class="slds-table slds-table_cell-buffer slds-table_bordered full-width-table">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered full-width-table"
+                            data-table-key="single">
                             <thead>
                                 <tr>
-                                    <th data-field="ruleName" onclick={handleSort}>Rule Name {sortIndicators.ruleName}</th>
-                                    <th data-field="severity" onclick={handleSort}>Severity {sortIndicators.severity}</th>
-                                    <th data-field="name" onclick={handleSort}>Violation Name {sortIndicators.name}</th>
-                                    <th data-field="type" onclick={handleSort}>Type {sortIndicators.type}</th>
-                                    <th data-field="metaType" onclick={handleSort}>Meta Type {sortIndicators.metaType}</th>
-                                    <th data-field="dataType" onclick={handleSort}>Data Type {sortIndicators.dataType}</th>
-                                    <th data-field="locationX" onclick={handleSort}>Location X {sortIndicators.locationX}</th>
-                                    <th data-field="locationY" onclick={handleSort}>Location Y {sortIndicators.locationY}</th>
-                                    <th data-field="connectsTo" onclick={handleSort}>Connects To {sortIndicators.connectsTo}</th>
-                                    <th data-field="expression" onclick={handleSort}>Expression {sortIndicators.expression}</th>
+                                    <th data-field="ruleName" onclick={handleSort}>Rule Name {sortIndicators.ruleName}<span
+                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                    <th data-field="severity" onclick={handleSort}>Severity {sortIndicators.severity}<span
+                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                    <th data-field="name" onclick={handleSort}>Violation Name {sortIndicators.name}<span
+                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                    <th data-field="type" onclick={handleSort}>Type {sortIndicators.type}<span
+                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                    <th data-field="dataType" onclick={handleSort}>Data Type {sortIndicators.dataType}<span
+                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                    <th data-field="locationX" onclick={handleSort}>Location X {sortIndicators.locationX}<span
+                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                    <th data-field="locationY" onclick={handleSort}>Location Y {sortIndicators.locationY}<span
+                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                    <th data-field="connectsTo" onclick={handleSort}>Connects To {sortIndicators.connectsTo}<span
+                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                    <th data-field="expression" onclick={handleSort}>Expression {sortIndicators.expression}<span
+                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -56,7 +65,6 @@
                                         <td title={v.severity}>{v.severity}</td>
                                         <td title={v.name}>{v.name}</td>
                                         <td title={v.type}>{v.type}</td>
-                                        <td title={v.metaType}>{v.metaType}</td>
                                         <td title={v.dataType}>{v.dataType}</td>
                                         <td title={v.locationX}>{v.locationX}</td>
                                         <td title={v.locationY}>{v.locationY}</td>
@@ -105,20 +113,30 @@
                     <div class="table-card">
                         <template if:true={hasFlattenedViolations}>
                             <div class="custom-datatable">
-                                <table class="slds-table slds-table_cell-buffer full-width-table">
+                                <table class="slds-table slds-table_cell-buffer full-width-table"
+                                    data-table-key="all">
                                     <thead>
                                         <tr>
-                                            <th data-field="flowName" onclick={handleSort}>Flow {sortIndicators.flowName}</th>
-                                            <th data-field="ruleName" onclick={handleSort}>Rule Name {sortIndicators.ruleName}</th>
-                                            <th data-field="severity" onclick={handleSort}>Severity {sortIndicators.severity}</th>
-                                            <th data-field="name" onclick={handleSort}>Violation Name {sortIndicators.name}</th>
-                                            <th data-field="type" onclick={handleSort}>Type {sortIndicators.type}</th>
-                                            <th data-field="metaType" onclick={handleSort}>Meta Type {sortIndicators.metaType}</th>
-                                            <th data-field="dataType" onclick={handleSort}>Data Type {sortIndicators.dataType}</th>
-                                            <th data-field="locationX" onclick={handleSort}>Location X {sortIndicators.locationX}</th>
-                                            <th data-field="locationY" onclick={handleSort}>Location Y {sortIndicators.locationY}</th>
-                                            <th data-field="connectsTo" onclick={handleSort}>Connects To {sortIndicators.connectsTo}</th>
-                                            <th data-field="expression" onclick={handleSort}>Expression {sortIndicators.expression}</th>
+                                            <th data-field="flowName" onclick={handleSort}>Flow {sortIndicators.flowName}<span
+                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                            <th data-field="ruleName" onclick={handleSort}>Rule Name {sortIndicators.ruleName}<span
+                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                            <th data-field="severity" onclick={handleSort}>Severity {sortIndicators.severity}<span
+                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                            <th data-field="name" onclick={handleSort}>Violation Name {sortIndicators.name}<span
+                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                            <th data-field="type" onclick={handleSort}>Type {sortIndicators.type}<span
+                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                            <th data-field="dataType" onclick={handleSort}>Data Type {sortIndicators.dataType}<span
+                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                            <th data-field="locationX" onclick={handleSort}>Location X {sortIndicators.locationX}<span
+                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                            <th data-field="locationY" onclick={handleSort}>Location Y {sortIndicators.locationY}<span
+                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                            <th data-field="connectsTo" onclick={handleSort}>Connects To {sortIndicators.connectsTo}<span
+                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                            <th data-field="expression" onclick={handleSort}>Expression {sortIndicators.expression}<span
+                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -129,7 +147,6 @@
                                                 <td title={v.severity}>{v.severity}</td>
                                                 <td title={v.name}>{v.name}</td>
                                                 <td title={v.type}>{v.type}</td>
-                                                <td title={v.metaType}>{v.metaType}</td>
                                                 <td title={v.dataType}>{v.dataType}</td>
                                                 <td title={v.locationX}>{v.locationX}</td>
                                                 <td title={v.locationY}>{v.locationY}</td>
