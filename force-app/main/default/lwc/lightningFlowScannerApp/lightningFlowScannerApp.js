@@ -61,6 +61,12 @@ export default class LightningFlowScannerApp extends LightningElement {
     scriptLoaded = false;
     autoSwitchedToSetup = false;
 
+    // Per-flow issue counts are computed in the background (metadata fetch +
+    // client-side scan per flow); the cache maps versionId -> count and is
+    // invalidated whenever the rule configuration changes.
+    _issueCountCache = new Map();
+    _issueCountRun = 0;
+
     /* ────────────────────── GETTERS ────────────────────── */
     get isTab1Active() { return this.activeTab === 1; }
     get isTab2Active() { return this.activeTab === 2; }
@@ -79,6 +85,7 @@ export default class LightningFlowScannerApp extends LightningElement {
             await this.loadMDTOverrides();
             await this.loadSavedConfig();
             await this.loadFlows();
+            this.computeIssueCounts();
         } catch (e) {
             this.err = e.message || e.body?.message;
             console.error(e);
@@ -473,7 +480,79 @@ export default class LightningFlowScannerApp extends LightningElement {
 
     handleSearch(event) {
         this.searchKey = event.detail.searchTerm;
-        this.loadFlows();
+        this.loadFlows().then(() => this.computeIssueCounts());
+    }
+
+    /* ────────────────────── ASYNC ISSUE COUNTS ────────────────────── */
+    // Flow definitions load near-instantly, but counting issues needs the full
+    // metadata of every flow plus a scan — so counts stream in per flow while
+    // the overview stays interactive. A small worker pool keeps the Tooling
+    // API calls bounded, and a run token discards results that finish after a
+    // newer search / rule change superseded them.
+    async computeIssueCounts() {
+        if (!this.scriptLoaded || !this.records.length) return;
+        const run = ++this._issueCountRun;
+
+        let seeded = false;
+        this.records.forEach(rec => {
+            if (this._issueCountCache.has(rec.versionId)) {
+                rec.issueCount = this._issueCountCache.get(rec.versionId);
+                seeded = true;
+            }
+        });
+        if (seeded) this.records = [...this.records];
+
+        const pending = this.records.filter(r => r.issueCount === undefined);
+        if (!pending.length) return;
+
+        const opts = this.prepareScanOptions();
+        let next = 0;
+        const worker = async () => {
+            // Each worker is deliberately sequential; the pool provides the
+            // concurrency, keeping Tooling API traffic bounded.
+            /* eslint-disable no-await-in-loop */
+            while (next < pending.length && run === this._issueCountRun) {
+                const rec = pending[next++];
+                let count = null;
+                try {
+                    const meta = await getFlowMetadata({ versionId: rec.versionId });
+                    const flow = new window.lightningflowscanner.Flow(meta.fullName, meta.metadata);
+                    const uri = `/services/data/v62.0/tooling/sobjects/Flow/${rec.versionId}`;
+                    const scan = window.lightningflowscanner.scan([{ uri, flow }], opts);
+                    count = this.countIssues(this.postProcessScanResult(scan[0], opts));
+                } catch {
+                    count = null;    // shown as "—" in the overview
+                }
+                if (run !== this._issueCountRun) return;
+                if (count !== null) this._issueCountCache.set(rec.versionId, count);
+                this.setRecordIssueCount(rec.versionId, count);
+            }
+            /* eslint-enable no-await-in-loop */
+        };
+        const POOL_SIZE = 4;
+        await Promise.all(
+            Array.from({ length: Math.min(POOL_SIZE, pending.length) }, worker)
+        );
+    }
+
+    countIssues(res) {
+        return (res?.ruleResults ?? []).reduce(
+            (total, r) => total + (r.details?.length || 0), 0
+        );
+    }
+
+    setRecordIssueCount(versionId, count) {
+        const target = this.records.find(r => r.versionId === versionId);
+        if (target) {
+            target.issueCount = count;
+            this.records = [...this.records];   // push the update into the overview
+        }
+    }
+
+    resetIssueCounts() {
+        this._issueCountRun++;                  // cancel any in-flight run
+        this._issueCountCache.clear();
+        this.records = this.records.map(r => ({ ...r, issueCount: undefined }));
     }
 
     /* ────────────────────── SINGLE FLOW ────────────────────── */
@@ -503,6 +582,11 @@ export default class LightningFlowScannerApp extends LightningElement {
             const scan = window.lightningflowscanner.scan([{ uri, flow }], opts);
 
             this.scanResult = this.postProcessScanResult(scan[0], opts);
+
+            // A fresh single-flow scan is authoritative for that flow's count
+            const count = this.countIssues(this.scanResult);
+            this._issueCountCache.set(this.selectedFlowRecord.versionId, count);
+            this.setRecordIssueCount(this.selectedFlowRecord.versionId, count);
         } catch (e) {
             this.err = e.message;
         } finally {
@@ -589,6 +673,17 @@ export default class LightningFlowScannerApp extends LightningElement {
                 }
             });
             this.allScanResults = (await Promise.all(promises)).filter(r => r);
+
+            // Scan-all already did the expensive work — reuse it for the counts
+            this.allScanResults.forEach(r => {
+                const rec = this.records.find(x => x.id === r.flowId);
+                if (rec) {
+                    const count = this.countIssues(r.scanResult);
+                    this._issueCountCache.set(rec.versionId, count);
+                    rec.issueCount = count;
+                }
+            });
+            this.records = [...this.records];
         } catch (e) {
             this.err = e.message;
         } finally {
@@ -624,8 +719,10 @@ export default class LightningFlowScannerApp extends LightningElement {
     async handleRuleChange(event) {
         this.rules = event.detail.rules;
         this.buildRulesConfig();
+        this.resetIssueCounts();
         if (this.allScanResults.length) await this.scanAllFlows();
         else if (this.selectedFlowRecord) await this.scanCurrentFlow();
+        this.computeIssueCounts();
     }
 
     handleNavigateFlow(event) {
