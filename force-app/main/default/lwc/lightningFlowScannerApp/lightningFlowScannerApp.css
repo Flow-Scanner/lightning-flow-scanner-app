@@ -66,9 +66,57 @@ c-lightning-flow-scanner {
   width: 100%;
 }
 
+/* The tab strip renders directly on the app-page background, which can be a
+   dark or image-based theme in subscriber orgs. Keep the tabs opaque and fully
+   self-styled so they stay readable regardless of the org theme and don't
+   depend on the global SLDS stylesheet reaching into this component. */
 .slds-tabs_default__nav {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  list-style: none;
+  padding: 0;
   border-bottom: none !important;
-  margin-bottom: 0 !important;
+  margin: 0 !important;
+  background-color: #ffffff;
+  border-radius: 0.5rem 0.5rem 0 0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.slds-tabs_default__item {
+  margin: 0;
+}
+
+.slds-tabs_default__item + .slds-tabs_default__item {
+  border-left: 1px solid #e5e5e5;
+}
+
+.slds-tabs_default__link {
+  display: flex;
+  align-items: center;
+  height: 2.25rem;
+  padding: 0 1rem;
+  background-color: transparent;
+  color: #003087;
+  font-weight: 600;
+  font-size: 0.85rem;
+  line-height: 1;
+  text-decoration: none;
+  border: none;
+  border-radius: 0;
+}
+
+.slds-tabs_default__link:hover,
+.slds-tabs_default__link:focus {
+  background-color: #e6f0ff;
+  color: #00205b;
+  text-decoration: none;
+}
+
+.slds-tabs_default__link.slds-active {
+  background-color: #003087;
+  color: #ffffff;
 }
 
 .slds-tabs_default__content {
