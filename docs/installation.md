@@ -42,8 +42,8 @@ The JWT Bearer Flow has no interactive login screen where a user could approve t
 
 1. In **External Client App Manager → Flow Scanner JWT**, open the **Policies** tab and click **Edit**.
 2. Under **OAuth Policies**, set **Permitted Users** to **Admin approved users are pre-authorized** → **Save**.
-3. Still on the **Policies** tab, assign the profiles or permission sets that should use Flow Scanner (e.g. **System Administrator**) — including your own, or your Test Connection in the next step will fail.
-   - If you need more granularity, create a custom (unmanaged) Permission Set and assign it here instead.
+3. Still on the **Policies** tab, assign the permission sets or profiles that should use Flow Scanner — the simplest choice is the **Flow Scanner** permission set from Step 1, so the same assignment covers both the app and the pre-authorization. Include yourself, or your Test Connection in the next step will fail.
+   - Non-admin users need nothing beyond the **Flow Scanner** permission set: it grants the OAuth configuration read access, **API Enabled**, and **View Setup and Configuration** that Tooling API authentication requires.
 
 ### Step 5 – Configure the Consumer Key (1 minute)
 1. Open the app in **External Client App Manager → Flow Scanner JWT**.
