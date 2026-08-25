@@ -436,6 +436,50 @@ function sleep(milliseconds) {
 function configureAndVerify(targetOrg, consumerKey, namespace) {
   "use strict";
   const prefix = namespace ? `${namespace}.` : "";
+
+  if (namespace) {
+    // In the managed package only LFSSetup is global — the LFSSetupController
+    // verification below is not callable from subscriber anonymous Apex, so
+    // poll the metadata deployment that configure() enqueues instead.
+    const logs = runApex(
+      targetOrg,
+      [
+        `Id jobId = ${prefix}LFSSetup.configure('${consumerKey}');`,
+        "System.debug('FLOW_SCANNER_JOB=' + jobId);"
+      ].join("\n")
+    );
+    const job = logs.match(/FLOW_SCANNER_JOB=([0-9A-Za-z]{15,18})/);
+    if (!job) {
+      throw new Error("Could not read the deployment job id from the debug log.");
+    }
+    let status = "";
+    for (let attempt = 0; attempt < 15 && status !== "Succeeded"; attempt++) {
+      sleep(4000);
+      const body = JSON.parse(
+        sf([
+          "api",
+          "request",
+          "rest",
+          `/services/data/v${API_VERSION}/metadata/deployRequest/${job[1]}`,
+          "--target-org",
+          targetOrg
+        ])
+      );
+      status = (body.deployResult && body.deployResult.status) || "";
+      if (status === "Failed" || status === "Canceled") {
+        throw new Error(`Consumer Key deployment ${status.toLowerCase()}.`);
+      }
+    }
+    if (status !== "Succeeded") {
+      throw new Error("The Consumer Key was not stored within a minute.");
+    }
+    return {
+      success: true,
+      message:
+        "Consumer Key stored. Open the app's Setup tab — the connection check runs automatically there."
+    };
+  }
+
   runApex(targetOrg, `${prefix}LFSSetup.configure('${consumerKey}');`);
 
   // configure() deploys protected custom metadata asynchronously, so wait for it.
