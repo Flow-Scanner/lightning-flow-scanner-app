@@ -101,11 +101,6 @@ npm run setup:jwt -- --target-org <alias> --namespace lfscanner
 
 The script creates the `Flow_Scanner` self-signed certificate, deploys the `Flow Scanner JWT` External Client App with the certificate attached, reads the generated Consumer Key back out of the org, stores it through `LFSSetup.configure()`, assigns the **Flow Scanner** permission set and finishes by running the same connection test as the Setup tab. It is safe to re-run: an existing certificate is left untouched and the app is simply redeployed.
 
-Notes:
-
-- The org must allow External Client Apps. Scratch orgs need the `ExternalClientApps` feature in the scratch definition file.
-- Pre-authorization is granted to the running user's own profile, so a non-English org works without changes.
-
 ---
 
 ## Existing Connected App setups
