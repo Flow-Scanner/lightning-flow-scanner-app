@@ -22,7 +22,8 @@
         "prettier:verify": "prettier --check \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
         "precommit": "lint-staged",
         "pkg:prepare": "node scripts/packaging.js prepare",
-        "pkg:restore": "node scripts/packaging.js restore"
+        "pkg:restore": "node scripts/packaging.js restore",
+        "setup:jwt": "node scripts/setup-jwt.js"
     },
     "devDependencies": {
         "@eslint/js": "^9.37.0",
