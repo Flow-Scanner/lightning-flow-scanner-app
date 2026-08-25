@@ -4,6 +4,8 @@ To enable server-to-server authentication for your application using JWT Bearer 
 
 > **Already set up with a Connected App?** Nothing breaks — see [Existing Connected App setups](#existing-connected-app-setups) below.
 
+> **Prefer a single command?** If you have the Salesforce CLI and this repository, `npm run setup:jwt -- --target-org <alias>` does all of the steps below for you — see [Automated setup](#automated-setup).
+
 ### Step 1 – Assign the Permission Set
 1. Go to **Setup → Permission Sets → Flow Scanner**.
 2. Click **Manage Assignments** → add your users → **Done**.
@@ -83,6 +85,24 @@ if (String.isBlank(consumerKey) || consumerKey.contains('YOUR_CONSUMER_KEY_HERE'
 </details>
 
 **The app is now ready to use!** Assigned users can run Flow Scanner features, and JWT authentication will handle Tooling API calls seamlessly.
+
+---
+
+## Automated setup
+
+If you have the [Salesforce CLI](https://developer.salesforce.com/tools/salesforcecli) installed and a clone of this repository, one command replaces Steps 1–5:
+
+```bash
+npm run setup:jwt -- --target-org <alias>
+```
+
+For the managed package, pass the namespace so the script calls the right Apex class:
+
+```bash
+npm run setup:jwt -- --target-org <alias> --namespace lfscanner
+```
+
+The script creates the `Flow_Scanner` self-signed certificate, deploys the `Flow Scanner JWT` External Client App with the certificate attached, reads the generated Consumer Key back out of the org, stores it through `LFSSetup.configure()`, assigns the **Flow Scanner** permission set and finishes by running the same connection test as the Setup tab. It is safe to re-run: an existing certificate is left untouched and the app is simply redeployed.
 
 ---
 
