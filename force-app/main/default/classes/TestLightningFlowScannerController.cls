@@ -83,6 +83,7 @@ private class TestLightningFlowScannerController {
         mockResult.records = new List<Map<String,Object>>{
             new Map<String,Object>{
                 'Id' => '301a',
+                'DefinitionId' => '300a',
                 'Definition' => new Map<String,Object>{ 'DeveloperName' => 'ActiveFlow' },
                 'MasterLabel' => 'Active Flow',
                 'Status' => 'Active',
@@ -91,6 +92,7 @@ private class TestLightningFlowScannerController {
             },
             new Map<String,Object>{
                 'Id' => '301b',
+                'DefinitionId' => '300b',
                 'Definition' => new Map<String,Object>{ 'DeveloperName' => 'DraftFlow' },
                 'MasterLabel' => 'Draft Flow',
                 'Status' => 'Draft',
