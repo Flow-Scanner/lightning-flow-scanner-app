@@ -14,3 +14,14 @@
  color: #5a5a5a !important;
  opacity: 1;
 }
+
+/* -----------------------------
+ Toolbar Toggles
+ ----------------------------- */
+/* The Active/Inactive (and Beta shown/hidden) text under toolbar toggles
+ defaults to SLDS gray, which is unreadable on the dark blue toolbar. */
+.toolbar-row .compact-toggle .slds-checkbox_faux_container,
+.toolbar-row .compact-toggle .slds-checkbox_on,
+.toolbar-row .compact-toggle .slds-checkbox_off {
+ color: #ffffff !important;
+}
