@@ -164,7 +164,7 @@ lightning-datatable {
 
 .full-width-table {
     width: 100%;
-    min-width: 1400px;
+    min-width: 1000px;
     table-layout: fixed;
     border-collapse: collapse;
     margin: 0;
@@ -219,8 +219,8 @@ lightning-datatable {
     border-top: 1px solid #ddd;
 }
 
-.expression-cell {
-    max-width: 250px;
+.details-cell {
+    max-width: 320px;
     white-space: normal;
 }
 

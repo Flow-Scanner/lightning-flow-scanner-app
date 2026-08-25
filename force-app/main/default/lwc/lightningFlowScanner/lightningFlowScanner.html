@@ -46,15 +46,7 @@
                                             class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
                                     <th data-field="type" onclick={handleSort}>Type {sortIndicators.type}<span
                                             class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
-                                    <th data-field="dataType" onclick={handleSort}>Data Type {sortIndicators.dataType}<span
-                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
-                                    <th data-field="locationX" onclick={handleSort}>Location X {sortIndicators.locationX}<span
-                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
-                                    <th data-field="locationY" onclick={handleSort}>Location Y {sortIndicators.locationY}<span
-                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
-                                    <th data-field="connectsTo" onclick={handleSort}>Connects To {sortIndicators.connectsTo}<span
-                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
-                                    <th data-field="expression" onclick={handleSort}>Expression {sortIndicators.expression}<span
+                                    <th data-field="details" onclick={handleSort}>Details {sortIndicators.details}<span
                                             class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
                                 </tr>
                             </thead>
@@ -65,11 +57,7 @@
                                         <td title={v.severity}>{v.severity}</td>
                                         <td title={v.name}>{v.name}</td>
                                         <td title={v.type}>{v.type}</td>
-                                        <td title={v.dataType}>{v.dataType}</td>
-                                        <td title={v.locationX}>{v.locationX}</td>
-                                        <td title={v.locationY}>{v.locationY}</td>
-                                        <td title={v.connectsTo}>{v.connectsTo}</td>
-                                        <td class="expression-cell" title={v.expression}>{v.expression}</td>
+                                        <td class="details-cell" title={v.details}>{v.details}</td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -127,15 +115,7 @@
                                                     class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
                                             <th data-field="type" onclick={handleSort}>Type {sortIndicators.type}<span
                                                     class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
-                                            <th data-field="dataType" onclick={handleSort}>Data Type {sortIndicators.dataType}<span
-                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
-                                            <th data-field="locationX" onclick={handleSort}>Location X {sortIndicators.locationX}<span
-                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
-                                            <th data-field="locationY" onclick={handleSort}>Location Y {sortIndicators.locationY}<span
-                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
-                                            <th data-field="connectsTo" onclick={handleSort}>Connects To {sortIndicators.connectsTo}<span
-                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
-                                            <th data-field="expression" onclick={handleSort}>Expression {sortIndicators.expression}<span
+                                            <th data-field="details" onclick={handleSort}>Details {sortIndicators.details}<span
                                                     class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
                                         </tr>
                                     </thead>
@@ -147,11 +127,7 @@
                                                 <td title={v.severity}>{v.severity}</td>
                                                 <td title={v.name}>{v.name}</td>
                                                 <td title={v.type}>{v.type}</td>
-                                                <td title={v.dataType}>{v.dataType}</td>
-                                                <td title={v.locationX}>{v.locationX}</td>
-                                                <td title={v.locationY}>{v.locationY}</td>
-                                                <td title={v.connectsTo}>{v.connectsTo}</td>
-                                                <td class="expression-cell" title={v.expression}>{v.expression}</td>
+                                                <td class="details-cell" title={v.details}>{v.details}</td>
                                             </tr>
                                         </template>
                                     </tbody>
