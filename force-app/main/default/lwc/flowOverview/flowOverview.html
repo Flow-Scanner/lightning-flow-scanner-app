@@ -28,6 +28,16 @@
             <lightning-input type="toggle" label="Active" checked={activeOnly} onchange={handleToggleChange}
                 class="compact-toggle" variant="label-hidden"></lightning-input>
         </div>
+
+        <!-- Violations -->
+        <div class="toolbar-item slds-p-left_x-small" title="Total violations across all flows">
+            <span class="slds-text-body_small toolbar-stats">
+                <strong>Violations: {totalIssues}</strong>
+                <template if:true={countsPending}>
+                    <span class="count-loading toolbar-count-loading" title="Scanning flows…"></span>
+                </template>
+            </span>
+        </div>
     </div>
     <div class="table-card">
         <template if:true={err}>
@@ -43,17 +53,37 @@
                 <table class="slds-table slds-table_cell-buffer full-width-table">
                     <thead>
                         <tr>
-                            <th data-field="masterLabel" onclick={handleHeaderSort}>Label {sortIndicators.masterLabel}</th>
-                            <th data-field="developerName" onclick={handleHeaderSort}>API Name {sortIndicators.developerName}</th>
-                            <th data-field="processType" onclick={handleHeaderSort}>Process Type {sortIndicators.processType}</th>
-                            <th data-field="lastModifiedDate" onclick={handleHeaderSort}>Last Modified Date {sortIndicators.lastModifiedDate}</th>
-                            <th data-field="isActive" onclick={handleHeaderSort} class="center-cell">Is Active {sortIndicators.isActive}</th>
+                            <th data-field="issueCount" onclick={handleHeaderSort} class="center-cell">Issues {sortIndicators.issueCount}<span
+                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                            <th data-field="masterLabel" onclick={handleHeaderSort}>Label {sortIndicators.masterLabel}<span
+                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                            <th data-field="developerName" onclick={handleHeaderSort}>API Name {sortIndicators.developerName}<span
+                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                            <th data-field="processType" onclick={handleHeaderSort}>Process Type {sortIndicators.processType}<span
+                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                            <th data-field="lastModifiedDate" onclick={handleHeaderSort}>Last Modified Date {sortIndicators.lastModifiedDate}<span
+                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                            <th data-field="isActive" onclick={handleHeaderSort} class="center-cell">Is Active {sortIndicators.isActive}<span
+                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
                             <th>Results</th>
                         </tr>
                     </thead>
                     <tbody>
                         <template for:each={displayedRecords} for:item="r">
                             <tr key={r.id}>
+                                <td class="center-cell">
+                                    <template if:true={r.issueCountKnown}>
+                                        <span class="issue-count">{r.issueCount}</span>
+                                    </template>
+                                    <template if:false={r.issueCountKnown}>
+                                        <template if:true={r.issueCountFailed}>
+                                            <span class="issue-count-failed" title="Scan failed for this flow">—</span>
+                                        </template>
+                                        <template if:false={r.issueCountFailed}>
+                                            <span class="count-loading" title="Scanning…"></span>
+                                        </template>
+                                    </template>
+                                </td>
                                 <td title={r.masterLabel}>{r.masterLabel}</td>
                                 <td title={r.developerName}>
                                     <a href={r.developerNameUrl} target="_blank" rel="noopener noreferrer">{r.developerName}</a>
@@ -87,10 +117,10 @@
     <div class="footer">
         <div class="github-info">
             Want to help improve&nbsp;
-            <a href="https://flow-scanner.github.io/lightning-flow-scanner-core/" target="_blank">Lightning Flow
+            <a href="https://github.com/Flow-Scanner/lightning-flow-scanner" target="_blank">Lightning Flow
                 Scanner</a>
             ?&nbsp;See our&nbsp;
-            <a href="https://github.com/Flow-Scanner/lightning-flow-scanner-core?tab=contributing-ov-file"
+            <a href="https://github.com/Flow-Scanner/lightning-flow-scanner?tab=contributing-ov-file"
                 target="_blank">Contributing Guidelines</a>.
         </div>
     </div>

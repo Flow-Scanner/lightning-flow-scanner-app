@@ -36,7 +36,7 @@ public with sharing class LightningFlowScannerController {
     @AuraEnabled(cacheable=false)
     public static List<FlowDefinitionWrapper> getFlowDefinitions(String searchTerm) {
         String safeTerm = String.escapeSingleQuotes(searchTerm);
-        String soql = 'SELECT Id, Definition.DeveloperName, MasterLabel, ProcessType, ' +
+        String soql = 'SELECT Id, DefinitionId, Definition.DeveloperName, MasterLabel, ProcessType, ' +
                       'Status, LastModifiedDate ' +
                       'FROM Flow WHERE Status IN (\'Active\', \'Draft\')';
 
@@ -55,7 +55,9 @@ public with sharing class LightningFlowScannerController {
 
                 if (!flowMap.containsKey(devName)) {
                     FlowDefinitionWrapper w = new FlowDefinitionWrapper();
-                    w.id = (String) rec.get('Id');
+                    // The FlowDefinition (300…) id — links must open the flow,
+                    // not the version record (301…).
+                    w.id = (String) rec.get('DefinitionId');
                     w.developerName = devName;
                     w.masterLabel = (String) rec.get('MasterLabel');
                     w.isActive = 'Active'.equals((String) rec.get('Status'));

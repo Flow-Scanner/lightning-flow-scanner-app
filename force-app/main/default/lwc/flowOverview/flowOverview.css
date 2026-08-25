@@ -88,6 +88,8 @@
 
 .custom-datatable {
     margin-top: 0;
+    /* Resized columns can push the table past its container */
+    overflow-x: auto;
 }
 
 /* Table — same treatment as the Results tab */
@@ -109,6 +111,24 @@
     white-space: nowrap;
     border: none;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.col-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+}
+
+.col-resizer:hover,
+.col-resizer:active {
+    background-color: rgba(255, 255, 255, 0.35);
 }
 
 .full-width-table td {
@@ -129,6 +149,42 @@
 
 .center-cell {
     text-align: center;
+}
+
+.toolbar-stats {
+    color: #ffffff;
+    white-space: nowrap;
+}
+
+.count-loading {
+    display: inline-block;
+    width: 0.85rem;
+    height: 0.85rem;
+    border: 2px solid #d8dde6;
+    border-top-color: #003087;
+    border-radius: 50%;
+    animation: count-spin 0.8s linear infinite;
+    vertical-align: middle;
+}
+
+.toolbar-count-loading {
+    border-color: rgba(255, 255, 255, 0.4);
+    border-top-color: #ffffff;
+    margin-left: 0.4rem;
+}
+
+@keyframes count-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.issue-count {
+    font-weight: 600;
+}
+
+.issue-count-failed {
+    color: #999;
 }
 
 .details-button {

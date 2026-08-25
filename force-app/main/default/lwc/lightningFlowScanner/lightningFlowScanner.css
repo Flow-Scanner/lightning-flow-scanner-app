@@ -164,7 +164,7 @@ lightning-datatable {
 
 .full-width-table {
     width: 100%;
-    min-width: 1400px;
+    min-width: 1000px;
     table-layout: fixed;
     border-collapse: collapse;
     margin: 0;
@@ -183,6 +183,30 @@ lightning-datatable {
     text-align: left;
     white-space: nowrap;
     border: none !important;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.custom-datatable {
+    /* Resized columns can push the table past its container */
+    overflow-x: auto;
+}
+
+.col-resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 100%;
+    cursor: col-resize;
+    user-select: none;
+}
+
+.col-resizer:hover,
+.col-resizer:active {
+    background-color: rgba(255, 255, 255, 0.35);
 }
 
 .full-width-table td {
@@ -195,8 +219,8 @@ lightning-datatable {
     border-top: 1px solid #ddd;
 }
 
-.expression-cell {
-    max-width: 250px;
+.details-cell {
+    max-width: 320px;
     white-space: normal;
 }
 

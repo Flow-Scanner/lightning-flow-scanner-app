@@ -9,6 +9,8 @@
  <img src="media/lfs-app.gif" alt="Lightning Flow Scanner Demo" />
 </p>
 
+**Lightning Flow Scanner App** is a free Salesforce app for static analysis of Flows. It scans your flow metadata directly inside your org — no data leaves Salesforce — and flags 20+ best-practice violations such as unsafe running contexts, SOQL and DML statements in loops, hardcoded IDs and URLs, missing fault paths, and unused variables, before they reach production.
+
 ---
 
 ## Table of contents
@@ -25,20 +27,26 @@
 
 ### Flow Overview
 
+Browse every flow in your org with live issue counts, search by name, label, or type, and open any flow directly from its API name.
+
 <p align="center">
- <img src="media/flowoverview.jpg" alt="Flow Overview" width="68%" />
+ <img src="media/flowoverview.jpg" alt="Flow Overview — all flows with issue counts" width="68%" />
 </p>
 
 ### Violation Details
 
+All scan results in one sortable, searchable table: rule, severity, and contextual details for every violation, with links to each flow and CSV export.
+
 <p align="center">
-  <img src="media/allresults.jpg" alt="All Results View" width="68%" />
+  <img src="media/allresults.jpg" alt="Scan results — violations across all flows" width="68%" />
 </p>
 
-### Rule Configuration:
+### Rule Configuration
+
+Enable, disable, and tune every rule inline — severity, expressions, and thresholds — or use the guided wizard, config file import/export, and org-wide saving.
 
 <p align="center">
- <img src="media/config.jpg" alt="Rule Configuration" width="68%" />
+ <img src="media/config.jpg" alt="Rule configuration — severities, options, and beta rules" width="68%" />
 </p>
 
 ## Usage
@@ -125,9 +133,9 @@ Rules with configurable options (e.g. the naming `expression` or complexity `thr
 
 | Deployment Type | Installation |
 |-----------------|----------------|
-| [**AppExchange(managed)**](https://appexchange.salesforce.com/appxListingDetail?listingId=80d6caf3-d4a8-41ec-b48e-da1fe3457e98) | <a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK000000GVmDQAW"><img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
+| [**AppExchange(managed)**](https://appexchange.salesforce.com/appxListingDetail?listingId=80d6caf3-d4a8-41ec-b48e-da1fe3457e98) | <a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tgK000000IRjJQAW"><img alt="Install Managed Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
 | **Unmanaged** | <a href="https://githubsfdeploy.herokuapp.com?owner=Flow-Scanner&repo=lightning-flow-scanner-app&ref=main"><img alt="Install Unmanaged Package" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/deploy.png"></a> |
-| **Or via CLI** | `sf package install --package 04tgK000000GVmDQAW --wait 10` |
+| **Or via CLI** | `sf package install --package 04tgK000000IRjJQAW --wait 10` |
 
 > After installation, complete the [Post-Installation Setup](docs/installation.md) to configure the External Client App and assign permissions.
 

@@ -2,9 +2,9 @@
   "packageDirectories": [
     {
       "package": "flow-scanner",
-      "versionName": "v3.4",
-      "versionNumber": "3.4.0.NEXT",
-      "versionDescription": "Configuration import and wizard: import CLI/VS Code rule configs, edit rule options inline, and save configuration in the org",
+      "versionName": "v3.5",
+      "versionNumber": "3.5.0.NEXT",
+      "versionDescription": "UI improvements: unified violation Details column, clickable flow links, resizable rule configuration columns, non-admin Tooling API authentication, automated JWT setup script",
       "ancestorVersion": "HIGHEST"
     }
   ],
@@ -16,6 +16,7 @@
     "flow-scanner@3.0.0-2": "04tgK0000007M73QAE",
     "flow-scanner@3.2.0-1": "04tgK0000008CLlQAM",
     "flow-scanner@3.3.0-1": "04tgK000000E7ODQA0",
-    "flow-scanner@3.4.0-1": "04tgK000000GVmDQAW"
+    "flow-scanner@3.4.0-1": "04tgK000000GVmDQAW",
+    "flow-scanner@3.5.0-1": "04tgK000000IRjJQAW"
   }
 }

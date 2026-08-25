@@ -1,5 +1,7 @@
 import { LightningElement, api } from "lwc";
 
+const MIN_COLUMN_WIDTH = 60;
+
 export default class LightningFlowScanner extends LightningElement {
     @api name;
     @api metadata;
@@ -15,6 +17,23 @@ export default class LightningFlowScanner extends LightningElement {
     sortField = null;
     sortDirection = "asc";
     sortIndicators = {};
+
+    // Widths are kept per table (single-flow vs all-flows mode) since the two
+    // tables have different columns.
+    _colWidths = { single: {}, all: {} };
+    _tableFixed = { single: false, all: false };
+    _resizing = null;
+    _suppressNextSort = false;
+
+    renderedCallback() {
+        // Re-renders (sorting, filtering, mode switches) rebuild the table DOM,
+        // so any user-chosen column widths must be reapplied afterwards.
+        this._applyColWidths();
+    }
+
+    disconnectedCallback() {
+        this._teardownResizeListeners();
+    }
 
     // ----- MODE GETTERS -----
     get isAllMode() {
@@ -78,6 +97,10 @@ export default class LightningFlowScanner extends LightningElement {
 
     // ----- SORTING -----
     handleSort(event) {
+        if (this._suppressNextSort) {
+            this._suppressNextSort = false;
+            return;
+        }
         const field = event.currentTarget.dataset.field;
         if (!field) return;
 
@@ -91,6 +114,92 @@ export default class LightningFlowScanner extends LightningElement {
         this.sortIndicators = { [field]: this.sortDirection === "asc" ? "▲" : "▼" };
     }
 
+    // ----- COLUMN RESIZING -----
+    handleResizerClick(event) {
+        event.stopPropagation();
+    }
+
+    handleResizeStart(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const th = event.currentTarget.closest("th");
+        const table = th && th.closest("table");
+        if (!table) return;
+        const key = table.dataset.tableKey;
+        const headers = Array.from(table.querySelectorAll("thead th"));
+        const widths = this._colWidths[key];
+
+        // Freeze the current layout widths so untouched columns keep their
+        // size while one column is dragged.
+        headers.forEach((el, i) => {
+            if (widths[i] === undefined) {
+                widths[i] = el.getBoundingClientRect().width;
+            }
+        });
+        this._tableFixed[key] = true;
+
+        const index = headers.indexOf(th);
+        this._resizing = {
+            key,
+            index,
+            startX: event.clientX,
+            startWidth: widths[index]
+        };
+        this._applyColWidths();
+
+        this._onResizeMove = (e) => this._handleResizeMove(e);
+        this._onResizeEnd = () => this._handleResizeEnd();
+        window.addEventListener("mousemove", this._onResizeMove);
+        window.addEventListener("mouseup", this._onResizeEnd);
+    }
+
+    _handleResizeMove(event) {
+        if (!this._resizing) return;
+        const delta = event.clientX - this._resizing.startX;
+        this._colWidths[this._resizing.key][this._resizing.index] = Math.max(
+            MIN_COLUMN_WIDTH,
+            this._resizing.startWidth + delta
+        );
+        this._applyColWidths();
+    }
+
+    _handleResizeEnd() {
+        this._resizing = null;
+        // A click fires on the header right after mouseup — don't let it sort.
+        this._suppressNextSort = true;
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        setTimeout(() => {
+            this._suppressNextSort = false;
+        }, 0);
+        this._teardownResizeListeners();
+    }
+
+    _teardownResizeListeners() {
+        if (this._onResizeMove) {
+            window.removeEventListener("mousemove", this._onResizeMove);
+            this._onResizeMove = null;
+        }
+        if (this._onResizeEnd) {
+            window.removeEventListener("mouseup", this._onResizeEnd);
+            this._onResizeEnd = null;
+        }
+    }
+
+    _applyColWidths() {
+        const table = this.template.querySelector("table[data-table-key]");
+        if (!table) return;
+        const key = table.dataset.tableKey;
+        const widths = this._colWidths[key];
+        if (this._tableFixed[key]) {
+            table.style.tableLayout = "fixed";
+        }
+        Array.from(table.querySelectorAll("thead th")).forEach((el, i) => {
+            if (widths[i] !== undefined) {
+                el.style.width = `${widths[i]}px`;
+            }
+        });
+    }
+
     // ----- FLATTENED VIOLATIONS -----
     get flattenedViolations() {
         let violations = [];
@@ -98,57 +207,87 @@ export default class LightningFlowScanner extends LightningElement {
         // flowKey keeps row keys unique across flows in all-mode — detail.id values
         // (e.g. "res-0-0") repeat per flow, and duplicate for:each keys break LWC's
         // list diffing when a sort reorders the rows.
-        const processRuleDetails = (rule, ruleIndex, flowName, flowKey) => {
+        const processRuleDetails = (rule, ruleIndex, flowCtx, flowKey) => {
             if (!rule.details) return;
             rule.details.forEach((detail, detailIndex) => {
+                const d = detail.details || {};
+                const connectsTo = Array.isArray(d.connectsTo)
+                    ? d.connectsTo.join(", ")
+                    : d.connectsTo || "";
                 violations.push({
                     id: `flow-${flowKey}-rule-${ruleIndex}-detail-${detailIndex}`,
-                    flowName: flowName,
+                    flowName: flowCtx.flowName,
+                    flowApiName: flowCtx.flowApiName,
+                    flowUrl: flowCtx.flowUrl,
                     ruleName: rule.ruleName,
                     severity: rule.severity,
                     name: detail.name,
                     type: detail.type,
-                    metaType: detail.metaType,
-                    dataType: detail.details ? detail.details.dataType : "",
-                    locationX: detail.details ? detail.details.locationX : "",
-                    locationY: detail.details ? detail.details.locationY : "",
-                    connectsTo: detail.connectsTo || "",
-                    expression: detail.details ? detail.details.expression : ""
+                    dataType: d.dataType ?? "",
+                    locationX: d.locationX ?? "",
+                    locationY: d.locationY ?? "",
+                    connectsTo: connectsTo,
+                    expression: d.expression ?? "",
+                    details: this.composeDetails(d, connectsTo)
                 });
             });
         };
 
         if (this.isAllMode) {
             this.allScanResults.forEach((item, itemIndex) => {
-                const flowName = item.flowName;
+                const flowCtx = {
+                    flowName: item.flowName,
+                    flowApiName: item.flowApiName || item.flowName,
+                    flowUrl: item.flowId ? `/${item.flowId}` : ""
+                };
                 item.scanResult?.ruleResults?.forEach((rule, ruleIndex) =>
-                    processRuleDetails(rule, ruleIndex, flowName, itemIndex)
+                    processRuleDetails(rule, ruleIndex, flowCtx, itemIndex)
                 );
             });
         } else {
-            const flowName =
-                this.flowName ||
-                (this.selectedFlowRecord &&
-                    (this.selectedFlowRecord.masterLabel ||
-                        this.selectedFlowRecord.developerName)) ||
-                "";
+            const rec = this.selectedFlowRecord;
+            const flowCtx = {
+                flowName:
+                    this.flowName ||
+                    (rec && (rec.masterLabel || rec.developerName)) ||
+                    "",
+                flowApiName: (rec && rec.developerName) || this.flowName || "",
+                flowUrl: rec && rec.id ? `/${rec.id}` : ""
+            };
             this.scanResult?.ruleResults?.forEach((rule, ruleIndex) =>
-                processRuleDetails(rule, ruleIndex, flowName, "single")
+                processRuleDetails(rule, ruleIndex, flowCtx, "single")
             );
         }
 
         return violations;
     }
 
+    // One display string per row: the core populates exactly one detail group
+    // per metaType (variable → dataType, node → location/connectors,
+    // attribute → expression, resource → none).
+    composeDetails(d, connectsTo) {
+        if (d.dataType) return `Data Type: ${d.dataType}`;
+        if (d.locationX != null || d.locationY != null) {
+            const location = `Location: ${d.locationX ?? ""}, ${d.locationY ?? ""}`;
+            return connectsTo
+                ? `${location} · Connects to: ${connectsTo}`
+                : location;
+        }
+        if (d.expression) return d.expression;
+        return "";
+    }
+
     // ----- FILTERED & SORTED VIOLATIONS -----
     get filteredViolations() {
         let filtered = [...this.flattenedViolations];
 
-        // Flow name filter
+        // Flow name filter (label or API name — the column displays the API name)
         if (this.flowNameFilter) {
             const f = this.flowNameFilter.toLowerCase();
-            filtered = filtered.filter((v) =>
-                (v.flowName || "").toLowerCase().includes(f)
+            filtered = filtered.filter(
+                (v) =>
+                    (v.flowName || "").toLowerCase().includes(f) ||
+                    (v.flowApiName || "").toLowerCase().includes(f)
             );
         }
 
@@ -161,10 +300,7 @@ export default class LightningFlowScanner extends LightningElement {
                     (v.severity || "").toLowerCase().includes(f) ||
                     (v.name || "").toLowerCase().includes(f) ||
                     (v.type || "").toLowerCase().includes(f) ||
-                    (v.metaType || "").toLowerCase().includes(f) ||
-                    (v.dataType || "").toLowerCase().includes(f) ||
-                    (v.connectsTo || "").toLowerCase().includes(f) ||
-                    (v.expression || "").toLowerCase().includes(f)
+                    (v.details || "").toLowerCase().includes(f)
             );
         }
 
@@ -198,14 +334,14 @@ export default class LightningFlowScanner extends LightningElement {
         if (!this.hasFlattenedViolations) return;
 
         const headers = [
-            "Flow Name", "Rule Name", "Severity", "Detail Name", "Type", "Meta Type",
+            "Flow Name", "Flow API Name", "Rule Name", "Severity", "Detail Name", "Type",
             "Data Type", "Location X", "Location Y", "Connects To", "Expression"
         ];
 
         const rows = this.filteredViolations.map(v =>
             [
-                v.flowName, v.ruleName, v.severity, v.name, v.type,
-                v.metaType, v.dataType, v.locationX, v.locationY, v.connectsTo, v.expression
+                v.flowName, v.flowApiName, v.ruleName, v.severity, v.name, v.type,
+                v.dataType, v.locationX, v.locationY, v.connectsTo, v.expression
             ].map(f => `"${String(f || "").replace(/"/g, '""')}"`)
         );
 
