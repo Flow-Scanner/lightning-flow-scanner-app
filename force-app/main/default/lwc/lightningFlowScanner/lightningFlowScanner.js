@@ -207,7 +207,7 @@ export default class LightningFlowScanner extends LightningElement {
         // flowKey keeps row keys unique across flows in all-mode — detail.id values
         // (e.g. "res-0-0") repeat per flow, and duplicate for:each keys break LWC's
         // list diffing when a sort reorders the rows.
-        const processRuleDetails = (rule, ruleIndex, flowName, flowKey) => {
+        const processRuleDetails = (rule, ruleIndex, flowCtx, flowKey) => {
             if (!rule.details) return;
             rule.details.forEach((detail, detailIndex) => {
                 const d = detail.details || {};
@@ -216,7 +216,9 @@ export default class LightningFlowScanner extends LightningElement {
                     : d.connectsTo || "";
                 violations.push({
                     id: `flow-${flowKey}-rule-${ruleIndex}-detail-${detailIndex}`,
-                    flowName: flowName,
+                    flowName: flowCtx.flowName,
+                    flowApiName: flowCtx.flowApiName,
+                    flowUrl: flowCtx.flowUrl,
                     ruleName: rule.ruleName,
                     severity: rule.severity,
                     name: detail.name,
@@ -233,20 +235,27 @@ export default class LightningFlowScanner extends LightningElement {
 
         if (this.isAllMode) {
             this.allScanResults.forEach((item, itemIndex) => {
-                const flowName = item.flowName;
+                const flowCtx = {
+                    flowName: item.flowName,
+                    flowApiName: item.flowApiName || item.flowName,
+                    flowUrl: item.flowId ? `/${item.flowId}` : ""
+                };
                 item.scanResult?.ruleResults?.forEach((rule, ruleIndex) =>
-                    processRuleDetails(rule, ruleIndex, flowName, itemIndex)
+                    processRuleDetails(rule, ruleIndex, flowCtx, itemIndex)
                 );
             });
         } else {
-            const flowName =
-                this.flowName ||
-                (this.selectedFlowRecord &&
-                    (this.selectedFlowRecord.masterLabel ||
-                        this.selectedFlowRecord.developerName)) ||
-                "";
+            const rec = this.selectedFlowRecord;
+            const flowCtx = {
+                flowName:
+                    this.flowName ||
+                    (rec && (rec.masterLabel || rec.developerName)) ||
+                    "",
+                flowApiName: (rec && rec.developerName) || this.flowName || "",
+                flowUrl: rec && rec.id ? `/${rec.id}` : ""
+            };
             this.scanResult?.ruleResults?.forEach((rule, ruleIndex) =>
-                processRuleDetails(rule, ruleIndex, flowName, "single")
+                processRuleDetails(rule, ruleIndex, flowCtx, "single")
             );
         }
 
@@ -272,11 +281,13 @@ export default class LightningFlowScanner extends LightningElement {
     get filteredViolations() {
         let filtered = [...this.flattenedViolations];
 
-        // Flow name filter
+        // Flow name filter (label or API name — the column displays the API name)
         if (this.flowNameFilter) {
             const f = this.flowNameFilter.toLowerCase();
-            filtered = filtered.filter((v) =>
-                (v.flowName || "").toLowerCase().includes(f)
+            filtered = filtered.filter(
+                (v) =>
+                    (v.flowName || "").toLowerCase().includes(f) ||
+                    (v.flowApiName || "").toLowerCase().includes(f)
             );
         }
 
@@ -323,13 +334,13 @@ export default class LightningFlowScanner extends LightningElement {
         if (!this.hasFlattenedViolations) return;
 
         const headers = [
-            "Flow Name", "Rule Name", "Severity", "Detail Name", "Type",
+            "Flow Name", "Flow API Name", "Rule Name", "Severity", "Detail Name", "Type",
             "Data Type", "Location X", "Location Y", "Connects To", "Expression"
         ];
 
         const rows = this.filteredViolations.map(v =>
             [
-                v.flowName, v.ruleName, v.severity, v.name, v.type,
+                v.flowName, v.flowApiName, v.ruleName, v.severity, v.name, v.type,
                 v.dataType, v.locationX, v.locationY, v.connectsTo, v.expression
             ].map(f => `"${String(f || "").replace(/"/g, '""')}"`)
         );

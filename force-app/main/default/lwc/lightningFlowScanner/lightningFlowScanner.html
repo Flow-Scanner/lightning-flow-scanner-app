@@ -105,7 +105,7 @@
                                     data-table-key="all">
                                     <thead>
                                         <tr>
-                                            <th data-field="flowName" onclick={handleSort}>Flow {sortIndicators.flowName}<span
+                                            <th data-field="flowApiName" onclick={handleSort}>Flow {sortIndicators.flowApiName}<span
                                                     class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
                                             <th data-field="ruleName" onclick={handleSort}>Rule Name {sortIndicators.ruleName}<span
                                                     class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
@@ -122,7 +122,9 @@
                                     <tbody>
                                         <template for:each={filteredViolations} for:item="v">
                                             <tr key={v.id}>
-                                                <td title={v.flowName}>{v.flowName}</td>
+                                                <td title={v.flowApiName}>
+                                                    <a href={v.flowUrl} target="_blank" rel="noopener noreferrer">{v.flowApiName}</a>
+                                                </td>
                                                 <td title={v.ruleName}>{v.ruleName}</td>
                                                 <td title={v.severity}>{v.severity}</td>
                                                 <td title={v.name}>{v.name}</td>
