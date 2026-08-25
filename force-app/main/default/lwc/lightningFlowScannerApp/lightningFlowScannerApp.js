@@ -665,6 +665,7 @@ export default class LightningFlowScannerApp extends LightningElement {
                     const scan = window.lightningflowscanner.scan([{ uri, flow }], opts);
                     return {
                         flowName: rec.masterLabel || rec.developerName,
+                        flowApiName: rec.developerName,
                         flowId: rec.id,
                         scanResult: this.postProcessScanResult(scan[0], opts)
                     };
