@@ -79,8 +79,8 @@ describe('c-flow-overview', () => {
     it('shows the running total of known issue counts in the toolbar', async () => {
         const element = buildElement();
         await Promise.resolve();
-        const total = element.shadowRoot.querySelector('.toolbar-total');
-        expect(total.textContent).toContain('Total Issues: 3');
+        const total = element.shadowRoot.querySelector('.toolbar-stats');
+        expect(total.textContent).toContain('Violations: 3');
         // one record is still pending, so the toolbar spinner is visible
         expect(total.querySelector('.count-loading')).not.toBeNull();
     });
@@ -90,8 +90,8 @@ describe('c-flow-overview', () => {
             RECORDS.map((r) => ({ ...r, issueCount: 2 }))
         );
         await Promise.resolve();
-        const total = element.shadowRoot.querySelector('.toolbar-total');
-        expect(total.textContent).toContain('Total Issues: 6');
+        const total = element.shadowRoot.querySelector('.toolbar-stats');
+        expect(total.textContent).toContain('Violations: 6');
         expect(total.querySelector('.count-loading')).toBeNull();
     });
 

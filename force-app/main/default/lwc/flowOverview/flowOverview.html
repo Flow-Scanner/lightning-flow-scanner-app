@@ -29,12 +29,14 @@
                 class="compact-toggle" variant="label-hidden"></lightning-input>
         </div>
 
-        <!-- Total Issues -->
-        <div class="toolbar-total slds-p-left_x-small" title="Total issues across all flows">
-            Total Issues: {totalIssues}
-            <template if:true={countsPending}>
-                <span class="count-loading toolbar-count-loading" title="Scanning flows…"></span>
-            </template>
+        <!-- Violations -->
+        <div class="toolbar-item slds-p-left_x-small" title="Total violations across all flows">
+            <span class="slds-text-body_small toolbar-stats">
+                <strong>Violations: {totalIssues}</strong>
+                <template if:true={countsPending}>
+                    <span class="count-loading toolbar-count-loading" title="Scanning flows…"></span>
+                </template>
+            </span>
         </div>
     </div>
     <div class="table-card">
