@@ -151,15 +151,8 @@
     text-align: center;
 }
 
-.toolbar-total {
-    flex: 0 0 auto;
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
+.toolbar-stats {
     color: #ffffff;
-    font-size: 0.8rem;
-    font-weight: 600;
     white-space: nowrap;
 }
 
@@ -177,6 +170,7 @@
 .toolbar-count-loading {
     border-color: rgba(255, 255, 255, 0.4);
     border-top-color: #ffffff;
+    margin-left: 0.4rem;
 }
 
 @keyframes count-spin {
