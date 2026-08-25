@@ -1,4 +1,33 @@
-# Lightning Flow Scanner App — v3.3 Release Notes
+# Lightning Flow Scanner App — v3.5 Release Notes
+
+## New in v3.5
+
+### Clearer results: one Details column
+
+The Results table previously spread violation context over five mostly-empty columns (Data Type, Location X/Y, Connects To, Expression) — each result type only ever fills one of them. They are now a single **Details** column showing whichever applies: `Data Type: Boolean` for variables, `Location: 835, 244 · Connects to: Next_Step` for nodes, or the rule expression/threshold for attributes. The details text is searchable via **Search All Fields** (locations included, for the first time), and this release also fixes the Connects To data, which had never rendered. CSV exports keep the separate columns for machine processing.
+
+### Clickable flow links
+
+Flow names link to the flow itself throughout the app: the Flows tab's API Name column and the Results tab's Flow column (which now shows the flow label) both open the flow directly. A long-standing bug where links opened the flow *version* record instead of the flow is fixed.
+
+### Non-admin access
+
+The **Flow Scanner** permission set now includes everything a non-admin needs to authenticate to the Tooling API — OAuth configuration read access, **API Enabled**, and **View Setup and Configuration**. Assign the permission set on the External Client App's Policies tab and one assignment covers both app access and JWT pre-authorization.
+
+### Automated JWT setup
+
+`npm run setup:jwt -- --target-org <alias>` performs the entire post-installation setup from the CLI: certificate, External Client App, Consumer Key storage, and permission set assignment. Pass `--namespace lfscanner` for the managed package.
+
+### UI polish
+
+- Resizable columns on every table, now including Rule Configuration.
+- The Flows tab counter reads **Violations** and sits inline with the toolbar controls, matching the Results tab.
+- Toggle state labels (Active/Inactive, Beta shown/hidden) are white and readable on the dark toolbars.
+- Footer links point at the app repository.
+
+---
+
+# v3.3 / v3.4
 
 ## External Client App support (new default setup)
 
