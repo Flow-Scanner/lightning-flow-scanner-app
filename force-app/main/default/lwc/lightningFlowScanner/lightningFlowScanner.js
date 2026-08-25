@@ -210,6 +210,10 @@ export default class LightningFlowScanner extends LightningElement {
         const processRuleDetails = (rule, ruleIndex, flowName, flowKey) => {
             if (!rule.details) return;
             rule.details.forEach((detail, detailIndex) => {
+                const d = detail.details || {};
+                const connectsTo = Array.isArray(d.connectsTo)
+                    ? d.connectsTo.join(", ")
+                    : d.connectsTo || "";
                 violations.push({
                     id: `flow-${flowKey}-rule-${ruleIndex}-detail-${detailIndex}`,
                     flowName: flowName,
@@ -217,11 +221,12 @@ export default class LightningFlowScanner extends LightningElement {
                     severity: rule.severity,
                     name: detail.name,
                     type: detail.type,
-                    dataType: detail.details ? detail.details.dataType : "",
-                    locationX: detail.details ? detail.details.locationX : "",
-                    locationY: detail.details ? detail.details.locationY : "",
-                    connectsTo: detail.connectsTo || "",
-                    expression: detail.details ? detail.details.expression : ""
+                    dataType: d.dataType ?? "",
+                    locationX: d.locationX ?? "",
+                    locationY: d.locationY ?? "",
+                    connectsTo: connectsTo,
+                    expression: d.expression ?? "",
+                    details: this.composeDetails(d, connectsTo)
                 });
             });
         };
@@ -248,6 +253,21 @@ export default class LightningFlowScanner extends LightningElement {
         return violations;
     }
 
+    // One display string per row: the core populates exactly one detail group
+    // per metaType (variable → dataType, node → location/connectors,
+    // attribute → expression, resource → none).
+    composeDetails(d, connectsTo) {
+        if (d.dataType) return `Data Type: ${d.dataType}`;
+        if (d.locationX != null || d.locationY != null) {
+            const location = `Location: ${d.locationX ?? ""}, ${d.locationY ?? ""}`;
+            return connectsTo
+                ? `${location} · Connects to: ${connectsTo}`
+                : location;
+        }
+        if (d.expression) return d.expression;
+        return "";
+    }
+
     // ----- FILTERED & SORTED VIOLATIONS -----
     get filteredViolations() {
         let filtered = [...this.flattenedViolations];
@@ -269,9 +289,7 @@ export default class LightningFlowScanner extends LightningElement {
                     (v.severity || "").toLowerCase().includes(f) ||
                     (v.name || "").toLowerCase().includes(f) ||
                     (v.type || "").toLowerCase().includes(f) ||
-                    (v.dataType || "").toLowerCase().includes(f) ||
-                    (v.connectsTo || "").toLowerCase().includes(f) ||
-                    (v.expression || "").toLowerCase().includes(f)
+                    (v.details || "").toLowerCase().includes(f)
             );
         }
 
