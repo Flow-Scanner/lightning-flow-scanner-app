@@ -1,8 +1,14 @@
 import { LightningElement, api, track } from 'lwc';
 import { parseConfigText } from 'c/configParser';
 
+const MIN_COLUMN_WIDTH = 60;
+
 export default class scanConfigurator extends LightningElement {
     _rules;
+    _colWidths = {};
+    _tableFixed = false;
+    _resizing = null;
+    _suppressNextSort = false;
     @track localRules;
     // Core's severity set is error | warning | note — there is no "info".
     severityOptions = [
@@ -71,7 +77,21 @@ export default class scanConfigurator extends LightningElement {
         this.showBeta = event.target.checked;
     }
 
+    renderedCallback() {
+        // Re-renders (sorting, filtering, rule edits) rebuild the table DOM,
+        // so any user-chosen column widths must be reapplied afterwards.
+        this._applyColWidths();
+    }
+
+    disconnectedCallback() {
+        this._teardownResizeListeners();
+    }
+
     handleHeaderSort(event) {
+        if (this._suppressNextSort) {
+            this._suppressNextSort = false;
+            return;
+        }
         const field = event.currentTarget.dataset.field;
         if (!field) return;
 
@@ -83,6 +103,91 @@ export default class scanConfigurator extends LightningElement {
         }
 
         this.sortIndicators = { [field]: this.sortedDirection === 'asc' ? '▲' : '▼' };
+    }
+
+    /* ────────────────────── COLUMN RESIZING ────────────────────── */
+    handleResizerClick(event) {
+        event.stopPropagation();
+    }
+
+    handleResizeStart(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const th = event.currentTarget.closest('th');
+        const headers = this._headerCells();
+        if (!th || !headers.length) return;
+
+        // Freeze the current auto-layout widths so untouched columns keep
+        // their size once the table switches to fixed layout.
+        headers.forEach((el, i) => {
+            if (this._colWidths[i] === undefined) {
+                this._colWidths[i] = el.getBoundingClientRect().width;
+            }
+        });
+        this._tableFixed = true;
+
+        const index = headers.indexOf(th);
+        this._resizing = {
+            index,
+            startX: event.clientX,
+            startWidth: this._colWidths[index]
+        };
+        this._applyColWidths();
+
+        this._onResizeMove = (e) => this._handleResizeMove(e);
+        this._onResizeEnd = () => this._handleResizeEnd();
+        window.addEventListener('mousemove', this._onResizeMove);
+        window.addEventListener('mouseup', this._onResizeEnd);
+    }
+
+    _handleResizeMove(event) {
+        if (!this._resizing) return;
+        const delta = event.clientX - this._resizing.startX;
+        this._colWidths[this._resizing.index] = Math.max(
+            MIN_COLUMN_WIDTH,
+            this._resizing.startWidth + delta
+        );
+        this._applyColWidths();
+    }
+
+    _handleResizeEnd() {
+        this._resizing = null;
+        // A click fires on the header right after mouseup — don't let it sort.
+        this._suppressNextSort = true;
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        setTimeout(() => {
+            this._suppressNextSort = false;
+        }, 0);
+        this._teardownResizeListeners();
+    }
+
+    _teardownResizeListeners() {
+        if (this._onResizeMove) {
+            window.removeEventListener('mousemove', this._onResizeMove);
+            this._onResizeMove = null;
+        }
+        if (this._onResizeEnd) {
+            window.removeEventListener('mouseup', this._onResizeEnd);
+            this._onResizeEnd = null;
+        }
+    }
+
+    _headerCells() {
+        return Array.from(this.template.querySelectorAll('thead th'));
+    }
+
+    _applyColWidths() {
+        const table = this.template.querySelector('table');
+        if (!table) return;
+        if (this._tableFixed) {
+            table.style.tableLayout = 'fixed';
+        }
+        this._headerCells().forEach((el, i) => {
+            const width = this._colWidths[i];
+            if (width !== undefined) {
+                el.style.width = `${width}px`;
+            }
+        });
     }
 
     get allRulesDisabled() {
