@@ -9,6 +9,8 @@
  <img src="media/lfs-app.gif" alt="Lightning Flow Scanner Demo" />
 </p>
 
+**Lightning Flow Scanner App** is a free Salesforce app for static analysis of Flows. It scans your flow metadata directly inside your org — no data leaves Salesforce — and flags 20+ best-practice violations such as unsafe running contexts, SOQL and DML statements in loops, hardcoded IDs and URLs, missing fault paths, and unused variables, before they reach production.
+
 ---
 
 ## Table of contents
@@ -25,20 +27,26 @@
 
 ### Flow Overview
 
+Browse every flow in your org with live issue counts, search by name, label, or type, and open any flow directly from its API name.
+
 <p align="center">
- <img src="media/flowoverview.jpg" alt="Flow Overview" width="68%" />
+ <img src="media/flowoverview.jpg" alt="Flow Overview — all flows with issue counts" width="68%" />
 </p>
 
 ### Violation Details
 
+All scan results in one sortable, searchable table: rule, severity, and contextual details for every violation, with links to each flow and CSV export.
+
 <p align="center">
-  <img src="media/allresults.jpg" alt="All Results View" width="68%" />
+  <img src="media/allresults.jpg" alt="Scan results — violations across all flows" width="68%" />
 </p>
 
-### Rule Configuration:
+### Rule Configuration
+
+Enable, disable, and tune every rule inline — severity, expressions, and thresholds — or use the guided wizard, config file import/export, and org-wide saving.
 
 <p align="center">
- <img src="media/config.jpg" alt="Rule Configuration" width="68%" />
+ <img src="media/config.jpg" alt="Rule configuration — severities, options, and beta rules" width="68%" />
 </p>
 
 ## Usage
