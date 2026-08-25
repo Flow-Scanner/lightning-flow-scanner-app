@@ -61,11 +61,16 @@
         <table class="slds-table slds-table_cell-buffer">
           <thead>
             <tr>
-              <th data-field="isActive" onclick={handleHeaderSort}>Active {sortIndicators.isActive}</th>
-              <th data-field="name" onclick={handleHeaderSort}>Rule Name {sortIndicators.name}</th>
-              <th data-field="description" onclick={handleHeaderSort}>Description {sortIndicators.description}</th>
-              <th data-field="severity" onclick={handleHeaderSort}>Severity {sortIndicators.severity}</th>
-              <th title="Rule options (expression, threshold). Empty uses the core default.">Options</th>
+              <th data-field="isActive" onclick={handleHeaderSort}>Active {sortIndicators.isActive}<span
+                      class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+              <th data-field="name" onclick={handleHeaderSort}>Rule Name {sortIndicators.name}<span
+                      class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+              <th data-field="description" onclick={handleHeaderSort}>Description {sortIndicators.description}<span
+                      class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+              <th data-field="severity" onclick={handleHeaderSort}>Severity {sortIndicators.severity}<span
+                      class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+              <th title="Rule options (expression, threshold). Empty uses the core default.">Options<span
+                      class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
             </tr>
           </thead>
           <tbody>

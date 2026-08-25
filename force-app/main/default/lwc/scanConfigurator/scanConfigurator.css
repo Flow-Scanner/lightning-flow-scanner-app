@@ -9,6 +9,8 @@
   background-color: #ffffff;
   border-radius: 0 0 0.5rem 0.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* Resized columns can push the table past its container */
+  overflow-x: auto;
 }
 
 .toolbar-row {
@@ -110,11 +112,29 @@
   white-space: nowrap;
   border-top: none;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .slds-table td {
   padding: 0.5rem;
   vertical-align: top;
+}
+
+.col-resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  user-select: none;
+}
+
+.col-resizer:hover,
+.col-resizer:active {
+  background-color: rgba(255, 255, 255, 0.35);
 }
 
 .wrap-text {
