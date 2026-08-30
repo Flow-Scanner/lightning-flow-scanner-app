@@ -2,9 +2,9 @@
   "packageDirectories": [
     {
       "package": "flow-scanner",
-      "versionName": "v3.5",
-      "versionNumber": "3.5.0.NEXT",
-      "versionDescription": "UI improvements: unified violation Details column, clickable flow links, resizable rule configuration columns, non-admin Tooling API authentication, automated JWT setup script",
+      "versionName": "v3.6",
+      "versionNumber": "3.6.0.NEXT",
+      "versionDescription": "Security patch: rebuilds the bundled scanner engine on core 6.19.4, fixing a regular expression denial of service in the Unused Variable rule (GHSA-fpvw-w7ff-h7vr, CWE-1333).",
       "ancestorVersion": "HIGHEST"
     }
   ],
@@ -17,6 +17,7 @@
     "flow-scanner@3.2.0-1": "04tgK0000008CLlQAM",
     "flow-scanner@3.3.0-1": "04tgK000000E7ODQA0",
     "flow-scanner@3.4.0-1": "04tgK000000GVmDQAW",
-    "flow-scanner@3.5.0-1": "04tgK000000IRjJQAW"
+    "flow-scanner@3.5.0-1": "04tgK000000IRjJQAW",
+    "flow-scanner@3.6.0-1": "04tgK000000J269QAC"
   }
 }
