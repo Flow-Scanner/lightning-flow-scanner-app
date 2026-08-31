@@ -31,6 +31,20 @@
                 <template if:true={error}>
                     <p class="error">Error scanning Flow: {error}</p>
                 </template>
+                <!-- Auto-fix -->
+                <template if:true={showFixBar}>
+                    <div class="slds-scoped-notification slds-media slds-media_center slds-theme_info slds-m-bottom_small"
+                        role="status">
+                        <div class="slds-media__figure">
+                            <lightning-icon icon-name="utility:wrench" size="small"></lightning-icon>
+                        </div>
+                        <div class="slds-media__body slds-grid slds-grid_vertical-align-center slds-grid_align-spread">
+                            <span>{fixBarText}</span>
+                            <lightning-button variant="brand" label="Review fix" icon-name="utility:preview"
+                                onclick={handleFixClick} class="slds-m-left_small"></lightning-button>
+                        </div>
+                    </div>
+                </template>
                 <!-- Table -->
                 <template if:true={hasScanResults}>
                     <div class="custom-datatable">
@@ -48,6 +62,8 @@
                                             class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
                                     <th data-field="details" onclick={handleSort}>Details {sortIndicators.details}<span
                                             class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                    <th data-field="isFixable" onclick={handleSort}>Auto-fix {sortIndicators.isFixable}<span
+                                            class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -58,6 +74,12 @@
                                         <td title={v.name}>{v.name}</td>
                                         <td title={v.type}>{v.type}</td>
                                         <td class="details-cell" title={v.details}>{v.details}</td>
+                                        <td>
+                                            <template if:true={v.isFixable}>
+                                                <span class="slds-badge slds-theme_success"
+                                                    title="Included when you use Review fix">Auto-fixable</span>
+                                            </template>
+                                        </td>
                                     </tr>
                                 </template>
                             </tbody>

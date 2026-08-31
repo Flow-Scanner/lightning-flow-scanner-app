@@ -8,6 +8,14 @@ import getFlowMetadata    from '@salesforce/apex/LightningFlowScannerController.
 import getMDTRules        from '@salesforce/apex/LightningFlowScannerController.getMDTRules';
 import getSavedConfig     from '@salesforce/apex/LFSConfigController.getSavedConfig';
 import saveConfig         from '@salesforce/apex/LFSConfigController.saveConfig';
+import saveAsDraft        from '@salesforce/apex/LFSFixController.saveAsDraft';
+import checkDeployStatus  from '@salesforce/apex/LFSFixController.checkDeployStatus';
+
+import { buildFixPlan, isFixableRule, stripNulls } from 'c/lfsFixEngine';
+
+// How long to wait between polls of a Metadata API deployment, and how many times.
+const DEPLOY_POLL_INTERVAL_MS = 2000;
+const DEPLOY_POLL_ATTEMPTS = 30;
 
 // Top-level keys accepted from CLI / VS Code style config files.
 const SCAN_META_KEYS = [
@@ -53,6 +61,12 @@ export default class LightningFlowScannerApp extends LightningElement {
     @track scanMeta = {};
     @track isLoading = false;
     @track showWizard = false;
+    // Fix flow: the plan the user is confirming, plus the state of the save.
+    @track fixPlan = null;
+    @track showFixPreview = false;
+    @track isFixSaving = false;
+    @track fixError;
+    @track fixStatusMessage;
     @track currentFlowIndex = 0;
     @track isScanningAll = false;
     @track searchKey = '';
@@ -516,7 +530,7 @@ export default class LightningFlowScannerApp extends LightningElement {
                 let count = null;
                 try {
                     const meta = await getFlowMetadata({ versionId: rec.versionId });
-                    const flow = new window.lightningflowscanner.Flow(meta.fullName, meta.metadata);
+                    const flow = new window.lightningflowscanner.Flow(meta.fullName, stripNulls(meta.metadata));
                     const uri = `/services/data/v62.0/tooling/sobjects/Flow/${rec.versionId}`;
                     const scan = window.lightningflowscanner.scan([{ uri, flow }], opts);
                     count = this.countIssues(this.postProcessScanResult(scan[0], opts));
@@ -577,7 +591,7 @@ export default class LightningFlowScannerApp extends LightningElement {
             const opts = this.prepareScanOptions();
             this.numberOfRules = Object.keys(opts.rules || {}).length;
 
-            const flow = new window.lightningflowscanner.Flow(this.flowName, this.flowMetadata);
+            const flow = new window.lightningflowscanner.Flow(this.flowName, stripNulls(this.flowMetadata));
             const uri = `/services/data/v62.0/tooling/sobjects/Flow/${this.selectedFlowRecord.versionId}`;
             const scan = window.lightningflowscanner.scan([{ uri, flow }], opts);
 
@@ -592,6 +606,127 @@ export default class LightningFlowScannerApp extends LightningElement {
         } finally {
             this.isLoading = false;
         }
+    }
+
+    /* ────────────────────── FIX ────────────────────── */
+    // Number of issues on the selected flow the engine can fix on its own. Drives
+    // the "Fix" affordance, which stays hidden when there is nothing to fix.
+    get fixableIssueCount() {
+        if (!this.scanResult?.ruleResults) return 0;
+        return this.scanResult.ruleResults
+            .filter(r => r.occurs && isFixableRule(r.ruleName))
+            .reduce((total, r) => total + (r.details?.length || 1), 0);
+    }
+
+    get canFixSelectedFlow() {
+        return !!this.selectedFlowRecord && this.fixableIssueCount > 0;
+    }
+
+    get selectedFlowIsActive() {
+        return this.selectedFlowRecord?.isActive === true;
+    }
+
+    get selectedFlowLabel() {
+        return this.selectedFlowRecord?.masterLabel ||
+               this.selectedFlowRecord?.developerName ||
+               this.flowName;
+    }
+
+    get fixChanges() {
+        return this.fixPlan?.changes || [];
+    }
+
+    // Opens the confirmation step. Nothing is written until the user confirms.
+    handleOpenFixPreview() {
+        this.fixError = undefined;
+        this.fixStatusMessage = undefined;
+        try {
+            this.fixPlan = buildFixPlan(
+                window.lightningflowscanner,
+                this.flowName,
+                this.flowMetadata,
+                this.prepareScanOptions()
+            );
+        } catch (e) {
+            this.fixPlan = null;
+            this.fixError = e.message || 'The fix could not be prepared.';
+        }
+        this.showFixPreview = true;
+    }
+
+    handleCloseFixPreview() {
+        this.showFixPreview = false;
+        this.fixPlan = null;
+        this.fixError = undefined;
+        this.fixStatusMessage = undefined;
+    }
+
+    async handleConfirmFix() {
+        if (!this.fixPlan || !this.selectedFlowRecord) return;
+
+        this.isFixSaving = true;
+        this.fixError = undefined;
+        try {
+            const result = await saveAsDraft({
+                versionId: this.selectedFlowRecord.versionId,
+                metadataJson: JSON.stringify(this.fixPlan.fixedMetadata)
+            });
+
+            // An Active flow is fixed by deploying a new Draft version, which is
+            // asynchronous — the save is not done until that deployment reports back.
+            if (!result.done && result.deployRequestId) {
+                await this.awaitDeployment(result.deployRequestId);
+            } else {
+                this.fixStatusMessage = result.message;
+            }
+
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Flow fixed',
+                message: this.fixStatusMessage,
+                variant: 'success'
+            }));
+
+            // The org has moved on; re-read and re-scan so the table reflects it.
+            await this.loadFlowMetadata(this.selectedFlowRecord);
+        } catch (e) {
+            this.fixError = e.body?.message || e.message || 'The fix could not be saved.';
+        } finally {
+            this.isFixSaving = false;
+        }
+    }
+
+    // A Metadata API deployment is asynchronous and there is no push channel for it,
+    // so the only way to report the outcome is to poll. The handle is kept so a
+    // disconnect stops the wait instead of leaving a timer behind.
+    _deployTimer;
+
+    disconnectedCallback() {
+        if (this._deployTimer) {
+            clearTimeout(this._deployTimer);
+            this._deployTimer = undefined;
+        }
+    }
+
+    async awaitDeployment(deployRequestId) {
+        for (let attempt = 0; attempt < DEPLOY_POLL_ATTEMPTS; attempt++) {
+            // eslint-disable-next-line no-await-in-loop
+            await new Promise(resolve => {
+                // eslint-disable-next-line @lwc/lwc/no-async-operation
+                this._deployTimer = setTimeout(resolve, DEPLOY_POLL_INTERVAL_MS);
+            });
+            // eslint-disable-next-line no-await-in-loop
+            const status = await checkDeployStatus({ deployRequestId });
+            if (status.done) {
+                if (!status.success) {
+                    throw new Error(status.message);
+                }
+                this.fixStatusMessage = status.message;
+                return;
+            }
+        }
+        throw new Error(
+            'The deployment is taking longer than expected. Check Setup → Deployment Status for the result.'
+        );
     }
 
     prepareScanOptions() {
@@ -660,7 +795,7 @@ export default class LightningFlowScannerApp extends LightningElement {
             const promises = this.records.map(async (rec) => {
                 try {
                     const meta = await getFlowMetadata({ versionId: rec.versionId });
-                    const flow = new window.lightningflowscanner.Flow(meta.fullName, meta.metadata);
+                    const flow = new window.lightningflowscanner.Flow(meta.fullName, stripNulls(meta.metadata));
                     const uri = `/services/data/v62.0/tooling/sobjects/Flow/${rec.versionId}`;
                     const scan = window.lightningflowscanner.scan([{ uri, flow }], opts);
                     return {

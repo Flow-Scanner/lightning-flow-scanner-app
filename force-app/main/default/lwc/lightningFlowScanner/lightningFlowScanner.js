@@ -1,4 +1,5 @@
 import { LightningElement, api } from "lwc";
+import { isFixableRule } from "c/lfsFixEngine";
 
 const MIN_COLUMN_WIDTH = 60;
 
@@ -11,6 +12,10 @@ export default class LightningFlowScanner extends LightningElement {
     @api error;
     @api records;
     @api selectedFlowRecord;
+    // Fix affordance — only meaningful in single-flow mode, where one flow is in view.
+    @api canFix = false;
+    @api fixableIssueCount = 0;
+    @api flowIsActive = false;
 
     flowNameFilter = "";
     otherFieldsFilter = "";
@@ -71,6 +76,23 @@ export default class LightningFlowScanner extends LightningElement {
             this.records.findIndex((rec) => rec.id === this.selectedFlowRecord.id) ===
             this.records.length - 1
         );
+    }
+
+    // ----- FIX -----
+    get showFixBar() {
+        return !this.isAllMode && this.canFix;
+    }
+
+    get fixBarText() {
+        const count = this.fixableIssueCount;
+        const issues = count === 1 ? "issue" : "issues";
+        return this.flowIsActive
+            ? `${count} ${issues} can be fixed automatically. This flow is Active, so the fix is saved as a new Draft version.`
+            : `${count} ${issues} can be fixed automatically. The fix is saved to this Draft.`;
+    }
+
+    handleFixClick() {
+        this.dispatchEvent(new CustomEvent("fixflow"));
     }
 
     // ----- FILTERS -----
@@ -228,7 +250,10 @@ export default class LightningFlowScanner extends LightningElement {
                     locationY: d.locationY ?? "",
                     connectsTo: connectsTo,
                     expression: d.expression ?? "",
-                    details: this.composeDetails(d, connectsTo)
+                    details: this.composeDetails(d, connectsTo),
+                    // Marks the rows the "Fix" button would act on, so the button's
+                    // scope is visible in the table rather than only in the dialog.
+                    isFixable: isFixableRule(rule.ruleName)
                 });
             });
         };

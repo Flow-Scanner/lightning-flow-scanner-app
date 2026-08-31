@@ -41,6 +41,19 @@ All scan results in one sortable, searchable table: rule, severity, and contextu
   <img src="media/allresults.jpg" alt="Scan results — violations across all flows" width="68%" />
 </p>
 
+### Auto-fix
+
+Four rules can be fixed by the scanner itself — unused variables, unreachable elements, missing auto-layout, and an outdated API version. Violations of those rules are marked **Auto-fixable** in the results table, and a **Review fix** button appears above it.
+
+Reviewing shows the exact changes as a list ("Remove unused variable `myVar`", "Raise API version 49 → 50"), never a metadata diff, and nothing is written until you confirm.
+
+The fix is always saved as a **Draft**:
+
+- a Draft flow is updated in place;
+- an **Active** flow gets a **new Draft version** — the running Active version is not touched.
+
+The app never activates a flow. Promoting the fixed Draft stays a deliberate step in Flow Builder.
+
 ### Rule Configuration
 
 Enable, disable, and tune every rule inline — severity, expressions, and thresholds — or use the guided wizard, config file import/export, and org-wide saving.
@@ -58,6 +71,7 @@ Enable, disable, and tune every rule inline — severity, expressions, and thres
 - Click on the "Flow Scanner" app to open the Scan Flows Overview.
 - (Optional) Configure rules in the Configuration tab.
 - View results of a Flow by clicking "details".
+- If any violation is marked **Auto-fixable**, click **Review fix**, check the listed changes, and confirm to save them as a Draft.
 
 For details about all available rules, their default severities, and configuration options, visit the [Flow Scanner Documentation](https://flow-scanner.github.io/lightning-flow-scanner/).
 
