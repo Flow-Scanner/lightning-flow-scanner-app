@@ -157,6 +157,44 @@ public with sharing class ToolingAPI {
         return parseQueryResponse(res.getBody());
     }
     
+    // Writes go to the same authenticated session as the reads. Callers pass a
+    // path below /services/data/vXX.0/ so the version stays in one place.
+    public static HttpResponse send(String method, String path, String body, String contentType) {
+        String token = getAccessToken();
+
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint(URL.getOrgDomainUrl().toExternalForm() + '/services/data/v' + API_VERSION + path);
+        req.setMethod(method);
+        req.setHeader('Authorization', 'Bearer ' + token);
+        if (String.isNotBlank(contentType)) {
+            req.setHeader('Content-Type', contentType);
+        }
+        if (body != null) {
+            req.setBody(body);
+        }
+        req.setTimeout(120000);
+
+        return new Http().send(req);
+    }
+
+    public static HttpResponse sendBlob(String method, String path, Blob body, String contentType) {
+        String token = getAccessToken();
+
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint(URL.getOrgDomainUrl().toExternalForm() + '/services/data/v' + API_VERSION + path);
+        req.setMethod(method);
+        req.setHeader('Authorization', 'Bearer ' + token);
+        req.setHeader('Content-Type', contentType);
+        req.setBodyAsBlob(body);
+        req.setTimeout(120000);
+
+        return new Http().send(req);
+    }
+
+    public static String getApiVersion() {
+        return API_VERSION;
+    }
+
     @TestVisible
     private static QueryResult parseQueryResponse(String responseBody) {
         Map<String, Object> resultMap = (Map<String, Object>) JSON.deserializeUntyped(responseBody);

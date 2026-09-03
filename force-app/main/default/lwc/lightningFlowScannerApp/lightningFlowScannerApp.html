@@ -26,8 +26,16 @@
             <template if:true={isTab2Active}>
                 <c-lightning-flow-scanner name={flowName} metadata={flowMetadata} scan-result={scanResult}
                     all-scan-results={allScanResults} number-of-rules={numberOfRules} error={err} records={records}
-                    selected-flow-record={selectedFlowRecord}
-                    onnavigateflow={handleNavigateFlow}></c-lightning-flow-scanner>
+                    selected-flow-record={selectedFlowRecord} can-fix={canFixSelectedFlow}
+                    fixable-issue-count={fixableIssueCount} flow-is-active={selectedFlowIsActive}
+                    onnavigateflow={handleNavigateFlow} onfixflow={handleOpenFixPreview}
+                    onfixflowrow={handleFixFlowFromResults}></c-lightning-flow-scanner>
+                <template if:true={showFixPreview}>
+                    <c-fix-preview flow-label={selectedFlowLabel} changes={fixChanges}
+                        is-active-flow={selectedFlowIsActive} busy={isFixSaving} error={fixError}
+                        status-message={fixStatusMessage} onconfirm={handleConfirmFix}
+                        onclose={handleCloseFixPreview}></c-fix-preview>
+                </template>
             </template>
             <template if:true={isTab3Active}>
                 <c-scan-configurator rules={rulesForDisplay} onrulechange={handleRuleChange}
