@@ -19,6 +19,9 @@
                                 <p class="info-item"><strong>Type:</strong> {metadata.processType}</p>
                                 <p class="info-item"><strong>API Version:</strong> {metadata.apiVersion}</p>
                                 <p class="info-item"><strong># Rules Run:</strong> {numberOfRules}</p>
+                                <template if:true={showFixCount}>
+                                    <p class="info-item"><strong>Auto-fixable:</strong> {fixableIssueCount}</p>
+                                </template>
                             </div>
                             <!-- Column 3 -->
                             <div class="flow-column">
@@ -30,20 +33,6 @@
                 <!-- Error -->
                 <template if:true={error}>
                     <p class="error">Error scanning Flow: {error}</p>
-                </template>
-                <!-- Auto-fix -->
-                <template if:true={showFixBar}>
-                    <div class="slds-scoped-notification slds-media slds-media_center slds-theme_info slds-m-bottom_small"
-                        role="status">
-                        <div class="slds-media__figure">
-                            <lightning-icon icon-name="utility:wrench" size="small"></lightning-icon>
-                        </div>
-                        <div class="slds-media__body slds-grid slds-grid_vertical-align-center slds-grid_align-spread">
-                            <span>{fixBarText}</span>
-                            <lightning-button variant="brand" label="Review fix" icon-name="utility:preview"
-                                onclick={handleFixClick} class="slds-m-left_small"></lightning-button>
-                        </div>
-                    </div>
                 </template>
                 <!-- Table -->
                 <template if:true={hasScanResults}>
@@ -76,8 +65,10 @@
                                         <td class="details-cell" title={v.details}>{v.details}</td>
                                         <td>
                                             <template if:true={v.isFixable}>
-                                                <span class="slds-badge slds-theme_success"
-                                                    title="Included when you use Review fix">Auto-fixable</span>
+                                                <template if:true={showFixCount}>
+                                                    <button class="fix-button" onclick={handleFixClick}
+                                                        title={fixButtonTitle}>Fix</button>
+                                                </template>
                                             </template>
                                         </td>
                                     </tr>
@@ -114,23 +105,18 @@
                                 <strong>Violations: {displayedViolationsCount} / {totalViolationsCount}</strong>
                             </span>
                         </div>
+                        <template if:true={showAllFixCount}>
+                            <div class="toolbar-item slds-p-left_x-small">
+                                <span class="slds-text-body_small toolbar-stats" title={allFixCountTitle}>
+                                    <strong>Auto-fixable: {fixableViolationCount}</strong>
+                                </span>
+                            </div>
+                        </template>
                         <div class="toolbar-item toolbar-button-container">
                             <lightning-button label="Export CSV" icon-name="utility:download" onclick={handleDownload}
                                 variant="brand" class="slds-button slds-button_brand"></lightning-button>
                         </div>
                     </div>
-                    <!-- Auto-fix -->
-                    <template if:true={showAllFixBar}>
-                        <div class="slds-scoped-notification slds-media slds-media_center slds-theme_info slds-m-bottom_small"
-                            role="status">
-                            <div class="slds-media__figure">
-                                <lightning-icon icon-name="utility:wrench" size="small"></lightning-icon>
-                            </div>
-                            <div class="slds-media__body">
-                                <span>{allFixBarText}</span>
-                            </div>
-                        </div>
-                    </template>
                     <!-- Table Card -->
                     <div class="table-card">
                         <template if:true={hasFlattenedViolations}>

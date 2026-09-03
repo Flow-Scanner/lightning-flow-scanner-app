@@ -79,16 +79,17 @@ export default class LightningFlowScanner extends LightningElement {
     }
 
     // ----- FIX -----
-    get showFixBar() {
+    // The count sits with the other flow-level facts in the header, and the
+    // action sits on the violation it fixes. A notification band between the
+    // toolbar and the table would displace the table on every fixable scan.
+    get showFixCount() {
         return !this.isAllMode && this.canFix;
     }
 
-    get fixBarText() {
-        const count = this.fixableIssueCount;
-        const issues = count === 1 ? "issue" : "issues";
+    get fixButtonTitle() {
         return this.flowIsActive
-            ? `${count} ${issues} can be fixed automatically. This flow is Active, so the fix is saved as a new Draft version.`
-            : `${count} ${issues} can be fixed automatically. The fix is saved to this Draft.`;
+            ? "Review the fix. This flow is Active, so it is saved as a new Draft version."
+            : "Review the fix. It is saved to this Draft.";
     }
 
     handleFixClick() {
@@ -111,11 +112,11 @@ export default class LightningFlowScanner extends LightningElement {
         return new Set(this.fixableViolations.map((v) => v.flowId)).size;
     }
 
-    get showAllFixBar() {
+    get showAllFixCount() {
         return this.isAllMode && this.fixableViolationCount > 0;
     }
 
-    get allFixBarText() {
+    get allFixCountTitle() {
         const count = this.fixableViolationCount;
         const issues = count === 1 ? "issue" : "issues";
         const flows = this.fixableFlowCount;
