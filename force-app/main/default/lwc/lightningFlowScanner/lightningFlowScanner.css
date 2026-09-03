@@ -279,3 +279,25 @@ lightning-datatable {
 .full-width-table th.sorted-desc .sort-indicator {
     color: #ffcc00; /* gold for descending */
 }
+/* --------------------------
+ ROW-LEVEL FIX ACTION
+--------------------------- */
+/* A write action, so it reads as a button rather than as the plain text link
+   used for navigation elsewhere in the tables. */
+.fix-button {
+    background-color: #0176d3;
+    border: 1px solid #0176d3;
+    border-radius: 0.25rem;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.4;
+    padding: 0.1rem 0.7rem;
+}
+
+.fix-button:hover,
+.fix-button:focus {
+    background-color: #014486;
+    border-color: #014486;
+}

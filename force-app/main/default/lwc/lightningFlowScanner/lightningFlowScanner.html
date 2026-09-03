@@ -119,6 +119,18 @@
                                 variant="brand" class="slds-button slds-button_brand"></lightning-button>
                         </div>
                     </div>
+                    <!-- Auto-fix -->
+                    <template if:true={showAllFixBar}>
+                        <div class="slds-scoped-notification slds-media slds-media_center slds-theme_info slds-m-bottom_small"
+                            role="status">
+                            <div class="slds-media__figure">
+                                <lightning-icon icon-name="utility:wrench" size="small"></lightning-icon>
+                            </div>
+                            <div class="slds-media__body">
+                                <span>{allFixBarText}</span>
+                            </div>
+                        </div>
+                    </template>
                     <!-- Table Card -->
                     <div class="table-card">
                         <template if:true={hasFlattenedViolations}>
@@ -139,6 +151,8 @@
                                                     class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
                                             <th data-field="details" onclick={handleSort}>Details {sortIndicators.details}<span
                                                     class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
+                                            <th data-field="isFixable" onclick={handleSort}>Auto-fix {sortIndicators.isFixable}<span
+                                                    class="col-resizer" onmousedown={handleResizeStart} onclick={handleResizerClick}></span></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -152,6 +166,13 @@
                                                 <td title={v.name}>{v.name}</td>
                                                 <td title={v.type}>{v.type}</td>
                                                 <td class="details-cell" title={v.details}>{v.details}</td>
+                                                <td>
+                                                    <template if:true={v.isFixable}>
+                                                        <button class="fix-button" data-flow-id={v.flowId}
+                                                            data-flow-name={v.flowName} onclick={handleRowFixClick}
+                                                            title="Review the automatic fixes for this flow before anything is saved">Fix</button>
+                                                    </template>
+                                                </td>
                                             </tr>
                                         </template>
                                     </tbody>

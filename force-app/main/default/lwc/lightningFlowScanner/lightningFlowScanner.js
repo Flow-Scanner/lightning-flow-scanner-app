@@ -95,6 +95,42 @@ export default class LightningFlowScanner extends LightningElement {
         this.dispatchEvent(new CustomEvent("fixflow"));
     }
 
+    // ----- FIX (all-flows mode) -----
+    // The all-results table lists violations across flows, but a fix is always
+    // written per flow. So the row action names its flow and the confirmation
+    // step stays the same one the single-flow view uses.
+    get fixableViolations() {
+        return this.filteredViolations.filter((v) => v.isFixable);
+    }
+
+    get fixableViolationCount() {
+        return this.fixableViolations.length;
+    }
+
+    get fixableFlowCount() {
+        return new Set(this.fixableViolations.map((v) => v.flowId)).size;
+    }
+
+    get showAllFixBar() {
+        return this.isAllMode && this.fixableViolationCount > 0;
+    }
+
+    get allFixBarText() {
+        const count = this.fixableViolationCount;
+        const issues = count === 1 ? "issue" : "issues";
+        const flows = this.fixableFlowCount;
+        const flowWord = flows === 1 ? "flow" : "flows";
+        return `${count} ${issues} across ${flows} ${flowWord} can be fixed automatically. Use Fix on a row to review that flow's changes before anything is saved.`;
+    }
+
+    handleRowFixClick(event) {
+        const { flowId, flowName } = event.currentTarget.dataset;
+        if (!flowId) return;
+        this.dispatchEvent(
+            new CustomEvent("fixflowrow", { detail: { flowId, flowName } })
+        );
+    }
+
     // ----- FILTERS -----
     handleFlowNameFilter(event) {
         this.flowNameFilter = event.target.value;
@@ -241,6 +277,9 @@ export default class LightningFlowScanner extends LightningElement {
                     flowName: flowCtx.flowName,
                     flowApiName: flowCtx.flowApiName,
                     flowUrl: flowCtx.flowUrl,
+                    // Needed in all-flows mode: the row is the only thing that
+                    // knows which flow a "Fix" click should act on.
+                    flowId: flowCtx.flowId,
                     ruleName: rule.ruleName,
                     severity: rule.severity,
                     name: detail.name,
@@ -263,7 +302,8 @@ export default class LightningFlowScanner extends LightningElement {
                 const flowCtx = {
                     flowName: item.flowName,
                     flowApiName: item.flowApiName || item.flowName,
-                    flowUrl: item.flowId ? `/${item.flowId}` : ""
+                    flowUrl: item.flowId ? `/${item.flowId}` : "",
+                    flowId: item.flowId
                 };
                 item.scanResult?.ruleResults?.forEach((rule, ruleIndex) =>
                     processRuleDetails(rule, ruleIndex, flowCtx, itemIndex)
@@ -277,7 +317,8 @@ export default class LightningFlowScanner extends LightningElement {
                     (rec && (rec.masterLabel || rec.developerName)) ||
                     "",
                 flowApiName: (rec && rec.developerName) || this.flowName || "",
-                flowUrl: rec && rec.id ? `/${rec.id}` : ""
+                flowUrl: rec && rec.id ? `/${rec.id}` : "",
+                flowId: rec && rec.id
             };
             this.scanResult?.ruleResults?.forEach((rule, ruleIndex) =>
                 processRuleDetails(rule, ruleIndex, flowCtx, "single")
@@ -360,13 +401,14 @@ export default class LightningFlowScanner extends LightningElement {
 
         const headers = [
             "Flow Name", "Flow API Name", "Rule Name", "Severity", "Detail Name", "Type",
-            "Data Type", "Location X", "Location Y", "Connects To", "Expression"
+            "Data Type", "Location X", "Location Y", "Connects To", "Expression", "Auto-fixable"
         ];
 
         const rows = this.filteredViolations.map(v =>
             [
                 v.flowName, v.flowApiName, v.ruleName, v.severity, v.name, v.type,
-                v.dataType, v.locationX, v.locationY, v.connectsTo, v.expression
+                v.dataType, v.locationX, v.locationY, v.connectsTo, v.expression,
+                v.isFixable ? "Yes" : "No"
             ].map(f => `"${String(f || "").replace(/"/g, '""')}"`)
         );
 
