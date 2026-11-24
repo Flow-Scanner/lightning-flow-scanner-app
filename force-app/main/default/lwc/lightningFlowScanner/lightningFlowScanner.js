@@ -267,6 +267,7 @@ export default class LightningFlowScanner extends LightningElement {
     // attribute → expression, resource → none).
     composeDetails(d, connectsTo) {
         if (d.dataType) return `Data Type: ${d.dataType}`;
+        if (d.expression) return d.expression;
         if (d.locationX != null || d.locationY != null) {
             const location = `Location: ${d.locationX ?? ""}, ${d.locationY ?? ""}`;
             return connectsTo
