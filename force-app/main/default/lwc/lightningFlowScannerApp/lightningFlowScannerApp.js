@@ -657,23 +657,27 @@ export default class LightningFlowScannerApp extends LightningElement {
             const opts = this.prepareScanOptions();
             this.numberOfRules = Object.keys(opts.rules || {}).length;
 
-            const promises = this.records.map(async (rec) => {
+            const loaded = await Promise.all(this.records.map(async (rec) => {
                 try {
                     const meta = await getFlowMetadata({ versionId: rec.versionId });
                     const flow = new window.lightningflowscanner.Flow(meta.fullName, meta.metadata);
                     const uri = `/services/data/v62.0/tooling/sobjects/Flow/${rec.versionId}`;
-                    const scan = window.lightningflowscanner.scan([{ uri, flow }], opts);
-                    return {
-                        flowName: rec.masterLabel || rec.developerName,
-                        flowApiName: rec.developerName,
-                        flowId: rec.id,
-                        scanResult: this.postProcessScanResult(scan[0], opts)
-                    };
+                    return { rec, uri, flow };
                 } catch {
                     return null;
                 }
-            });
-            this.allScanResults = (await Promise.all(promises)).filter(r => r);
+            }));
+            const ready = loaded.filter(item => item);
+            // One scan over the whole set so cross-flow rules can see every flow.
+            const scan = ready.length
+                ? window.lightningflowscanner.scan(ready.map(item => ({ uri: item.uri, flow: item.flow })), opts)
+                : [];
+            this.allScanResults = ready.map((item, index) => ({
+                flowName: item.rec.masterLabel || item.rec.developerName,
+                flowApiName: item.rec.developerName,
+                flowId: item.rec.id,
+                scanResult: this.postProcessScanResult(scan[index], opts)
+            }));
 
             // Scan-all already did the expensive work — reuse it for the counts
             this.allScanResults.forEach(r => {
